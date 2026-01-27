@@ -56,8 +56,8 @@ const config: ZudokuConfig = {
   redirects: [{ from: "/", to: "/introduction" }],
   apis: [
     {
-      type: "file",
-      input: "./apis/api.json",
+      type: "url",
+      input: "https://community-management-public-prod.s3.amazonaws.com/docs/api.json",
       path: "/api",
     },
   ],
