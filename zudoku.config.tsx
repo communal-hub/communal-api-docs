@@ -3,8 +3,8 @@ import type { ZudokuConfig } from "zudoku";
 const config: ZudokuConfig = {
   site: {
     logo: {
-      src: { light: "/logo-light.svg", dark: "/logo-dark.svg" },
-      alt: "Zudoku",
+      src: { light: "/logo.svg", dark: "/logo-dark.svg" },
+      alt: "Communal",
       width: "130px",
     },
   },
