@@ -45,13 +45,10 @@
       <img src="/logo.svg" alt="Communal" class="logo-light" />
       <img src="/logo-dark.svg" alt="Communal" class="logo-dark" />
     </div>
-    <div id="api-reference"></div>
-
+    <script
+      id="api-reference"
+      data-url="http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json"
+      data-proxy-url="https://proxy.scalar.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-    <script>
-      Scalar.createApiReference('#api-reference', {
-        url: 'https://registry.scalar.com/@scalar/apis/galaxy?format=json',
-      })
-    </script>
   </body>
 </html>
