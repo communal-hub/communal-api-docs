@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Communal API Reference</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="API documentation for the Communal platform" />
+    <link rel="icon" type="image/svg+xml" href="/logo-icon.svg" />
+    <style>
+      body {
+        margin: 0;
+      }
+
+      .custom-header {
+        display: flex;
+        align-items: center;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--scalar-border-color, #e1e1e1);
+        background: var(--scalar-background-1, #fff);
+      }
+
+      .custom-header img {
+        height: 28px;
+        width: auto;
+      }
+
+      /* Hide the dark logo by default, show the light one */
+      .custom-header .logo-dark {
+        display: none;
+      }
+
+      /* In dark mode, swap logos */
+      .dark-mode .custom-header .logo-light,
+      [class*="dark"] .custom-header .logo-light {
+        display: none;
+      }
+      .dark-mode .custom-header .logo-dark,
+      [class*="dark"] .custom-header .logo-dark {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="custom-header">
+      <img src="/logo.svg" alt="Communal" class="logo-light" />
+      <img src="/logo-dark.svg" alt="Communal" class="logo-dark" />
+    </div>
+    <div id="api-reference"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script>
+      Scalar.createApiReference('#api-reference', {
+        url: 'https://community-management-public-prod.s3.amazonaws.com/docs/api.json',
+        proxyUrl: 'https://proxy.scalar.com',
+      })
+    </script>
+  </body>
+</html>
