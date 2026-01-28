@@ -47,25 +47,12 @@
     </div>
     <div id="api-reference"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.25.28"></script>
     <script>
-      const SPEC_URL = 'https://proxy.scalar.com/?scalar_url=http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json'
-
-      fetch(SPEC_URL)
-        .then(res => res.json())
-        .then(spec => {
-          // Clean invalid null/empty values from required arrays
-          JSON.stringify(spec, (key, value) => {
-            if (key === 'required' && Array.isArray(value)) {
-              value.splice(0, value.length, ...value.filter(v => typeof v === 'string' && v.length > 0))
-            }
-            return value
-          })
-
-          Scalar.createApiReference('#api-reference', {
-            content: JSON.stringify(spec),
-          })
-        })
+      Scalar.createApiReference('#api-reference', {
+        url: 'http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json',
+        proxyUrl: 'https://proxy.scalar.com',
+      })
     </script>
   </body>
 </html>
