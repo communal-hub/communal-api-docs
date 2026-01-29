@@ -49,7 +49,9 @@
         transition: opacity 0.15s ease;
       }
 
-      /* Show on hover of the parent heading area */
+      /* Show on hover of the parent section header */
+      .section-header:hover .llm-actions,
+      .section-header-wrapper:hover .llm-actions,
       *:hover > .llm-actions,
       .llm-actions:hover {
         opacity: 1;
@@ -139,14 +141,19 @@
         }
 
         function injectButtons() {
+          // Scalar renders: .section-header > [Anchor] > h3 (with operation summary text)
+          // Target h3 inside .section-header, plus fallback selectors
           const headings = document.querySelectorAll(
-            'h2, h3, [class*="section-header"] [class*="heading"], [class*="operation"] [class*="name"]'
+            '.section-header h3, .section-header h2, .section-header-wrapper h3, .section-header-wrapper h2'
           )
 
           headings.forEach(heading => {
+            // Skip if already injected
+            if (heading.closest('.section-header-wrapper')?.querySelector('.llm-actions')) return
             if (heading.querySelector('.llm-actions')) return
 
-            const text = heading.textContent.trim()
+            // Get text, stripping any nested element text we may have added
+            const text = heading.childNodes[0]?.textContent?.trim() || heading.textContent.trim()
             const key = summaryToKey[text]
             if (!key || !endpoints[key]) return
 
@@ -156,7 +163,14 @@
             actions.innerHTML =
               `<button class="llm-btn" onclick="event.stopPropagation(); viewEndpointMarkdown('${escaped}')" title="View as Markdown">${MD_ICON}Markdown</button>` +
               `<button class="llm-btn" onclick="event.stopPropagation(); copyEndpointMarkdown(this, '${escaped}')" title="Copy for LLM">${COPY_ICON}Copy for LLM</button>`
-            heading.appendChild(actions)
+
+            // Append to the section-header div (sibling to heading) for better layout
+            const sectionHeader = heading.closest('.section-header') || heading.closest('.section-header-wrapper')
+            if (sectionHeader) {
+              sectionHeader.appendChild(actions)
+            } else {
+              heading.appendChild(actions)
+            }
           })
         }
 
