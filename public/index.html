@@ -46,6 +46,29 @@
         background: var(--scalar-background-2, #f5f5f5);
       }
 
+      .llm-actions {
+        display: flex;
+        gap: 6px;
+        padding: 8px 12px;
+        justify-content: flex-end;
+      }
+
+      .llm-btn {
+        padding: 4px 10px;
+        border: 1px solid var(--scalar-border-color, #e1e1e1);
+        border-radius: 4px;
+        background: transparent;
+        color: var(--scalar-color-2, #6b6b6b);
+        font-size: 12px;
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      .llm-btn:hover {
+        background: var(--scalar-background-2, #f5f5f5);
+        color: var(--scalar-color-1, #1a1a1a);
+      }
+
       /* Hide the dark logo by default, show the light one */
       .custom-header .logo-dark {
         display: none;
@@ -82,12 +105,85 @@
           .then(res => res.text())
           .then(text => {
             navigator.clipboard.writeText(text)
-            const btn = document.querySelector('.header-btn[onclick]')
+            const btn = document.querySelector('.header-actions .header-btn[onclick]')
             const original = btn.textContent
             btn.textContent = 'Copied!'
             setTimeout(() => btn.textContent = original, 2000)
           })
       }
+
+      function copyEndpointMarkdown(btn, key) {
+        if (!window.__endpointMarkdown) return
+        const md = window.__endpointMarkdown[key]
+        if (!md) return
+        navigator.clipboard.writeText(md)
+        const original = btn.textContent
+        btn.textContent = 'Copied!'
+        setTimeout(() => btn.textContent = original, 2000)
+      }
+
+      function viewEndpointMarkdown(key) {
+        if (!window.__endpointMarkdown) return
+        const md = window.__endpointMarkdown[key]
+        if (!md) return
+        const blob = new Blob([md], { type: 'text/plain' })
+        window.open(URL.createObjectURL(blob), '_blank')
+      }
+
+      // Load per-endpoint markdown and inject buttons into Scalar sections
+      fetch('/llms-endpoints.json')
+        .then(res => res.json())
+        .then(endpoints => {
+          window.__endpointMarkdown = endpoints
+
+          function injectButtons() {
+            // Scalar renders endpoint sections with [data-section-id] containing the path
+            // and shows method badges. We look for sections that have HTTP method + path.
+            const sections = document.querySelectorAll('[id^="tag/"]')
+
+            // Also try to find individual operation sections
+            const opSections = document.querySelectorAll('section[id], [data-section-id]')
+
+            // Look for all heading elements that contain HTTP methods
+            const headings = document.querySelectorAll('h2, h3, [class*="heading"]')
+
+            // Find Scalar endpoint containers by looking for method badges + paths
+            const allElements = document.querySelectorAll('[class*="operation"], [class*="endpoint"], [class*="section-container"]')
+
+            allElements.forEach(el => {
+              if (el.querySelector('.llm-actions')) return
+
+              // Try to extract method and path from the element
+              const methodEl = el.querySelector('[class*="method"], [class*="badge"]')
+              const pathEl = el.querySelector('[class*="path"], [class*="url"]')
+
+              if (!methodEl || !pathEl) return
+
+              const method = methodEl.textContent.trim().toUpperCase()
+              const path = pathEl.textContent.trim()
+              const key = `${method} ${path}`
+
+              if (!endpoints[key]) return
+
+              const actions = document.createElement('div')
+              actions.className = 'llm-actions'
+              actions.innerHTML = `
+                <button class="llm-btn" onclick="viewEndpointMarkdown('${key}')">View as Markdown</button>
+                <button class="llm-btn" onclick="copyEndpointMarkdown(this, '${key}')">Copy for LLM</button>
+              `
+              el.prepend(actions)
+            })
+          }
+
+          // Run injection after Scalar renders, and watch for dynamic changes
+          const observer = new MutationObserver(() => injectButtons())
+          observer.observe(document.body, { childList: true, subtree: true })
+
+          // Also try immediately and after a delay
+          injectButtons()
+          setTimeout(injectButtons, 3000)
+          setTimeout(injectButtons, 6000)
+        })
     </script>
   </body>
 </html>
