@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 
-const SPEC_URL = 'http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json'
+const SPEC_URL = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json'
 
 const res = await fetch(SPEC_URL)
 const spec = await res.json()
@@ -172,6 +172,17 @@ for (const [tag, eps] of Object.entries(tagGroups)) {
   }
 }
 
+// Build summary/operationId -> "METHOD /path" lookup for client-side heading matching
+const summaryMap = {}
+for (const [path, methods] of Object.entries(spec.paths || {})) {
+  for (const [method, op] of Object.entries(methods)) {
+    const key = `${method.toUpperCase()} ${path}`
+    if (op.summary) summaryMap[op.summary.trim()] = key
+    if (op.operationId) summaryMap[op.operationId] = key
+  }
+}
+
 writeFileSync('public/llms.txt', fullLines.join('\n'))
 writeFileSync('public/llms-endpoints.json', JSON.stringify(endpoints))
-console.log(`Generated public/llms.txt and public/llms-endpoints.json (${Object.keys(endpoints).length} endpoints)`)
+writeFileSync('public/llms-summary-map.json', JSON.stringify(summaryMap))
+console.log(`Generated llms.txt, llms-endpoints.json, llms-summary-map.json (${Object.keys(endpoints).length} endpoints)`)

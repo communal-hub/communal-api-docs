@@ -98,7 +98,7 @@
     </div>
     <script
       id="api-reference"
-      data-url="http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json"
+      data-url="https://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json"
       data-proxy-url="https://proxy.scalar.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
     <script>
@@ -127,66 +127,45 @@
         window.open(URL.createObjectURL(blob), '_blank')
       }
 
-      // Load per-endpoint markdown and inject buttons next to endpoint headings
-      fetch('/llms-endpoints.json')
-        .then(res => res.json())
-        .then(endpoints => {
-          window.__endpointMarkdown = endpoints
+      // Load per-endpoint markdown and summary-to-key map (both generated at build time)
+      Promise.all([
+        fetch('/llms-endpoints.json').then(r => r.json()),
+        fetch('/llms-summary-map.json').then(r => r.json()),
+      ]).then(([endpoints, summaryToKey]) => {
+        window.__endpointMarkdown = endpoints
 
-          // Build a lookup from summary text -> key for matching headings
-          const summaryToKey = {}
-          fetch('http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json')
-            .then(r => r.json())
-            .catch(() => null)
-            .then(spec => {
-              if (spec?.paths) {
-                for (const [path, methods] of Object.entries(spec.paths)) {
-                  for (const [method, op] of Object.entries(methods)) {
-                    if (op.summary) {
-                      summaryToKey[op.summary.trim()] = `${method.toUpperCase()} ${path}`
-                    }
-                    if (op.operationId) {
-                      summaryToKey[op.operationId] = `${method.toUpperCase()} ${path}`
-                    }
-                  }
-                }
-              }
+        function escapeAttr(str) {
+          return str.replace(/'/g, "\\'").replace(/"/g, '&quot;')
+        }
 
-              function escapeAttr(str) {
-                return str.replace(/'/g, "\\'").replace(/"/g, '&quot;')
-              }
+        function injectButtons() {
+          const headings = document.querySelectorAll(
+            'h2, h3, [class*="section-header"] [class*="heading"], [class*="operation"] [class*="name"]'
+          )
 
-              function injectButtons() {
-                // Target Scalar's endpoint heading elements
-                // Scalar uses section headings with the operation summary as text
-                const headings = document.querySelectorAll(
-                  'h2, h3, [class*="section-header"] [class*="heading"], [class*="operation"] [class*="name"]'
-                )
+          headings.forEach(heading => {
+            if (heading.querySelector('.llm-actions')) return
 
-                headings.forEach(heading => {
-                  if (heading.querySelector('.llm-actions')) return
+            const text = heading.textContent.trim()
+            const key = summaryToKey[text]
+            if (!key || !endpoints[key]) return
 
-                  const text = heading.textContent.trim()
-                  const key = summaryToKey[text]
-                  if (!key || !endpoints[key]) return
+            const escaped = escapeAttr(key)
+            const actions = document.createElement('span')
+            actions.className = 'llm-actions'
+            actions.innerHTML =
+              `<button class="llm-btn" onclick="event.stopPropagation(); viewEndpointMarkdown('${escaped}')" title="View as Markdown">${MD_ICON}Markdown</button>` +
+              `<button class="llm-btn" onclick="event.stopPropagation(); copyEndpointMarkdown(this, '${escaped}')" title="Copy for LLM">${COPY_ICON}Copy for LLM</button>`
+            heading.appendChild(actions)
+          })
+        }
 
-                  const escaped = escapeAttr(key)
-                  const actions = document.createElement('span')
-                  actions.className = 'llm-actions'
-                  actions.innerHTML =
-                    `<button class="llm-btn" onclick="event.stopPropagation(); viewEndpointMarkdown('${escaped}')" title="View as Markdown">${MD_ICON}Markdown</button>` +
-                    `<button class="llm-btn" onclick="event.stopPropagation(); copyEndpointMarkdown(this, '${escaped}')" title="Copy for LLM">${COPY_ICON}Copy for LLM</button>`
-                  heading.appendChild(actions)
-                })
-              }
-
-              const observer = new MutationObserver(() => injectButtons())
-              observer.observe(document.body, { childList: true, subtree: true })
-              injectButtons()
-              setTimeout(injectButtons, 3000)
-              setTimeout(injectButtons, 6000)
-            })
-        })
+        const observer = new MutationObserver(() => injectButtons())
+        observer.observe(document.body, { childList: true, subtree: true })
+        injectButtons()
+        setTimeout(injectButtons, 3000)
+        setTimeout(injectButtons, 6000)
+      })
     </script>
   </body>
 </html>
