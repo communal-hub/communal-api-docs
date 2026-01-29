@@ -1,0 +1,10 @@
+{
+  "name": "communal-api-docs",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@scalar/openapi-to-markdown": "latest"
+  }
+}

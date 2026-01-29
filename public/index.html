@@ -24,6 +24,28 @@
         width: auto;
       }
 
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .header-btn {
+        padding: 6px 12px;
+        border: 1px solid var(--scalar-border-color, #e1e1e1);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--scalar-color-1, #1a1a1a);
+        font-size: 13px;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .header-btn:hover {
+        background: var(--scalar-background-2, #f5f5f5);
+      }
+
       /* Hide the dark logo by default, show the light one */
       .custom-header .logo-dark {
         display: none;
@@ -44,11 +66,28 @@
     <div class="custom-header">
       <img src="/logo.svg" alt="Communal" class="logo-light" />
       <img src="/logo-dark.svg" alt="Communal" class="logo-dark" />
+      <div class="header-actions">
+        <a href="/llms.txt" target="_blank" class="header-btn">View as Markdown</a>
+        <button class="header-btn" onclick="copyLlmsTxt()">Copy for LLM</button>
+      </div>
     </div>
     <script
       id="api-reference"
       data-url="http://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json"
       data-proxy-url="https://proxy.scalar.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script>
+      function copyLlmsTxt() {
+        fetch('/llms.txt')
+          .then(res => res.text())
+          .then(text => {
+            navigator.clipboard.writeText(text)
+            const btn = document.querySelector('.header-btn[onclick]')
+            const original = btn.textContent
+            btn.textContent = 'Copied!'
+            setTimeout(() => btn.textContent = original, 2000)
+          })
+      }
+    </script>
   </body>
 </html>
