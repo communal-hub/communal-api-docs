@@ -62,6 +62,12 @@
                 "title": "Using the API",
                 "filepath": "docs/using-the-api.md",
                 "icon": "phosphor/regular/code"
+              },
+              "versioning": {
+                "type": "page",
+                "title": "Versioning",
+                "filepath": "docs/versioning.md",
+                "icon": "phosphor/regular/git-branch"
               }
             }
           },
@@ -174,6 +180,12 @@
                     "icon": "phosphor/regular/clipboard-text"
                   }
                 }
+              },
+              "changelog": {
+                "type": "page",
+                "title": "Changelog",
+                "filepath": "docs/changelog.md",
+                "icon": "phosphor/regular/clock-counter-clockwise"
               }
             }
           }
