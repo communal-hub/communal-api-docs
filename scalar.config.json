@@ -7,10 +7,10 @@
   },
   "siteConfig": {
     "subdomain": "communal",
-    "favicon": "/logo-icon.svg",
+    "favicon": "./public/logo-icon.svg",
     "logo": {
-      "darkMode": "/logo-dark.svg",
-      "lightMode": "/logo-light.svg"
+      "darkMode": "./public/logo-dark.svg",
+      "lightMode": "./public/logo-light.svg"
     }
   },
   "navigation": {
@@ -71,15 +71,15 @@
             "mode": "flat",
             "icon": "phosphor/regular/squares-four",
             "children": {
-              "users-and-activity": {
+              "users": {
                 "type": "group",
-                "title": "Users & activity",
+                "title": "Users",
                 "mode": "flat",
                 "icon": "phosphor/regular/user",
                 "children": {
                   "users-overview": {
                     "type": "page",
-                    "title": "Users & activity",
+                    "title": "Users",
                     "filepath": "docs/guides/users-overview.md",
                     "icon": "phosphor/regular/book-open-text"
                   },
@@ -88,12 +88,6 @@
                     "title": "Update user profiles",
                     "filepath": "docs/guides/update-user-profiles.md",
                     "icon": "phosphor/regular/user-gear"
-                  },
-                  "track-card-deliveries": {
-                    "type": "page",
-                    "title": "Track card deliveries",
-                    "filepath": "docs/guides/track-card-deliveries.md",
-                    "icon": "phosphor/regular/pulse"
                   }
                 }
               },
@@ -157,6 +151,26 @@
                     "type": "page",
                     "title": "View attendance",
                     "filepath": "docs/guides/view-attendance.md",
+                    "icon": "phosphor/regular/clipboard-text"
+                  }
+                }
+              },
+              "activities": {
+                "type": "group",
+                "title": "Activities",
+                "mode": "flat",
+                "icon": "phosphor/regular/pulse",
+                "children": {
+                  "activities-overview": {
+                    "type": "page",
+                    "title": "Activities",
+                    "filepath": "docs/guides/activities-overview.md",
+                    "icon": "phosphor/regular/book-open-text"
+                  },
+                  "track-card-deliveries": {
+                    "type": "page",
+                    "title": "Track card deliveries",
+                    "filepath": "docs/guides/track-card-deliveries.md",
                     "icon": "phosphor/regular/clipboard-text"
                   }
                 }
