@@ -1,0 +1,293 @@
+# Communal Platform API
+
+API documentation for the Communal platform.
+
+Version: 1.1.0
+
+## Servers
+
+- **Local**: http://api.community-management.test/api
+- **Staging**: https://api.communitymanagement.xyz/api
+- **Prod**: https://api.getcommunal.com/api
+
+## Authentication
+
+- **http**: http (bearer)
+
+## Endpoints
+
+### Activity
+
+#### GET /activities/card-deliveries
+
+List all digital member card delivery activities
+
+**Parameters:**
+
+- `filter[member_id]` (query) - Filter activities by the member ID belonging to the related user. Accepts alphanumeric strings.
+- `filter[request_hash]` (query) - Filter activities by the unique request hash for tracing API requests.
+- `filter[date_from]` (query) - Return activities created on or after the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
+- `filter[date_to]` (query) - Return activities created on or before the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
+- `filter[status]` (query) - Filter activities by delivery status. Supported values: `success`, `failed`.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
+### Attendance Record
+
+#### GET /attendance_records
+
+List attendance records
+
+**Parameters:**
+
+- `filter[attendance_sheet_id]` (query) - Filter by attendance sheet ID.
+- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
+#### GET /attendance_records/{attendance_record}
+
+Get an attendance record
+
+**Parameters:**
+
+- `attendance_record` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
+
+**Responses:**
+
+- `200`: `AttendanceRecordResource`
+- `401`: 
+
+### Attendance Sheet
+
+#### GET /attendance_sheets
+
+List attendance sheets
+
+**Parameters:**
+
+- `filter[registration_opportunity_id]` (query) - Filter by registration opportunity ID.
+- `filter[date]` (query) - Filter by date (YYYY-MM-DD).
+- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunity, records.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
+#### GET /attendance_sheets/{attendance_sheet}
+
+Get an attendance sheet
+
+**Parameters:**
+
+- `attendance_sheet` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunity, records.
+
+**Responses:**
+
+- `200`: `AttendanceSheetResource`
+- `401`: 
+
+### Membership Card
+
+#### POST /membership_cards/send
+
+Send a membership card for a user
+Sends a membership card via the email on file for the user. This method allows
+configuration of which card types to send.
+
+This endpoint can also be used to create
+and update user specific data that will be used to generate the card. If an email supplied
+is not found, a new user will be created with the additional data supplied.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
+- `500`: 
+
+### Membership Type
+
+#### POST /membership_types/{id}/archive
+
+Archive or unarchive a membership type
+
+**Parameters:**
+
+- `id` (path) (required)
+
+**Responses:**
+
+- `200`: `MembershipTypeResource`
+- `401`: 
+
+#### GET /membership_types
+
+List all membership types in the system
+
+**Responses:**
+
+- `200`: `PaginatedResourceCollection`
+- `401`: 
+
+#### GET /membership_types/{membership_type}
+
+Retrieve a membership type
+
+**Parameters:**
+
+- `membership_type` (path) (required)
+
+**Responses:**
+
+- `200`: `MembershipTypeResource`
+- `401`: 
+
+### Program
+
+#### GET /parent_programs
+
+List programs
+Returns a paginated list of programs. Registration opportunities (sessions) are
+excluded by default for performance - use `?include=programs` to include them.
+
+**Responses:**
+
+- `200`: Paginated set
+- `401`: 
+
+#### GET /parent_programs/{parent_program}
+
+Get a program
+Returns detailed information about a specific program including
+all configuration fields. Use `?include=programs` to include registration
+opportunities (sessions) with pricing information.
+
+**Parameters:**
+
+- `parent_program` (path) (required)
+
+**Responses:**
+
+- `200`: `ParentProgramResource`
+- `401`: 
+
+### Program Signup
+
+#### GET /program_signups
+
+List program signups
+
+**Parameters:**
+
+- `filter[program_id]` (query) - Filter by program ID. Supports comma-separated values for multiple programs.
+- `filter[program[parent_program_id]]` (query) - Filter by parent program ID. Returns signups for all child programs under this parent.
+- `filter[user_id]` (query) - Filter by user ID. Non-managers can only filter to their own ID.
+- `filter[query]` (query) - Search by program name, user name, user email, guest name, additional member name, or guest email.
+- `filter[status]` (query) - Filter by program time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.
+- `filter[timeScope]` (query) - Simple time scope filter. Options: upcoming (includes ongoing and active), past, all.
+- `filter[event_start_date]` (query) - Filter by program event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing programs.
+- `filter[upcoming]` (query) - Filter to signups for upcoming programs only.
+- `filter[past]` (query) - Filter to signups for past programs only.
+- `filter[ongoing]` (query) - Filter to signups for ongoing programs only.
+- `filter[withTrashed]` (query) - Include soft-deleted signups. Defaults to excluding deleted.
+- `filter[program[archived_at]]` (query) - Filter by program archived status. Pass empty string to exclude archived programs.
+- `filter[program[deleted_at]]` (query) - Filter by program deleted status. Pass empty string to exclude deleted programs.
+- `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
+#### GET /program_signups/{program_signup}
+
+Get a program signup
+
+**Parameters:**
+
+- `program_signup` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
+
+**Responses:**
+
+- `200`: `ProgramSignupResource`
+- `401`: 
+
+### Registration Opportunity
+
+#### GET /programs
+
+List registration opportunities
+Returns a paginated list of registration opportunities (programs) with optional filtering.
+
+**Parameters:**
+
+- `filter[parent_program_id]` (query) - Filter by parent program ID.
+- `filter[status]` (query) - Filter by status. Supports multiple comma-separated values. Options: active, upcoming, past, ongoing, archived.
+- `filter[query]` (query) - Search programs by name (partial match).
+- `filter[with_participants]` (query) - Filter to only programs that have participants.
+- `filter[can_register]` (query) - Filter to only programs the authenticated user can register for.
+- `filter[upcoming]` (query) - Filter to only upcoming programs.
+- `filter[past]` (query) - Filter to only past programs.
+- `filter[archived_at]` (query) - Filter by archived status. Pass empty string to exclude archived programs.
+- `filter[deleted_at]` (query) - Filter by deleted status. Pass empty string to exclude deleted programs.
+- `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets.
+- `append` (query) - Append computed attributes (comma-separated). Options: audience, signup_count.
+- `sort` (query) - Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
+#### GET /programs/{program}
+
+Get a registration opportunity
+
+**Parameters:**
+
+- `program` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets.
+- `append` (query) - Append computed attributes (comma-separated). Options: signup_count.
+
+**Responses:**
+
+- `200`: `RegistrationOpportunity`
+- `401`: 
+
+### User
+
+#### PUT /users/{user}
+
+Update a user
+Performs an user update request.
+
+**Parameters:**
+
+- `user` (path) (required)
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 

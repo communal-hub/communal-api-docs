@@ -1,0 +1,172 @@
+{
+  "$schema": "https://registry.scalar.com/@scalar/schemas/config",
+  "scalar": "2.0.0",
+  "info": {
+    "title": "Communal Platform API",
+    "description": "Documentation and API reference for organizations building on Communal."
+  },
+  "siteConfig": {
+    "subdomain": "communal"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "title": "Get Started",
+        "path": "/",
+        "icon": "phosphor/regular/rocket-launch"
+      },
+      {
+        "title": "API Reference",
+        "path": "/reference",
+        "icon": "phosphor/regular/plug"
+      }
+    ],
+    "routes": {
+      "/": {
+        "type": "group",
+        "title": "Documentation",
+        "mode": "flat",
+        "icon": "phosphor/regular/book-open",
+        "children": {
+          "basics": {
+            "type": "group",
+            "title": "Basics",
+            "mode": "flat",
+            "icon": "phosphor/regular/info",
+            "children": {
+              "": {
+                "type": "page",
+                "title": "Overview",
+                "filepath": "docs/overview.md",
+                "icon": "phosphor/regular/house"
+              },
+              "getting-started": {
+                "type": "page",
+                "title": "Getting started",
+                "filepath": "docs/getting-started.md",
+                "icon": "phosphor/regular/flag"
+              },
+              "authentication": {
+                "type": "page",
+                "title": "Authentication",
+                "filepath": "docs/authentication.md",
+                "icon": "phosphor/regular/key"
+              },
+              "using-the-api": {
+                "type": "page",
+                "title": "Using the API",
+                "filepath": "docs/using-the-api.md",
+                "icon": "phosphor/regular/code"
+              }
+            }
+          },
+          "platform": {
+            "type": "group",
+            "title": "Platform guides",
+            "mode": "flat",
+            "icon": "phosphor/regular/squares-four",
+            "children": {
+              "users-and-activity": {
+                "type": "group",
+                "title": "Users & activity",
+                "mode": "flat",
+                "icon": "phosphor/regular/user",
+                "children": {
+                  "users-overview": {
+                    "type": "page",
+                    "title": "Users & activity",
+                    "filepath": "docs/guides/users-overview.md",
+                    "icon": "phosphor/regular/book-open-text"
+                  },
+                  "update-user-profiles": {
+                    "type": "page",
+                    "title": "Update user profiles",
+                    "filepath": "docs/guides/update-user-profiles.md",
+                    "icon": "phosphor/regular/user-gear"
+                  },
+                  "track-card-deliveries": {
+                    "type": "page",
+                    "title": "Track card deliveries",
+                    "filepath": "docs/guides/track-card-deliveries.md",
+                    "icon": "phosphor/regular/pulse"
+                  }
+                }
+              },
+              "membership": {
+                "type": "group",
+                "title": "Membership",
+                "mode": "flat",
+                "icon": "phosphor/regular/identification-card",
+                "children": {
+                  "membership-overview": {
+                    "type": "page",
+                    "title": "Membership",
+                    "filepath": "docs/guides/membership-overview.md",
+                    "icon": "phosphor/regular/book-open-text"
+                  },
+                  "browse-membership-types": {
+                    "type": "page",
+                    "title": "Browse membership types",
+                    "filepath": "docs/guides/browse-membership-types.md",
+                    "icon": "phosphor/regular/list-magnifying-glass"
+                  },
+                  "send-membership-cards": {
+                    "type": "page",
+                    "title": "Send membership cards",
+                    "filepath": "docs/guides/send-membership-cards.md",
+                    "icon": "phosphor/regular/envelope"
+                  }
+                }
+              },
+              "programs": {
+                "type": "group",
+                "title": "Programs",
+                "mode": "flat",
+                "icon": "phosphor/regular/folders",
+                "children": {
+                  "programs-overview": {
+                    "type": "page",
+                    "title": "Programs & registration",
+                    "filepath": "docs/guides/programs-overview.md",
+                    "icon": "phosphor/regular/book-open-text"
+                  },
+                  "fetch-program-information": {
+                    "type": "page",
+                    "title": "Fetch program information",
+                    "filepath": "docs/guides/fetch-program-information.md",
+                    "icon": "phosphor/regular/magnifying-glass"
+                  },
+                  "browse-registration-opportunities": {
+                    "type": "page",
+                    "title": "Browse registration opportunities",
+                    "filepath": "docs/guides/browse-registration-opportunities.md",
+                    "icon": "phosphor/regular/list-magnifying-glass"
+                  },
+                  "retrieve-program-signups": {
+                    "type": "page",
+                    "title": "Retrieve program signups",
+                    "filepath": "docs/guides/retrieve-program-signups.md",
+                    "icon": "phosphor/regular/users-three"
+                  },
+                  "view-attendance": {
+                    "type": "page",
+                    "title": "View attendance",
+                    "filepath": "docs/guides/view-attendance.md",
+                    "icon": "phosphor/regular/clipboard-text"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/reference": {
+        "type": "openapi",
+        "title": "Communal Platform API",
+        "filepath": "docs/openapi.json",
+        "mode": "nested",
+        "icon": "phosphor/regular/brackets-curly"
+      }
+    }
+  }
+}

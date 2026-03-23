@@ -1,7 +1,17 @@
 {
   "name": "communal-api-docs",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "normalize-spec": "node normalize-openapi.mjs",
+    "fetch-spec": "curl -s -o docs/openapi.json https://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json && node normalize-openapi.mjs",
+    "preview": "npm run fetch-spec && scalar project preview",
+    "publish": "npm run fetch-spec && scalar project publish"
+  },
+  "devDependencies": {
+    "@scalar/cli": "^1.7.6"
   }
 }

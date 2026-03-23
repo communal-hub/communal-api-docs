@@ -1,0 +1,3362 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Communal Platform API",
+        "version": "1.1.0",
+        "description": "API documentation for the Communal platform."
+    },
+    "servers": [
+        {
+            "url": "http://api.community-management.test/api",
+            "description": "Local"
+        },
+        {
+            "url": "https://api.communitymanagement.xyz/api",
+            "description": "Staging"
+        },
+        {
+            "url": "https://api.getcommunal.com/api",
+            "description": "Prod"
+        }
+    ],
+    "tags": [
+        {
+            "name": "User"
+        },
+        {
+            "name": "Registration Opportunity"
+        },
+        {
+            "name": "Program"
+        },
+        {
+            "name": "Program Signup"
+        },
+        {
+            "name": "Membership Type"
+        },
+        {
+            "name": "Membership Card"
+        },
+        {
+            "name": "Activity"
+        },
+        {
+            "name": "Attendance Sheet"
+        },
+        {
+            "name": "Attendance Record"
+        }
+    ],
+    "security": [
+        {
+            "http": []
+        }
+    ],
+    "paths": {
+        "/activities/card-deliveries": {
+            "get": {
+                "operationId": "activity.cardDeliveries",
+                "summary": "List all digital member card delivery activities",
+                "tags": [
+                    "Activity"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[member_id]",
+                        "in": "query",
+                        "description": "Filter activities by the member ID belonging to the related user. Accepts alphanumeric strings.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "MEM-12345"
+                    },
+                    {
+                        "name": "filter[request_hash]",
+                        "in": "query",
+                        "description": "Filter activities by the unique request hash for tracing API requests.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[date_from]",
+                        "in": "query",
+                        "description": "Return activities created on or after the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2024-01-01"
+                    },
+                    {
+                        "name": "filter[date_to]",
+                        "in": "query",
+                        "description": "Return activities created on or before the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2024-12-31"
+                    },
+                    {
+                        "name": "filter[status]",
+                        "in": "query",
+                        "description": "Filter activities by delivery status. Supported values: `success`, `failed`.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "failed"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/attendance_records": {
+            "get": {
+                "operationId": "attendance_records.index",
+                "summary": "List attendance records",
+                "tags": [
+                    "Attendance Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[attendance_sheet_id]",
+                        "in": "query",
+                        "description": "Filter by attendance sheet ID.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 10
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "programSignup"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AttendanceRecordResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "links"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/attendance_records/{attendance_record}": {
+            "get": {
+                "operationId": "attendance_records.show",
+                "summary": "Get an attendance record",
+                "tags": [
+                    "Attendance Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "attendance_record",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "attendanceSheet,programSignup"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`AttendanceRecordResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AttendanceRecordResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/attendance_sheets": {
+            "get": {
+                "operationId": "attendance_sheets.index",
+                "summary": "List attendance sheets",
+                "tags": [
+                    "Attendance Sheet"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[registration_opportunity_id]",
+                        "in": "query",
+                        "description": "Filter by registration opportunity ID.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 42
+                    },
+                    {
+                        "name": "filter[date]",
+                        "in": "query",
+                        "description": "Filter by date (YYYY-MM-DD).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-06-15"
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunity, records.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "records"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AttendanceSheetResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "links"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/attendance_sheets/{attendance_sheet}": {
+            "get": {
+                "operationId": "attendance_sheets.show",
+                "summary": "Get an attendance sheet",
+                "tags": [
+                    "Attendance Sheet"
+                ],
+                "parameters": [
+                    {
+                        "name": "attendance_sheet",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunity, records.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "registrationOpportunity,records"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`AttendanceSheetResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AttendanceSheetResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership_cards/send": {
+            "post": {
+                "operationId": "membershipCard.sendCard",
+                "description": "Sends a membership card via the email on file for the user. This method allows\nconfiguration of which card types to send.\n\nThis endpoint can also be used to create\nand update user specific data that will be used to generate the card. If an email supplied\nis not found, a new user will be created with the additional data supplied.",
+                "summary": "Send a membership card for a user",
+                "tags": [
+                    "Membership Card"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendMembershipCardApiRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Membership card sent successfully."
+                                            ]
+                                        },
+                                        "request_hash": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "request_hash"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Feature not enabled"
+                                            ]
+                                        },
+                                        "": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        null
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Plan type could not be determined from given membership type."
+                                                    ]
+                                                },
+                                                "": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message",
+                                                null
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/membership_types/{id}/archive": {
+            "post": {
+                "operationId": "membershipType.archive",
+                "summary": "Archive or unarchive a membership type",
+                "tags": [
+                    "Membership Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`MembershipTypeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MembershipTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership_types": {
+            "get": {
+                "operationId": "membership_types.index",
+                "summary": "List all membership types in the system",
+                "tags": [
+                    "Membership Type"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`PaginatedResourceCollection`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership_types/{membership_type}": {
+            "get": {
+                "operationId": "membership_types.show",
+                "summary": "Retrieve a membership type",
+                "tags": [
+                    "Membership Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "membership_type",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`MembershipTypeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MembershipTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/parent_programs": {
+            "get": {
+                "operationId": "parent_programs.index",
+                "description": "Returns a paginated list of programs. Registration opportunities (sessions) are\nexcluded by default for performance - use `?include=programs` to include them.",
+                "summary": "List programs",
+                "tags": [
+                    "Program"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "description": "Number of items shown per page.",
+                                            "minimum": 0
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "description": "Total number of items being paginated.",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/parent_programs/{parent_program}": {
+            "get": {
+                "operationId": "parent_programs.show",
+                "description": "Returns detailed information about a specific program including\nall configuration fields. Use `?include=programs` to include registration\nopportunities (sessions) with pricing information.",
+                "summary": "Get a program",
+                "tags": [
+                    "Program"
+                ],
+                "parameters": [
+                    {
+                        "name": "parent_program",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ParentProgramResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Program"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/program_signups": {
+            "get": {
+                "operationId": "program_signups.index",
+                "summary": "List program signups",
+                "tags": [
+                    "Program Signup"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[program_id]",
+                        "in": "query",
+                        "description": "Filter by program ID. Supports comma-separated values for multiple programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1,2,3"
+                    },
+                    {
+                        "name": "filter[program[parent_program_id]]",
+                        "in": "query",
+                        "description": "Filter by parent program ID. Returns signups for all child programs under this parent.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 5
+                    },
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "description": "Filter by user ID. Non-managers can only filter to their own ID.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 42
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search by program name, user name, user email, guest name, additional member name, or guest email.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "john"
+                    },
+                    {
+                        "name": "filter[status]",
+                        "in": "query",
+                        "description": "Filter by program time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ongoing,upcoming"
+                    },
+                    {
+                        "name": "filter[timeScope]",
+                        "in": "query",
+                        "description": "Simple time scope filter. Options: upcoming (includes ongoing and active), past, all.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "upcoming"
+                    },
+                    {
+                        "name": "filter[event_start_date]",
+                        "in": "query",
+                        "description": "Filter by program event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-01-01"
+                    },
+                    {
+                        "name": "filter[upcoming]",
+                        "in": "query",
+                        "description": "Filter to signups for upcoming programs only.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[past]",
+                        "in": "query",
+                        "description": "Filter to signups for past programs only.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[ongoing]",
+                        "in": "query",
+                        "description": "Filter to signups for ongoing programs only.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[withTrashed]",
+                        "in": "query",
+                        "description": "Include soft-deleted signups. Defaults to excluding deleted.",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "filter[program[archived_at]]",
+                        "in": "query",
+                        "description": "Filter by program archived status. Pass empty string to exclude archived programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "filter[program[deleted_at]]",
+                        "in": "query",
+                        "description": "Filter by program deleted status. Pass empty string to exclude deleted programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "user,program"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProgramSignupResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "links"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/program_signups/{program_signup}": {
+            "get": {
+                "operationId": "program_signups.show",
+                "summary": "Get a program signup",
+                "tags": [
+                    "Program Signup"
+                ],
+                "parameters": [
+                    {
+                        "name": "program_signup",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "user,program,transaction"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ProgramSignupResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProgramSignupResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/programs": {
+            "get": {
+                "operationId": "programs.index",
+                "description": "Returns a paginated list of registration opportunities (programs) with optional filtering.",
+                "summary": "List registration opportunities",
+                "tags": [
+                    "Registration Opportunity"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[parent_program_id]",
+                        "in": "query",
+                        "description": "Filter by parent program ID.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 5
+                    },
+                    {
+                        "name": "filter[status]",
+                        "in": "query",
+                        "description": "Filter by status. Supports multiple comma-separated values. Options: active, upcoming, past, ongoing, archived.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "upcoming"
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search programs by name (partial match).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "basketball"
+                    },
+                    {
+                        "name": "filter[with_participants]",
+                        "in": "query",
+                        "description": "Filter to only programs that have participants.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[can_register]",
+                        "in": "query",
+                        "description": "Filter to only programs the authenticated user can register for.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[upcoming]",
+                        "in": "query",
+                        "description": "Filter to only upcoming programs.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[past]",
+                        "in": "query",
+                        "description": "Filter to only past programs.",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[archived_at]",
+                        "in": "query",
+                        "description": "Filter by archived status. Pass empty string to exclude archived programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "filter[deleted_at]",
+                        "in": "query",
+                        "description": "Filter by deleted status. Pass empty string to exclude deleted programs.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "signups,parentProgram"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options: audience, signup_count.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "signup_count"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "-event_start_date"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegistrationOpportunity"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "links": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta",
+                                        "links"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/programs/{program}": {
+            "get": {
+                "operationId": "programs.show",
+                "summary": "Get a registration opportunity",
+                "tags": [
+                    "Registration Opportunity"
+                ],
+                "parameters": [
+                    {
+                        "name": "program",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "prices,signups"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options: signup_count.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "signup_count"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`RegistrationOpportunity`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/RegistrationOpportunity"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/users/{user}": {
+            "put": {
+                "operationId": "users.update",
+                "description": "Performs an user update request.",
+                "summary": "Update a user",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "Authorization"
+            }
+        },
+        "schemas": {
+            "AttendanceRecordResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            501
+                        ]
+                    },
+                    "attendance_sheet_id": {
+                        "type": "integer",
+                        "examples": [
+                            10
+                        ]
+                    },
+                    "program_signup_id": {
+                        "type": "integer",
+                        "examples": [
+                            156
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "examples": [
+                            "present"
+                        ]
+                    },
+                    "notes": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Left early due to illness"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "attendanceSheet": {
+                        "description": "The attendance sheet this record belongs to.",
+                        "$ref": "#/components/schemas/AttendanceSheetResource"
+                    },
+                    "programSignup": {
+                        "description": "The program signup (attendee) this record tracks.",
+                        "$ref": "#/components/schemas/ProgramSignupResource"
+                    }
+                },
+                "required": [
+                    "id",
+                    "attendance_sheet_id",
+                    "program_signup_id",
+                    "status",
+                    "notes",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "AttendanceRecordResource"
+            },
+            "AttendanceSheetResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "registration_opportunity_id": {
+                        "type": "integer",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "date": {
+                        "type": "string",
+                        "examples": [
+                            "2025-06-15"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "registrationOpportunity": {
+                        "description": "Registration opportunity this attendance sheet belongs to.",
+                        "$ref": "#/components/schemas/RegistrationOpportunity"
+                    },
+                    "records": {
+                        "type": "array",
+                        "description": "Attendance records for this sheet.",
+                        "items": {
+                            "$ref": "#/components/schemas/AttendanceRecordResource"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "registration_opportunity_id",
+                    "date",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "AttendanceSheetResource"
+            },
+            "MembershipTypeResource": {
+                "type": "object",
+                "properties": {
+                    "": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string",
+                        "description": "The ID of the membership type."
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The title of the membership type."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the membership type."
+                    },
+                    "waivers": {
+                        "type": "string",
+                        "description": "The waivers that are associated with the membership type."
+                    },
+                    "plans": {
+                        "type": "array",
+                        "description": "The plans that are associated with the membership type.",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanResource"
+                        }
+                    },
+                    "visibility_requires_base_membership": {
+                        "type": "string",
+                        "description": "Whether this add-on should only be shown to members with its base membership."
+                    },
+                    "form_id": {
+                        "type": "string",
+                        "description": "The form associated with this membership type."
+                    },
+                    "form": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    null,
+                    "id",
+                    "title",
+                    "description",
+                    "waivers",
+                    "plans",
+                    "visibility_requires_base_membership",
+                    "form_id"
+                ],
+                "title": "MembershipTypeResource"
+            },
+            "PaginatedResourceCollection": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "title": "PaginatedResourceCollection"
+            },
+            "PlanResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The ID of the plan."
+                    },
+                    "nickname": {
+                        "type": "string",
+                        "description": "The name of the plan."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the plan."
+                    },
+                    "amount": {
+                        "type": "string",
+                        "description": "The amount charged for the plan."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "The status of the plan."
+                    },
+                    "": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "nickname",
+                    "description",
+                    "amount",
+                    "status",
+                    null
+                ],
+                "title": "PlanResource"
+            },
+            "Program": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "Unique identifier for the parent program.",
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Display name of the parent program shown to users.",
+                        "examples": [
+                            "Summer Sports Programs"
+                        ]
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Detailed description of the parent program, may contain HTML.",
+                        "examples": [
+                            "A collection of exciting summer sports programs for all ages."
+                        ]
+                    },
+                    "event_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When the program's events begin. All child programs run within this window.",
+                        "examples": [
+                            "2025-06-01T12:00:00.000000Z"
+                        ]
+                    },
+                    "event_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When the program's events end. All child programs run within this window.",
+                        "examples": [
+                            "2025-08-31T15:00:00.000000Z"
+                        ]
+                    },
+                    "registration_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When registration opens for this program. Users cannot sign up before this date.",
+                        "examples": [
+                            "2025-01-01T12:00:00.000000Z"
+                        ]
+                    },
+                    "registration_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When registration closes for this program. Users cannot sign up after this date.",
+                        "examples": [
+                            "2025-02-03T12:00:00.000000Z"
+                        ]
+                    },
+                    "ongoing": {
+                        "type": "boolean",
+                        "description": "Whether this is an ongoing program with no fixed end date.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Current status of the program (e.g., active, archived, draft).",
+                        "examples": [
+                            "active"
+                        ]
+                    },
+                    "dates": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable formatted event date range for display.",
+                        "examples": [
+                            "June 1 - August 31, 2025"
+                        ]
+                    },
+                    "registration_dates": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable formatted registration date range for display.",
+                        "examples": [
+                            "May 1 - May 31, 2025"
+                        ]
+                    },
+                    "is_event": {
+                        "type": "boolean",
+                        "description": "Whether this parent program represents a single event rather than a program series.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "draft": {
+                        "type": "boolean",
+                        "description": "Whether this program is in draft mode and not yet published.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "is_hidden": {
+                        "type": "boolean",
+                        "description": "Whether this program is hidden from public listings.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "profile_image": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "URL to the program's profile/header image.",
+                        "examples": [
+                            "https://example.com/images/summer-sports.jpg"
+                        ]
+                    },
+                    "limit": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Legacy capacity limit alias retained for compatibility with existing clients.",
+                        "examples": [
+                            120
+                        ]
+                    },
+                    "total_spots": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Total number of signup spots across all registration opportunities.",
+                        "examples": [
+                            120
+                        ]
+                    },
+                    "available_spots": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of remaining spots available to be claimed.",
+                        "examples": [
+                            34
+                        ]
+                    },
+                    "total_signups": {
+                        "type": "integer",
+                        "description": "Total active signups across child programs.",
+                        "examples": [
+                            86
+                        ]
+                    },
+                    "reserved_spots": {
+                        "type": "integer",
+                        "description": "Number of spots reserved by capped child programs.",
+                        "examples": [
+                            60
+                        ]
+                    },
+                    "reserved_spots_signups": {
+                        "type": "integer",
+                        "description": "Number of signups currently consuming reserved spots.",
+                        "examples": [
+                            44
+                        ]
+                    },
+                    "reserved_spots_remaining": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Remaining reserved spots after reserved signups are counted.",
+                        "examples": [
+                            16
+                        ]
+                    },
+                    "uncapped_spots": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of spots available to uncapped child programs.",
+                        "examples": [
+                            60
+                        ]
+                    },
+                    "uncapped_spots_signups": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of signups currently consuming uncapped spots.",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "uncapped_spots_remaining": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Remaining uncapped spots after uncapped signups are counted.",
+                        "examples": [
+                            18
+                        ]
+                    },
+                    "demographic": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Audience demographic label for this parent program.",
+                        "examples": [
+                            "Youth (Ages 8-12)"
+                        ]
+                    },
+                    "instructor": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Instructor or facilitator name shown for this parent program.",
+                        "examples": [
+                            "Jane Coach"
+                        ]
+                    },
+                    "location_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Optional display name for the physical location.",
+                        "examples": [
+                            "Main Gymnasium"
+                        ]
+                    },
+                    "location_address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Optional street address for the location.",
+                        "examples": [
+                            "123 Main St, Springfield, IL"
+                        ]
+                    },
+                    "location_latitude": {
+                        "description": "Latitude for map display when a location is set.",
+                        "examples": [
+                            43.6532
+                        ],
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "location_longitude": {
+                        "description": "Longitude for map display when a location is set.",
+                        "examples": [
+                            -79.3832
+                        ],
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "is_online": {
+                        "type": "boolean",
+                        "description": "Whether the program is delivered online.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "readable_event_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable event start date in tenant timezone.",
+                        "examples": [
+                            "Thu, Jun 1, 2025 7:00 PM"
+                        ]
+                    },
+                    "readable_event_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable event end date in tenant timezone.",
+                        "examples": [
+                            "Sat, Aug 31, 2025 5:00 PM"
+                        ]
+                    },
+                    "event_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Event start time in tenant timezone (24-hour HH:mm).",
+                        "examples": [
+                            "19:00"
+                        ]
+                    },
+                    "event_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Event end time in tenant timezone (24-hour HH:mm).",
+                        "examples": [
+                            "17:00"
+                        ]
+                    },
+                    "registration_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Registration open time in tenant timezone (24-hour HH:mm).",
+                        "examples": [
+                            "09:00"
+                        ]
+                    },
+                    "registration_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Registration close time in tenant timezone (24-hour HH:mm).",
+                        "examples": [
+                            "23:59"
+                        ]
+                    },
+                    "display_only": {
+                        "type": "boolean",
+                        "description": "Whether this parent program is display-only and not intended for signup.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "unsplash_author_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Unsplash credit author name for the selected profile image.",
+                        "examples": [
+                            "Alex Photographer"
+                        ]
+                    },
+                    "unsplash_author_link": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Unsplash credit URL for the selected profile image author.",
+                        "examples": [
+                            "https://unsplash.com/@alex"
+                        ]
+                    },
+                    "multiple_signups": {
+                        "type": "boolean",
+                        "description": "Whether users may submit multiple signups for this parent program.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_number_of_guests": {
+                        "type": "boolean",
+                        "description": "Whether checkout prompts for number of guests.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "prompt_for_registrant": {
+                        "type": "boolean",
+                        "description": "Whether checkout prompts for registrant selection.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "waitlist_enabled": {
+                        "type": "boolean",
+                        "description": "Whether waitlist functionality is enabled for this parent program.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "force_participant_selection": {
+                        "type": "boolean",
+                        "description": "Whether participants must be selected before checkout.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "show_participant_list": {
+                        "type": "boolean",
+                        "description": "Whether participants can view the participant list for this parent program.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "pay_by_cash": {
+                        "type": "boolean",
+                        "description": "Whether this parent program allows cash payment option.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "registration_fee": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Registration fee amount in minor currency units (for example, cents).",
+                        "examples": [
+                            2500
+                        ]
+                    },
+                    "cap_registration_fee": {
+                        "type": "boolean",
+                        "description": "Whether registration fee is applied once per checkout instead of per signup.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "ignores_tax_rates": {
+                        "type": "boolean",
+                        "description": "Whether this parent program is configured to ignore tenant tax rates.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "collect_additional_information": {
+                        "type": "boolean",
+                        "description": "Whether additional signup form data should be collected.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "require_emergency_contact_information": {
+                        "type": "boolean",
+                        "description": "Whether emergency contact information is required at signup.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "block_facility_calendars": {
+                        "type": "boolean",
+                        "description": "Whether facility calendars should be blocked by this parent program.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Optional linked form identifier for additional questions.",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "allow_file_uploads": {
+                        "type": "boolean",
+                        "description": "Whether registrants are allowed to upload files during signup.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "file_uploads_required": {
+                        "type": "boolean",
+                        "description": "Whether at least one file upload is required at signup.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "file_uploads_max": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Maximum number of files allowed per signup, or null for default behavior.",
+                        "examples": [
+                            3
+                        ]
+                    },
+                    "volunteer_opportunities_ids": {
+                        "type": "array",
+                        "description": "Volunteer opportunity identifiers linked to this parent program.",
+                        "examples": [
+                            [
+                                3,
+                                7,
+                                11
+                            ]
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "facility_ids": {
+                        "type": "array",
+                        "description": "Facility identifiers linked to this parent program.",
+                        "examples": [
+                            [
+                                2,
+                                5
+                            ]
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When this record was created.",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When this record was last updated.",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When this record was soft deleted, null if not deleted.",
+                        "examples": [
+                            "2025-01-25T12:00:00.000000Z"
+                        ]
+                    },
+                    "archived_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "When this program was archived, null if not archived.",
+                        "examples": [
+                            "2025-01-30T18:00:00.000000Z"
+                        ]
+                    },
+                    "facilities": {
+                        "type": "string",
+                        "description": "Facilities/locations where this program takes place."
+                    },
+                    "registration_opportunities": {
+                        "type": "string",
+                        "description": "Child programs available for registration under this parent program."
+                    },
+                    "member_pricing_savings": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Best currently available member pricing savings versus guest pricing.",
+                        "examples": [
+                            {
+                                "name": "Gold Membership",
+                                "guest_price": 4500,
+                                "price": 3500,
+                                "savings": 1000
+                            }
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "guest_price": {
+                                "type": "integer"
+                            },
+                            "price": {
+                                "type": "integer"
+                            },
+                            "savings": {
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "guest_price",
+                            "price",
+                            "savings"
+                        ]
+                    },
+                    "volunteer_opportunities": {
+                        "type": "string",
+                        "description": "Volunteer opportunities associated with this parent program."
+                    },
+                    "waiver_assignments": {
+                        "type": "string",
+                        "description": "Waiver assignments associated with this parent program."
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "event_start_date",
+                    "event_end_date",
+                    "registration_start_date",
+                    "registration_end_date",
+                    "ongoing",
+                    "status",
+                    "dates",
+                    "registration_dates",
+                    "is_event",
+                    "draft",
+                    "is_hidden",
+                    "profile_image",
+                    "limit",
+                    "total_spots",
+                    "available_spots",
+                    "total_signups",
+                    "reserved_spots",
+                    "reserved_spots_signups",
+                    "reserved_spots_remaining",
+                    "uncapped_spots",
+                    "uncapped_spots_signups",
+                    "uncapped_spots_remaining",
+                    "demographic",
+                    "instructor",
+                    "location_name",
+                    "location_address",
+                    "location_latitude",
+                    "location_longitude",
+                    "is_online",
+                    "readable_event_start_date",
+                    "readable_event_end_date",
+                    "event_start_time",
+                    "event_end_time",
+                    "registration_start_time",
+                    "registration_end_time",
+                    "display_only",
+                    "unsplash_author_name",
+                    "unsplash_author_link",
+                    "multiple_signups",
+                    "prompt_for_number_of_guests",
+                    "prompt_for_registrant",
+                    "waitlist_enabled",
+                    "force_participant_selection",
+                    "show_participant_list",
+                    "pay_by_cash",
+                    "registration_fee",
+                    "cap_registration_fee",
+                    "ignores_tax_rates",
+                    "collect_additional_information",
+                    "require_emergency_contact_information",
+                    "block_facility_calendars",
+                    "form_id",
+                    "allow_file_uploads",
+                    "file_uploads_required",
+                    "file_uploads_max",
+                    "volunteer_opportunities_ids",
+                    "facility_ids",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "archived_at",
+                    "member_pricing_savings"
+                ],
+                "title": "Program"
+            },
+            "ProgramSignupResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            156
+                        ]
+                    },
+                    "program_id": {
+                        "type": "integer",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "user_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            89
+                        ]
+                    },
+                    "guest_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "additional_member_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "transaction_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            1234
+                        ]
+                    },
+                    "subscription_schedule_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            7
+                        ]
+                    },
+                    "ticket_uuid": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                        ]
+                    },
+                    "product_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "prod_abc123"
+                        ]
+                    },
+                    "payment_method": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "credit_card"
+                        ]
+                    },
+                    "paid": {
+                        "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "amount_paid": {
+                        "type": "integer",
+                        "examples": [
+                            75
+                        ]
+                    },
+                    "number_of_guests": {
+                        "type": "integer",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "associated_email": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "john.doe@example.com"
+                        ]
+                    },
+                    "associated_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "John Doe"
+                        ]
+                    },
+                    "associated_address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "123 Main St, Toronto, ON"
+                        ]
+                    },
+                    "associated_telephone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "416-555-1234"
+                        ]
+                    },
+                    "participant_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Johnny Doe"
+                        ]
+                    },
+                    "participant_dob": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "YYYY-MM-DD",
+                        "examples": [
+                            "2015-03-15"
+                        ]
+                    },
+                    "additional_member_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "additional_member_dob": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "YYYY-MM-DD",
+                        "examples": [
+                            "2015-03-15"
+                        ]
+                    },
+                    "additional_member_gender_identity": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "additional_member_medical": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "additional_member_emergency_contact": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            {
+                                "name": "Jane Doe",
+                                "phone": "416-555-5678"
+                            }
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-05-20T14:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-05-20T14:30:00.000000Z"
+                        ]
+                    },
+                    "deleted_timestamp": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-05-25T10:00:00.000000Z"
+                        ]
+                    },
+                    "user": {
+                        "type": "string",
+                        "description": "User who created this signup."
+                    },
+                    "guest": {
+                        "type": "string",
+                        "description": "Guest associated with this signup (for non-member signups)."
+                    },
+                    "additional_member": {
+                        "type": "string",
+                        "description": "Additional family member registered through this signup."
+                    },
+                    "program": {
+                        "type": "string",
+                        "description": "Program this signup belongs to."
+                    },
+                    "transaction": {
+                        "type": "string",
+                        "description": "Payment transaction for this signup."
+                    },
+                    "files": {
+                        "type": "string",
+                        "description": "Files uploaded by the user as part of this signup."
+                    },
+                    "form_submissions": {
+                        "type": "string",
+                        "description": "Form submissions associated with this signup."
+                    },
+                    "subscription_schedule": {
+                        "type": "string",
+                        "description": "Recurring subscription schedule for this signup."
+                    },
+                    "attendance_records": {
+                        "type": "string",
+                        "description": "Attendance records for this signup across all dates."
+                    },
+                    "list_of_activities": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Comma-separated list of activities from the parent program.",
+                        "examples": [
+                            "Basketball, Soccer, Volleyball"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "program_id",
+                    "user_id",
+                    "guest_id",
+                    "additional_member_id",
+                    "transaction_id",
+                    "subscription_schedule_id",
+                    "ticket_uuid",
+                    "product_id",
+                    "payment_method",
+                    "paid",
+                    "amount_paid",
+                    "number_of_guests",
+                    "quantity",
+                    "associated_email",
+                    "associated_name",
+                    "associated_address",
+                    "associated_telephone",
+                    "participant_name",
+                    "participant_dob",
+                    "additional_member_name",
+                    "additional_member_dob",
+                    "additional_member_gender_identity",
+                    "additional_member_medical",
+                    "additional_member_emergency_contact",
+                    "created_at",
+                    "updated_at",
+                    "deleted_timestamp",
+                    "list_of_activities"
+                ],
+                "title": "ProgramSignupResource"
+            },
+            "RegistrationOpportunity": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "examples": [
+                            "Youth Basketball Camp"
+                        ]
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "A fun week-long basketball camp for ages 8-12."
+                        ]
+                    },
+                    "parent_program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "class_limit": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            25
+                        ]
+                    },
+                    "event_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-07-01T09:00:00.000000Z"
+                        ]
+                    },
+                    "event_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-07-05T16:00:00.000000Z"
+                        ]
+                    },
+                    "registration_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-05-01T00:00:00.000000Z"
+                        ]
+                    },
+                    "registration_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-06-25T23:59:59.000000Z"
+                        ]
+                    },
+                    "readable_event_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "July 1, 2025"
+                        ]
+                    },
+                    "readable_event_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "July 5, 2025"
+                        ]
+                    },
+                    "readable_registration_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "May 1, 2025"
+                        ]
+                    },
+                    "readable_registration_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "June 25, 2025"
+                        ]
+                    },
+                    "event_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "HH:mm:ss",
+                        "examples": [
+                            "09:00:00"
+                        ]
+                    },
+                    "event_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "HH:mm:ss",
+                        "examples": [
+                            "16:00:00"
+                        ]
+                    },
+                    "readable_event_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "9:00 AM"
+                        ]
+                    },
+                    "readable_event_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "4:00 PM"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "examples": [
+                            "active"
+                        ]
+                    },
+                    "ongoing": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "archived_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-30T18:00:00.000000Z"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-25T12:00:00.000000Z"
+                        ]
+                    },
+                    "waitlist_enabled": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "is_priority_waitlist_locked": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "multiple_signups": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "display_to_all_users": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "hide_from_non_buyers": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "dob_validation": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "min_date_of_birth": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "YYYY-MM-DD",
+                        "examples": [
+                            "2013-01-01"
+                        ]
+                    },
+                    "max_date_of_birth": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "YYYY-MM-DD",
+                        "examples": [
+                            "2017-12-31"
+                        ]
+                    },
+                    "program_prices": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "examples": [
+                            [
+                                {
+                                    "price": 7500,
+                                    "label": "Member"
+                                },
+                                {
+                                    "price": 10000,
+                                    "label": "Non-Member"
+                                }
+                            ]
+                        ],
+                        "items": {}
+                    },
+                    "free": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "ignore_gst": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "product_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "prod_abc123"
+                        ]
+                    },
+                    "registration_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "00:00:00"
+                        ]
+                    },
+                    "registration_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "23:59:59"
+                        ]
+                    },
+                    "is_event": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_registrant": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_number_of_guests": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "force_additional_member_info": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "allow_file_uploads": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "file_uploads_required": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "file_uploads_max": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "pay_by_cash": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "collect_additional_information": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            15
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "member_savings": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Member discount savings compared to guest pricing.",
+                        "examples": [
+                            1000
+                        ]
+                    },
+                    "price_for_user": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Price for the currently authenticated user based on membership status.",
+                        "examples": [
+                            7500
+                        ]
+                    },
+                    "num_signups_remaining_for_user": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of signups remaining for the authenticated user (based on signup limits).",
+                        "examples": [
+                            2
+                        ]
+                    },
+                    "lowest_price_excluded": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Lowest price available excluding special member pricing.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "highest_price": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Highest price tier available for this program.",
+                        "examples": [
+                            15000
+                        ]
+                    },
+                    "signup_count": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Total number of active signups for this program.",
+                        "examples": [
+                            18
+                        ]
+                    },
+                    "is_full": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the program has reached its capacity limit.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "spots_remaining": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of spots remaining before the program is full.",
+                        "examples": [
+                            7
+                        ]
+                    },
+                    "user_signup_count": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of signups the authenticated user has for this program.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "volunteer_price": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Special discounted price for volunteers.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "volunteer_price_is_free": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the program is free for volunteers.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "price_id_for_user": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Stripe price ID applicable for the authenticated user.",
+                        "examples": [
+                            "price_abc123"
+                        ]
+                    },
+                    "price_recurs_for_user": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the user's price is a recurring subscription.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "price_interval_for_user": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Billing interval for recurring prices (day, week, month, year).",
+                        "examples": [
+                            "month"
+                        ]
+                    },
+                    "price_interval_count_for_user": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Number of intervals between each billing cycle.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "can_user_purchase": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the authenticated user is eligible to purchase this program.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "signups": {
+                        "type": "string",
+                        "description": "Signups registered for this program."
+                    },
+                    "parent_program": {
+                        "type": "string",
+                        "description": "Parent program this program belongs to."
+                    },
+                    "prices": {
+                        "type": "string",
+                        "description": "Pricing tiers available for this program."
+                    },
+                    "metadata": {
+                        "type": "string"
+                    },
+                    "waivers": {
+                        "type": "string"
+                    },
+                    "waitlist_signups": {
+                        "type": "string",
+                        "description": "Users on the waitlist for this program."
+                    },
+                    "attendance_sheets": {
+                        "type": "string",
+                        "description": "Attendance sheets for this program."
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "parent_program_id",
+                    "class_limit",
+                    "event_start_date",
+                    "event_end_date",
+                    "registration_start_date",
+                    "registration_end_date",
+                    "readable_event_start_date",
+                    "readable_event_end_date",
+                    "readable_registration_start_date",
+                    "readable_registration_end_date",
+                    "event_start_time",
+                    "event_end_time",
+                    "readable_event_start_time",
+                    "readable_event_end_time",
+                    "status",
+                    "ongoing",
+                    "archived_at",
+                    "deleted_at",
+                    "waitlist_enabled",
+                    "is_priority_waitlist_locked",
+                    "multiple_signups",
+                    "display_to_all_users",
+                    "hide_from_non_buyers",
+                    "dob_validation",
+                    "min_date_of_birth",
+                    "max_date_of_birth",
+                    "program_prices",
+                    "free",
+                    "ignore_gst",
+                    "product_id",
+                    "registration_start_time",
+                    "registration_end_time",
+                    "is_event",
+                    "prompt_for_registrant",
+                    "prompt_for_number_of_guests",
+                    "force_additional_member_info",
+                    "allow_file_uploads",
+                    "file_uploads_required",
+                    "file_uploads_max",
+                    "pay_by_cash",
+                    "collect_additional_information",
+                    "form_id",
+                    "created_at",
+                    "updated_at",
+                    "member_savings",
+                    "price_for_user",
+                    "num_signups_remaining_for_user",
+                    "lowest_price_excluded",
+                    "highest_price",
+                    "signup_count",
+                    "is_full",
+                    "spots_remaining",
+                    "user_signup_count",
+                    "volunteer_price",
+                    "volunteer_price_is_free",
+                    "price_id_for_user",
+                    "price_recurs_for_user",
+                    "price_interval_for_user",
+                    "price_interval_count_for_user",
+                    "can_user_purchase"
+                ],
+                "title": "RegistrationOpportunity"
+            },
+            "SendMembershipCardApiRequest": {
+                "type": "object",
+                "properties": {
+                    "card_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "By default, all card types ['apple', 'google', 'pdf'] will be used if not specified.",
+                            "enum": [
+                                "apple",
+                                "google",
+                                "pdf"
+                            ]
+                        }
+                    },
+                    "user": {
+                        "type": "object",
+                        "description": "User specific data that will stored on the user profile and used to generate the card. If not supplied during\nthis request, the data stored on the user profile will be used.",
+                        "properties": {
+                            "unique_identifier_key": {
+                                "type": "string",
+                                "description": "The unique identifier key for the user. This is used to identify the user in the system.\nIn the example below, the unique identifier key is \"MemberID\"."
+                            },
+                            "data": {
+                                "type": "array",
+                                "description": "Additional metadata that can be included with the user data.\nExample of metadata keys (all in CapitalCase):\n```\n\"MemberID\": \"123456\",\n\"Active\": true,\n\"LastName\": \"Smith\",\n\"FirstName\": \"John\",\n\"MiddleName\": \"Andrew\",\n\"ExpiryDate\": \"12/31/2025\",\n\"PreferredEmail\": \"john@smith.com\",\n\"MemberCardLastUpdatedDateTime\": \"06/03/2025\",\n\"MemberType\": \"Active\"\n```",
+                                "items": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "unique_identifier_key",
+                            "data"
+                        ]
+                    }
+                },
+                "required": [
+                    "user"
+                ],
+                "title": "SendMembershipCardApiRequest"
+            },
+            "UpdateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The full name of the user (generated from first/last name)."
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "description": "The first name of the user.",
+                        "maxLength": 255
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "description": "The last name of the user.",
+                        "maxLength": 255
+                    },
+                    "middle_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The middle name of the user.",
+                        "maxLength": 255
+                    },
+                    "preferred_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The preferred name of the user.",
+                        "maxLength": 255
+                    },
+                    "date_of_birth": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time",
+                        "description": "The date of birth of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "A unique email address for the user."
+                    },
+                    "profile_city": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The city of the user."
+                    },
+                    "profile_zip": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The postal code or zip code of the user."
+                    },
+                    "profile_state": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The province or state of the user."
+                    },
+                    "profile_address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The street address of the user."
+                    },
+                    "profile_address_line_2": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The second line of the address of the user."
+                    },
+                    "profile_country": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The ISO 3166-1 alpha-2 country code of the user."
+                    },
+                    "telephone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "A phone number for the user."
+                    },
+                    "custom_form": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "data": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "email"
+                ],
+                "title": "UpdateUserRequest"
+            }
+        },
+        "responses": {
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            },
+            "AuthorizationException": {
+                "description": "Authorization error",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "x-tagGroups": [
+        {
+            "name": "Programs",
+            "tags": [
+                "Program",
+                "Attendance Sheet",
+                "Attendance Record"
+            ]
+        },
+        {
+            "name": "Registration opportunities",
+            "tags": [
+                "Registration Opportunity"
+            ]
+        },
+        {
+            "name": "Program signups",
+            "tags": [
+                "Program Signup"
+            ]
+        },
+        {
+            "name": "Membership",
+            "tags": [
+                "Membership Type",
+                "Membership Card"
+            ]
+        },
+        {
+            "name": "Activity & users",
+            "tags": [
+                "Activity",
+                "User"
+            ]
+        }
+    ]
+}
