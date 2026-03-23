@@ -6,7 +6,8 @@
     "description": "Documentation and API reference for organizations building on Communal."
   },
   "siteConfig": {
-    "subdomain": "communal"
+    "subdomain": "communal",
+    "favicon": "public/logo-icon.svg"
   },
   "navigation": {
     "tabs": [
