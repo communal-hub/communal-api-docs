@@ -7,7 +7,11 @@
   },
   "siteConfig": {
     "subdomain": "communal",
-    "favicon": "public/logo-icon.svg"
+    "favicon": "/logo-icon.svg",
+    "logo": {
+      "darkMode": "/logo-dark.svg",
+      "lightMode": "/logo-light.svg"
+    }
   },
   "navigation": {
     "tabs": [
