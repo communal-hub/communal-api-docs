@@ -127,6 +127,31 @@
                 }
             }
         },
+        "/attendance_records/export-config": {
+            "get": {
+                "operationId": "attendanceRecord.getExportConfig",
+                "summary": "Get export configuration for the current model",
+                "tags": [
+                    "Attendance Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {}
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/attendance_records": {
             "get": {
                 "operationId": "attendance_records.index",
@@ -143,6 +168,24 @@
                             "type": "integer"
                         },
                         "example": 10
+                    },
+                    {
+                        "name": "filter[export]",
+                        "in": "query",
+                        "description": "When true, request a CSV export.",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "filter[export_email]",
+                        "in": "query",
+                        "description": "Email to receive export notification/download link.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "manager@example.com"
                     },
                     {
                         "name": "include",
@@ -224,21 +267,56 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/AttendanceRecordResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/AttendanceRecordResource"
                                 }
                             }
                         }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/attendance_sheets/export": {
+            "get": {
+                "operationId": "attendanceSheet.export",
+                "summary": "Export attendance sheets as a single XLSX workbook",
+                "tags": [
+                    "Attendance Sheet"
+                ],
+                "parameters": [
+                    {
+                        "name": "sheet_ids[]",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -261,6 +339,15 @@
                         "example": 42
                     },
                     {
+                        "name": "filter[parent_program_id]",
+                        "in": "query",
+                        "description": "Filter by parent program ID.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 7
+                    },
+                    {
                         "name": "filter[date]",
                         "in": "query",
                         "description": "Filter by date (YYYY-MM-DD).",
@@ -272,11 +359,11 @@
                     {
                         "name": "include",
                         "in": "query",
-                        "description": "Include related resources (comma-separated). Options: registrationOpportunity, records.",
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "records"
+                        "example": "registrationOpportunities,records"
                     }
                 ],
                 "responses": {
@@ -336,11 +423,11 @@
                     {
                         "name": "include",
                         "in": "query",
-                        "description": "Include related resources (comma-separated). Options: registrationOpportunity, records.",
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "registrationOpportunity,records"
+                        "example": "registrationOpportunities,records"
                     }
                 ],
                 "responses": {
@@ -349,15 +436,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/AttendanceSheetResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
+                                    "$ref": "#/components/schemas/AttendanceSheetResource"
                                 }
                             }
                         }
@@ -532,6 +611,97 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership_types/reorder": {
+            "post": {
+                "operationId": "membershipType.reorder",
+                "summary": "Reorder items by an ordered array of IDs",
+                "tags": [
+                    "Membership Type"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Order updated successfully."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/membership_types/reset-order": {
+            "post": {
+                "operationId": "membershipType.resetOrder",
+                "summary": "Disable manual ordering and return to natural ordering",
+                "tags": [
+                    "Membership Type"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Manual order reset successfully."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1243,13 +1413,13 @@
                             "2025-01-20T14:45:00.000000Z"
                         ]
                     },
-                    "attendanceSheet": {
-                        "description": "The attendance sheet this record belongs to.",
-                        "$ref": "#/components/schemas/AttendanceSheetResource"
+                    "attendance_sheet": {
+                        "type": "string",
+                        "description": "The attendance sheet this record belongs to."
                     },
-                    "programSignup": {
-                        "description": "The program signup (attendee) this record tracks.",
-                        "$ref": "#/components/schemas/ProgramSignupResource"
+                    "program_signup": {
+                        "type": "string",
+                        "description": "The program signup (attendee) this record tracks."
                     }
                 },
                 "required": [
@@ -1272,16 +1442,31 @@
                             1
                         ]
                     },
-                    "registration_opportunity_id": {
-                        "type": "integer",
+                    "registration_opportunity_ids": {
+                        "type": "array",
                         "examples": [
-                            42
-                        ]
+                            [
+                                42,
+                                43
+                            ]
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
                     },
                     "date": {
                         "type": "string",
                         "examples": [
                             "2025-06-15"
+                        ]
+                    },
+                    "recordsCount": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5
                         ]
                     },
                     "created_at": {
@@ -1298,24 +1483,22 @@
                             "2025-01-20T14:45:00.000000Z"
                         ]
                     },
-                    "registrationOpportunity": {
-                        "description": "Registration opportunity this attendance sheet belongs to.",
-                        "$ref": "#/components/schemas/RegistrationOpportunity"
+                    "parentProgram": {},
+                    "registrationOpportunities": {
+                        "type": "string",
+                        "description": "Registration opportunities this attendance sheet includes."
                     },
                     "records": {
-                        "type": "array",
-                        "description": "Attendance records for this sheet.",
-                        "items": {
-                            "$ref": "#/components/schemas/AttendanceRecordResource"
-                        }
+                        "type": "string",
+                        "description": "Attendance records for this sheet."
                     }
                 },
                 "required": [
                     "id",
-                    "registration_opportunity_id",
                     "date",
                     "created_at",
-                    "updated_at"
+                    "updated_at",
+                    "parentProgram"
                 ],
                 "title": "AttendanceSheetResource"
             },
@@ -1339,7 +1522,7 @@
                     },
                     "waivers": {
                         "type": "string",
-                        "description": "The waivers that are associated with the membership type."
+                        "description": "The waivers that are associated with the membership type"
                     },
                     "plans": {
                         "type": "array",
@@ -1358,6 +1541,9 @@
                     },
                     "form": {
                         "type": "string"
+                    },
+                    "sort_order": {
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -1368,7 +1554,8 @@
                     "waivers",
                     "plans",
                     "visibility_requires_base_membership",
-                    "form_id"
+                    "form_id",
+                    "sort_order"
                 ],
                 "title": "MembershipTypeResource"
             },
@@ -1853,6 +2040,13 @@
                             true
                         ]
                     },
+                    "hide_participant_details": {
+                        "type": "boolean",
+                        "description": "Whether enrollment counts, participant avatars, and spots remaining are hidden on the program page.",
+                        "examples": [
+                            false
+                        ]
+                    },
                     "pay_by_cash": {
                         "type": "boolean",
                         "description": "Whether this parent program allows cash payment option.",
@@ -1884,7 +2078,7 @@
                             false
                         ]
                     },
-                    "collect_additional_information": {
+                    "collection_additional_information": {
                         "type": "boolean",
                         "description": "Whether additional signup form data should be collected.",
                         "examples": [
@@ -1903,6 +2097,20 @@
                         "description": "Whether facility calendars should be blocked by this parent program.",
                         "examples": [
                             false
+                        ]
+                    },
+                    "auto_archive": {
+                        "type": "boolean",
+                        "description": "Whether registration opportunities under this program are automatically archived after their event dates pass.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "auto_archive_days": {
+                        "type": "integer",
+                        "description": "Number of days after event_end_date to wait before auto-archiving (0 = immediately).",
+                        "examples": [
+                            0
                         ]
                     },
                     "form_id": {
@@ -1965,6 +2173,30 @@
                         "items": {
                             "type": "integer"
                         }
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "description": "Display order for sorting in listings.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "manual_order_enabled": {
+                        "type": "boolean",
+                        "description": "Whether this item is pinned in the recommended sort order.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "gl_code": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "GL code for accounting/financial reporting on program transactions.",
+                        "examples": [
+                            "4000-100"
+                        ]
                     },
                     "created_at": {
                         "type": "string",
@@ -2104,19 +2336,25 @@
                     "waitlist_enabled",
                     "force_participant_selection",
                     "show_participant_list",
+                    "hide_participant_details",
                     "pay_by_cash",
                     "registration_fee",
                     "cap_registration_fee",
                     "ignores_tax_rates",
-                    "collect_additional_information",
+                    "collection_additional_information",
                     "require_emergency_contact_information",
                     "block_facility_calendars",
+                    "auto_archive",
+                    "auto_archive_days",
                     "form_id",
                     "allow_file_uploads",
                     "file_uploads_required",
                     "file_uploads_max",
                     "volunteer_opportunities_ids",
                     "facility_ids",
+                    "sort_order",
+                    "manual_order_enabled",
+                    "gl_code",
                     "created_at",
                     "updated_at",
                     "deleted_at",
@@ -2525,6 +2763,9 @@
                         "examples": [
                             "2025-06-25T23:59:59.000000Z"
                         ]
+                    },
+                    "registration_open_until_event_start": {
+                        "type": "boolean"
                     },
                     "readable_event_start_date": {
                         "type": [
@@ -3026,6 +3267,7 @@
                     "event_end_date",
                     "registration_start_date",
                     "registration_end_date",
+                    "registration_open_until_event_start",
                     "readable_event_start_date",
                     "readable_event_end_date",
                     "readable_registration_start_date",
@@ -3082,6 +3324,26 @@
                     "can_user_purchase"
                 ],
                 "title": "RegistrationOpportunity"
+            },
+            "ReorderRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "minItems": 1
+                    },
+                    "prioritized_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "minItems": 1
+                    }
+                },
+                "title": "ReorderRequest"
             },
             "SendMembershipCardApiRequest": {
                 "type": "object",
