@@ -115,6 +115,12 @@
                     "filepath": "docs/guides/browse-membership-types.md",
                     "icon": "phosphor/regular/list-magnifying-glass"
                   },
+                  "create-and-archive-membership-types": {
+                    "type": "page",
+                    "title": "Create and archive membership types",
+                    "filepath": "docs/guides/create-and-archive-membership-types.md",
+                    "icon": "phosphor/regular/plus-circle"
+                  },
                   "send-membership-cards": {
                     "type": "page",
                     "title": "Send membership cards",

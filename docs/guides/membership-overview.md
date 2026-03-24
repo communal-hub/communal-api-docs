@@ -81,7 +81,7 @@ When you call the card send endpoint, Communal looks up or creates the user, gen
 
 ### Archiving
 
-Archiving a membership type sets its status to inactive and hides it from new purchases. Existing subscriptions remain active — archiving does not cancel current members. Unarchiving restores the type to active status. Use `POST /membership_types/{id}/archive` to toggle.
+Archiving a membership type sets its status to inactive and hides it from new purchases. Existing subscriptions remain active — archiving does not cancel current members. Unarchiving restores the type to active status. See [Create and archive membership types](./create-and-archive-membership-types.md) for the request flow and example payloads.
 
 ## API naming
 
@@ -95,5 +95,6 @@ Plans are nested within membership type responses and do not have their own endp
 ## What's next
 
 - [Browse membership types](./browse-membership-types.md) — list membership types, view plans, and check availability
+- [Create and archive membership types](./create-and-archive-membership-types.md) — add catalog products or toggle archive state
 - [Send membership cards](./send-membership-cards.md) — deliver digital cards to members via email
 - See the **Membership Type** and **Membership Card** endpoints in the API Reference for the complete field list

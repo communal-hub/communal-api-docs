@@ -74,20 +74,9 @@ Membership types are either **base** (standalone) or **add-on** (requires a base
 
 Add-on types have `visibility_requires_base_membership` set to the base membership's identifier. Use this field to filter your display logic — only show add-ons to users who already have the required base membership active.
 
-## 4. Archive or unarchive a membership type
-
-When a membership product is discontinued or temporarily unavailable, archive it to hide it from new purchases. Existing subscribers keep their access — archiving only affects visibility.
-
-```bash
-curl -X POST "https://api.getcommunal.com/api/membership_types/7/archive" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Accept: application/json"
-```
-
-The endpoint toggles the archived state — call it once to archive, again to unarchive. The response returns the updated membership type resource with its new status.
-
 ## What's next
 
+- [Create and archive membership types](./create-and-archive-membership-types.md) — add catalog products or toggle archive state
 - [Send membership cards](./send-membership-cards.md) — deliver digital membership cards to members
 - [Membership overview](./membership-overview.md) — review how membership types, plans, and cards relate
 - See the **Membership Type** endpoints in the API Reference for the complete list of fields
