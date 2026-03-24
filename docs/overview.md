@@ -11,14 +11,6 @@ Integrators building internal tools, automations, or member-facing experiences *
 - **Guides** (this sidebar) — concepts, conventions, and workflows by area.
 - **API Reference** — full OpenAPI documentation for every endpoint, including parameters and schemas.
 
-## Environments
-
-Production requests use the base URL below. Staging and local URLs are listed in the OpenAPI **Servers** section in the API Reference when you need them.
-
-```
-https://api.getcommunal.com/api
-```
-
 ## Next steps
 
 - [Getting started](./getting-started.md) — make your first authenticated request.
