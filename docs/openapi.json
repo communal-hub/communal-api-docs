@@ -213,18 +213,57 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`PaginatedResourceCollection`",
+                        "description": "Paginated set of `AttendanceRecordResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AttendanceRecordResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
                                     ]
                                 }
                             }
@@ -369,18 +408,57 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`PaginatedResourceCollection`",
+                        "description": "Paginated set of `AttendanceSheetResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/AttendanceSheetResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
                                     ]
                                 }
                             }
@@ -623,18 +701,57 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`PaginatedResourceCollection`",
+                        "description": "Paginated set of `MembershipTypeResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MembershipTypeResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
                                     ]
                                 }
                             }
@@ -690,14 +807,15 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginated set",
+                        "description": "Paginated collection",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {}
                                         },
                                         "current_page": {
                                             "type": "integer",
@@ -716,8 +834,7 @@
                                         },
                                         "per_page": {
                                             "type": "integer",
-                                            "description": "Number of items shown per page.",
-                                            "minimum": 0
+                                            "minimum": 1
                                         },
                                         "to": {
                                             "type": [
@@ -728,7 +845,6 @@
                                         },
                                         "total": {
                                             "type": "integer",
-                                            "description": "Total number of items being paginated.",
                                             "minimum": 0
                                         }
                                     },
@@ -920,18 +1036,57 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`PaginatedResourceCollection`",
+                        "description": "Paginated set of `ProgramSignupResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProgramSignupResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
                                     ]
                                 }
                             }
@@ -1102,18 +1257,57 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`PaginatedResourceCollection`",
+                        "description": "Paginated set of `ProgramResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegistrationOpportunity"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "data"
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
                                     ]
                                 }
                             }
@@ -1922,13 +2116,6 @@
                     "plans"
                 ],
                 "title": "MembershipTypeResource"
-            },
-            "PaginatedResourceCollection": {
-                "type": "array",
-                "items": {
-                    "$ref": "#/components/schemas/RegistrationOpportunity"
-                },
-                "title": "PaginatedResourceCollection"
             },
             "PlanResource": {
                 "type": "object",
