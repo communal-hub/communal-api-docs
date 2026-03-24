@@ -115,8 +115,22 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {}
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CardDeliveryActivityResource"
+                                            }
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "total"
+                                    ]
                                 }
                             }
                         }
@@ -199,31 +213,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "`PaginatedResourceCollection`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/AttendanceRecordResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "links": {
-                                            "type": "array",
-                                            "items": {}
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
                                         }
                                     },
                                     "required": [
-                                        "data",
-                                        "meta",
-                                        "links"
+                                        "data"
                                     ]
                                 }
                             }
@@ -368,31 +369,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "`PaginatedResourceCollection`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/AttendanceSheetResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "links": {
-                                            "type": "array",
-                                            "items": {}
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
                                         }
                                     },
                                     "required": [
-                                        "data",
-                                        "meta",
-                                        "links"
+                                        "data"
                                     ]
                                 }
                             }
@@ -477,13 +465,10 @@
                                             "type": "boolean"
                                         },
                                         "message": {
-                                            "type": "string",
-                                            "enum": [
-                                                "Membership card sent successfully."
-                                            ]
+                                            "type": "string"
                                         },
                                         "request_hash": {
-                                            "type": "object"
+                                            "type": "string"
                                         }
                                     },
                                     "required": [
@@ -498,85 +483,8 @@
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
-                    "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "boolean"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "enum": [
-                                                "Feature not enabled"
-                                            ]
-                                        },
-                                        "": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "message",
-                                        null
-                                    ]
-                                }
-                            }
-                        }
-                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "500": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "status": {
-                                                    "type": "boolean"
-                                                },
-                                                "message": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "status",
-                                                "message"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "status": {
-                                                    "type": "boolean"
-                                                },
-                                                "message": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "Plan type could not be determined from given membership type."
-                                                    ]
-                                                },
-                                                "": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "status",
-                                                "message",
-                                                null
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1012,31 +920,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "`PaginatedResourceCollection`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ProgramSignupResource"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "links": {
-                                            "type": "array",
-                                            "items": {}
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
                                         }
                                     },
                                     "required": [
-                                        "data",
-                                        "meta",
-                                        "links"
+                                        "data"
                                     ]
                                 }
                             }
@@ -1207,31 +1102,18 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "`PaginatedResourceCollection`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/RegistrationOpportunity"
-                                            }
-                                        },
-                                        "meta": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "links": {
-                                            "type": "array",
-                                            "items": {}
+                                            "$ref": "#/components/schemas/PaginatedResourceCollection"
                                         }
                                     },
                                     "required": [
-                                        "data",
-                                        "meta",
-                                        "links"
+                                        "data"
                                     ]
                                 }
                             }
@@ -1332,11 +1214,11 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "`User`",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "string"
+                                    "$ref": "#/components/schemas/User"
                                 }
                             }
                         }
@@ -1502,67 +1384,549 @@
                 ],
                 "title": "AttendanceSheetResource"
             },
-            "MembershipTypeResource": {
+            "CardDeliveryActivityResource": {
                 "type": "object",
                 "properties": {
-                    "": {
-                        "type": "string"
-                    },
                     "id": {
-                        "type": "string",
-                        "description": "The ID of the membership type."
+                        "type": "integer",
+                        "description": "The unique identifier of the activity log entry.",
+                        "examples": [
+                            1234
+                        ]
                     },
-                    "title": {
-                        "type": "string",
-                        "description": "The title of the membership type."
+                    "request_hash": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Unique request hash for tracing the request from API call to delivery.",
+                        "examples": [
+                            "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                        ]
                     },
-                    "description": {
+                    "message": {
                         "type": "string",
-                        "description": "The description of the membership type."
+                        "description": "Human-readable message describing the card delivery event.",
+                        "examples": [
+                            "Membership card delivered to john@example.com"
+                        ]
                     },
-                    "waivers": {
+                    "delivered_at": {
                         "type": "string",
-                        "description": "The waivers that are associated with the membership type"
+                        "description": "ISO 8601 timestamp of when the card was delivered.",
+                        "examples": [
+                            "2025-06-15T14:30:00.000Z"
+                        ]
                     },
-                    "plans": {
+                    "timestamp": {
+                        "type": "integer",
+                        "description": "Unix timestamp of when the card was delivered.",
+                        "examples": [
+                            1718460600
+                        ]
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "description": "The ID of the user who received the card.",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "member_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The member ID of the user who received the card.",
+                        "examples": [
+                            "MEM-12345"
+                        ]
+                    },
+                    "obfuscated_emails": {
                         "type": "array",
-                        "description": "The plans that are associated with the membership type.",
+                        "description": "Array of obfuscated email addresses where the card was sent.",
+                        "examples": [
+                            [
+                                "j***@example.com"
+                            ]
+                        ],
                         "items": {
-                            "$ref": "#/components/schemas/PlanResource"
+                            "type": "string"
                         }
                     },
-                    "visibility_requires_base_membership": {
-                        "type": "string",
-                        "description": "Whether this add-on should only be shown to members with its base membership."
+                    "emails_attempted": {
+                        "type": "array",
+                        "description": "Array of obfuscated email addresses that failed to send.",
+                        "examples": [
+                            []
+                        ],
+                        "items": {
+                            "type": "string"
+                        }
                     },
-                    "form_id": {
-                        "type": "string",
-                        "description": "The form associated with this membership type."
+                    "email_count": {
+                        "type": "integer",
+                        "description": "Total number of emails sent.",
+                        "examples": [
+                            1
+                        ]
                     },
-                    "form": {
+                    "card_types": {
+                        "type": "object",
+                        "description": "Types of membership cards delivered.",
+                        "examples": [
+                            {
+                                "pdf": true,
+                                "apple_pass": false,
+                                "google_wallet": false
+                            }
+                        ],
+                        "properties": {
+                            "pdf": {
+                                "type": "boolean"
+                            },
+                            "apple_pass": {
+                                "type": "boolean"
+                            },
+                            "google_wallet": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "pdf",
+                            "apple_pass",
+                            "google_wallet"
+                        ]
+                    },
+                    "status": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Delivery status.",
+                        "examples": [
+                            "delivered"
+                        ]
+                    },
+                    "failure_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Failure reason if status is failed.",
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "error_message": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Error message associated with the failure.",
+                        "examples": [
+                            null
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "request_hash",
+                    "message",
+                    "delivered_at",
+                    "timestamp",
+                    "user_id",
+                    "member_id",
+                    "obfuscated_emails",
+                    "emails_attempted",
+                    "email_count",
+                    "card_types",
+                    "status",
+                    "failure_reason",
+                    "error_message"
+                ],
+                "title": "CardDeliveryActivityResource"
+            },
+            "Form": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "parent_form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "title": {
                         "type": "string"
                     },
-                    "sort_order": {
+                    "creator_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "form_structure": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "allow_repeat_submissions": {
+                        "type": "boolean"
+                    },
+                    "original_form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "uuid": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_field_associations": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {}
+                    },
+                    "bookable_entity_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "link": {
+                        "type": "string"
+                    },
+                    "status": {
                         "type": "string"
                     }
                 },
                 "required": [
-                    null,
+                    "id",
+                    "parent_form_id",
+                    "title",
+                    "creator_id",
+                    "form_structure",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "tenant_id",
+                    "type",
+                    "allow_repeat_submissions",
+                    "original_form_id",
+                    "uuid",
+                    "description",
+                    "profile_field_associations",
+                    "bookable_entity_id",
+                    "link",
+                    "status"
+                ],
+                "title": "Form"
+            },
+            "MembershipTypeResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "title": {
+                        "type": "string",
+                        "examples": [
+                            "Gold Membership"
+                        ]
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Full access membership with all benefits included."
+                        ]
+                    },
+                    "product_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "prod_abc123"
+                        ]
+                    },
+                    "type": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "standard"
+                        ]
+                    },
+                    "base_membership_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            2
+                        ]
+                    },
+                    "status": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "active"
+                        ]
+                    },
+                    "metadata": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "examples": [
+                            {
+                                "color": "#FF5733"
+                            }
+                        ],
+                        "items": {}
+                    },
+                    "renewal_notifications": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "renewal_notifications_pre_expiration": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "renewal_notifications_post_expiration": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "renewal_notifications_pre_expiration_days": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            14
+                        ]
+                    },
+                    "renewal_notifications_post_expiration_days": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            7
+                        ]
+                    },
+                    "pre_expiration_leadup": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            30
+                        ]
+                    },
+                    "user_auto_renewals": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "exclude_from_tax": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "membership_card_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            3
+                        ]
+                    },
+                    "hidden": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "visibility_requires_base_membership": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "exclude_from_parent_tenant_fee": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            15
+                        ]
+                    },
+                    "disable_default_card": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "sort_order": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "manual_order_enabled": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "waivers": {
+                        "type": "array",
+                        "description": "Waivers associated with this membership type.",
+                        "items": {
+                            "$ref": "#/components/schemas/Waiver"
+                        }
+                    },
+                    "plans": {
+                        "type": "array",
+                        "description": "Plans associated with this membership type.",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanResource"
+                        }
+                    },
+                    "form": {
+                        "$ref": "#/components/schemas/Form"
+                    }
+                },
+                "required": [
                     "id",
                     "title",
                     "description",
-                    "waivers",
-                    "plans",
+                    "product_id",
+                    "type",
+                    "base_membership_id",
+                    "status",
+                    "metadata",
+                    "renewal_notifications",
+                    "renewal_notifications_pre_expiration",
+                    "renewal_notifications_post_expiration",
+                    "renewal_notifications_pre_expiration_days",
+                    "renewal_notifications_post_expiration_days",
+                    "pre_expiration_leadup",
+                    "user_auto_renewals",
+                    "exclude_from_tax",
+                    "membership_card_id",
+                    "hidden",
                     "visibility_requires_base_membership",
+                    "exclude_from_parent_tenant_fee",
                     "form_id",
-                    "sort_order"
+                    "disable_default_card",
+                    "sort_order",
+                    "manual_order_enabled",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "waivers",
+                    "plans"
                 ],
                 "title": "MembershipTypeResource"
             },
             "PaginatedResourceCollection": {
                 "type": "array",
                 "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/RegistrationOpportunity"
                 },
                 "title": "PaginatedResourceCollection"
             },
@@ -1570,36 +1934,178 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "string",
-                        "description": "The ID of the plan."
+                        "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "membership_type_id": {
+                        "type": "integer",
+                        "examples": [
+                            5
+                        ]
                     },
                     "nickname": {
-                        "type": "string",
-                        "description": "The name of the plan."
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Monthly Standard"
+                        ]
                     },
                     "description": {
-                        "type": "string",
-                        "description": "The description of the plan."
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Monthly membership plan with full access."
+                        ]
                     },
                     "amount": {
-                        "type": "string",
-                        "description": "The amount charged for the plan."
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5000
+                        ]
                     },
                     "status": {
-                        "type": "string",
-                        "description": "The status of the plan."
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "active"
+                        ]
                     },
-                    "": {
-                        "type": "string"
+                    "plan_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "price_abc123"
+                        ]
+                    },
+                    "subscription_schedule_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "sub_sched_abc123"
+                        ]
+                    },
+                    "metadata": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "examples": [
+                            {
+                                "features": [
+                                    "pool",
+                                    "gym"
+                                ]
+                            }
+                        ],
+                        "items": {}
+                    },
+                    "boundary_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "plan_to_hide": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "pricing_type": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "recurring"
+                        ]
+                    },
+                    "is_business_plan": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "max_beneficiaries": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "interval": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "month"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
                     }
                 },
                 "required": [
                     "id",
+                    "membership_type_id",
                     "nickname",
                     "description",
                     "amount",
                     "status",
-                    null
+                    "plan_id",
+                    "subscription_schedule_id",
+                    "metadata",
+                    "boundary_id",
+                    "plan_to_hide",
+                    "pricing_type",
+                    "is_business_plan",
+                    "max_beneficiaries",
+                    "interval",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at"
                 ],
                 "title": "PlanResource"
             },
@@ -3512,6 +4018,357 @@
                     "email"
                 ],
                 "title": "UpdateUserRequest"
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "last_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "middle_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "preferred_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "date_of_birth": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "requires_password_reset": {
+                        "type": "boolean"
+                    },
+                    "photo_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "uses_two_factor_auth": {
+                        "type": "boolean"
+                    },
+                    "current_team_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "stripe_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "current_billing_plan": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "billing_state": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "vat_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "trial_ends_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "last_read_announcements_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "work_phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_address_line_2": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_city": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_state": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_zip": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "profile_country": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "family_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "manager": {
+                        "type": "boolean"
+                    },
+                    "places_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "status": {
+                        "type": "integer"
+                    },
+                    "telephone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "timezone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "deleted_timestamp": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "member_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "card_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "business_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "account_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "can_use_card": {
+                        "type": "boolean"
+                    },
+                    "is_communal_admin": {
+                        "type": "boolean"
+                    },
+                    "referrer": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "active": {
+                        "type": "string"
+                    },
+                    "base_membership_plan": {
+                        "type": "null"
+                    },
+                    "membership_start_date": {
+                        "type": "null"
+                    },
+                    "readable_membership_start_date": {
+                        "type": "null"
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "name",
+                    "first_name",
+                    "last_name",
+                    "middle_name",
+                    "preferred_name",
+                    "date_of_birth",
+                    "email",
+                    "requires_password_reset",
+                    "photo_url",
+                    "uses_two_factor_auth",
+                    "current_team_id",
+                    "stripe_id",
+                    "current_billing_plan",
+                    "billing_state",
+                    "vat_id",
+                    "trial_ends_at",
+                    "last_read_announcements_at",
+                    "created_at",
+                    "updated_at",
+                    "work_phone",
+                    "profile_address",
+                    "profile_address_line_2",
+                    "profile_city",
+                    "profile_state",
+                    "profile_zip",
+                    "profile_country",
+                    "family_id",
+                    "manager",
+                    "places_id",
+                    "status",
+                    "telephone",
+                    "timezone",
+                    "deleted_timestamp",
+                    "member_id",
+                    "card_id",
+                    "business_name",
+                    "account_id",
+                    "can_use_card",
+                    "is_communal_admin",
+                    "referrer",
+                    "active",
+                    "base_membership_plan",
+                    "membership_start_date",
+                    "readable_membership_start_date"
+                ],
+                "title": "User"
+            },
+            "Waiver": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "string"
+                    },
+                    "publicUrl": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "title",
+                    "file",
+                    "publicUrl"
+                ],
+                "title": "Waiver"
             }
         },
         "responses": {
