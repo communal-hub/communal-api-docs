@@ -807,7 +807,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginated collection",
+                        "description": "Paginated set of `ParentProgramResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -815,7 +815,9 @@
                                     "properties": {
                                         "data": {
                                             "type": "array",
-                                            "items": {}
+                                            "items": {
+                                                "$ref": "#/components/schemas/Program"
+                                            }
                                         },
                                         "current_page": {
                                             "type": "integer",
@@ -887,7 +889,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "`ParentProgramResource`",
+                        "description": "`Program`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1578,6 +1580,58 @@
                 ],
                 "title": "AttendanceSheetResource"
             },
+            "Boundary": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "path": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "created_at",
+                    "updated_at",
+                    "title",
+                    "path",
+                    "deleted_at"
+                ],
+                "title": "Boundary"
+            },
             "CardDeliveryActivityResource": {
                 "type": "object",
                 "properties": {
@@ -1859,6 +1913,161 @@
                 ],
                 "title": "Form"
             },
+            "MembershipType": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "product_id": {
+                        "type": "string"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "base_membership_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "metadata": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "renewal_notifications_pre_expiration": {
+                        "type": "integer"
+                    },
+                    "renewal_notifications": {
+                        "type": "integer"
+                    },
+                    "renewal_notifications_post_expiration": {
+                        "type": "integer"
+                    },
+                    "renewal_notifications_pre_expiration_days": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "renewal_notifications_post_expiration_days": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "pre_expiration_leadup": {
+                        "type": "integer"
+                    },
+                    "user_auto_renewals": {
+                        "type": "boolean"
+                    },
+                    "exclude_from_tax": {
+                        "type": "integer"
+                    },
+                    "membership_card_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "hidden": {
+                        "type": "boolean"
+                    },
+                    "visibility_requires_base_membership": {
+                        "type": "boolean"
+                    },
+                    "exclude_from_parent_tenant_fee": {
+                        "type": "boolean"
+                    },
+                    "form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "disable_default_card": {
+                        "type": "boolean"
+                    },
+                    "sort_order": {
+                        "type": "integer"
+                    },
+                    "manual_order_enabled": {
+                        "type": "boolean"
+                    },
+                    "waivers": {
+                        "type": "array",
+                        "items": {}
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "title",
+                    "description",
+                    "created_at",
+                    "updated_at",
+                    "product_id",
+                    "deleted_at",
+                    "type",
+                    "base_membership_id",
+                    "metadata",
+                    "status",
+                    "renewal_notifications_pre_expiration",
+                    "renewal_notifications",
+                    "renewal_notifications_post_expiration",
+                    "renewal_notifications_pre_expiration_days",
+                    "renewal_notifications_post_expiration_days",
+                    "pre_expiration_leadup",
+                    "user_auto_renewals",
+                    "exclude_from_tax",
+                    "membership_card_id",
+                    "hidden",
+                    "visibility_requires_base_membership",
+                    "exclude_from_parent_tenant_fee",
+                    "form_id",
+                    "disable_default_card",
+                    "sort_order",
+                    "manual_order_enabled",
+                    "waivers"
+                ],
+                "title": "MembershipType"
+            },
             "MembershipTypeResource": {
                 "type": "object",
                 "properties": {
@@ -2082,6 +2291,30 @@
                     },
                     "form": {
                         "$ref": "#/components/schemas/Form"
+                    },
+                    "audience": {
+                        "type": "string"
+                    },
+                    "plans_active": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanResource"
+                        }
+                    },
+                    "plans_discountable": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanResource"
+                        }
+                    },
+                    "tax_ignore": {
+                        "$ref": "#/components/schemas/TaxIgnore"
+                    },
+                    "waiver_assignments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WaiverAssignment"
+                        }
                     }
                 },
                 "required": [
@@ -2272,6 +2505,18 @@
                         "examples": [
                             null
                         ]
+                    },
+                    "audience": {
+                        "type": "string"
+                    },
+                    "user_in_boundary": {
+                        "type": "string"
+                    },
+                    "membership_type": {
+                        "$ref": "#/components/schemas/MembershipType"
+                    },
+                    "boundary": {
+                        "$ref": "#/components/schemas/Boundary"
                     }
                 },
                 "required": [
@@ -4083,6 +4328,84 @@
                 ],
                 "title": "SendMembershipCardApiRequest"
             },
+            "TaxIgnore": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "parent_program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "membership_type_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "product_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "bookable_entity_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "program_id",
+                    "deleted_at",
+                    "created_at",
+                    "updated_at",
+                    "parent_program_id",
+                    "tenant_id",
+                    "membership_type_id",
+                    "product_id",
+                    "bookable_entity_id"
+                ],
+                "title": "TaxIgnore"
+            },
             "UpdateUserRequest": {
                 "type": "object",
                 "properties": {
@@ -4556,6 +4879,81 @@
                     "publicUrl"
                 ],
                 "title": "Waiver"
+            },
+            "WaiverAssignment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "membership_type_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "waiver_id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "volunteer_opportunity_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "parent_program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "program_id",
+                    "membership_type_id",
+                    "waiver_id",
+                    "tenant_id",
+                    "volunteer_opportunity_id",
+                    "parent_program_id"
+                ],
+                "title": "WaiverAssignment"
             }
         },
         "responses": {
