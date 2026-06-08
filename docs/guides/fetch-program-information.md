@@ -86,6 +86,6 @@ The response now contains a `registration_opportunities` array nested inside the
 
 ## What's next
 
-- [Registration opportunities](./registration-opportunities.md) — work with individual sessions and their pricing
+- [Browse registration opportunities](./browse-registration-opportunities.md) — work with individual sessions and their pricing
 - [Retrieve program signups](./retrieve-program-signups.md) — list and filter signups for a session
 - See the **Program** endpoints in the API Reference for the complete list of fields, filters, and includes

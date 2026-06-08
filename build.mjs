@@ -1,6 +1,8 @@
 import { writeFileSync } from 'fs'
+import { specUrl, DEFAULT_VERSION } from './versions.mjs'
 
-const SPEC_URL = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs/api.json'
+// llms.txt tracks the current (default) API version.
+const SPEC_URL = specUrl(DEFAULT_VERSION)
 
 const res = await fetch(SPEC_URL)
 const spec = await res.json()

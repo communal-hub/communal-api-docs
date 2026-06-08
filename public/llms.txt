@@ -37,6 +37,15 @@ List all digital member card delivery activities
 
 ### Attendance Record
 
+#### GET /attendance_records/export-config
+
+Get export configuration for the current model
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+
 #### GET /attendance_records
 
 List attendance records
@@ -44,11 +53,13 @@ List attendance records
 **Parameters:**
 
 - `filter[attendance_sheet_id]` (query) - Filter by attendance sheet ID.
+- `filter[export]` (query) - When true, request a CSV export.
+- `filter[export_email]` (query) - Email to receive export notification/download link.
 - `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
 
 **Responses:**
 
-- `200`: 
+- `200`: Paginated set of `AttendanceRecordResource`
 - `401`: 
 
 #### GET /attendance_records/{attendance_record}
@@ -67,6 +78,21 @@ Get an attendance record
 
 ### Attendance Sheet
 
+#### GET /attendance_sheets/export
+
+Export attendance sheets as a single XLSX workbook
+
+**Parameters:**
+
+- `sheet_ids[]` (query) (required)
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
+
 #### GET /attendance_sheets
 
 List attendance sheets
@@ -74,12 +100,13 @@ List attendance sheets
 **Parameters:**
 
 - `filter[registration_opportunity_id]` (query) - Filter by registration opportunity ID.
+- `filter[parent_program_id]` (query) - Filter by parent program ID.
 - `filter[date]` (query) - Filter by date (YYYY-MM-DD).
-- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunity, records.
+- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
 
 **Responses:**
 
-- `200`: 
+- `200`: Paginated set of `AttendanceSheetResource`
 - `401`: 
 
 #### GET /attendance_sheets/{attendance_sheet}
@@ -89,7 +116,7 @@ Get an attendance sheet
 **Parameters:**
 
 - `attendance_sheet` (path) (required)
-- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunity, records.
+- `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
 
 **Responses:**
 
@@ -112,13 +139,15 @@ is not found, a new user will be created with the additional data supplied.
 
 Content-Type: `application/json`
 
+- `card_types` (array)
+- `user` (object) - User specific data that will stored on the user profile and used to generate the card. If not supplied during
+this request, the data stored on the user profile will be used.
+
 **Responses:**
 
 - `200`: 
 - `401`: 
-- `403`: 
 - `422`: 
-- `500`: 
 
 ### Membership Type
 
@@ -135,13 +164,42 @@ Archive or unarchive a membership type
 - `200`: `MembershipTypeResource`
 - `401`: 
 
+#### POST /membership_types/reorder
+
+Reorder items by an ordered array of IDs
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `ids` (array)
+- `prioritized_ids` (array)
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### POST /membership_types/reset-order
+
+Disable manual ordering and return to natural ordering
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
+
 #### GET /membership_types
 
 List all membership types in the system
 
 **Responses:**
 
-- `200`: `PaginatedResourceCollection`
+- `200`: Paginated set of `MembershipTypeResource`
 - `401`: 
 
 #### GET /membership_types/{membership_type}
@@ -167,7 +225,7 @@ excluded by default for performance - use `?include=programs` to include them.
 
 **Responses:**
 
-- `200`: Paginated set
+- `200`: Paginated set of `Program`
 - `401`: 
 
 #### GET /parent_programs/{parent_program}
@@ -183,7 +241,7 @@ opportunities (sessions) with pricing information.
 
 **Responses:**
 
-- `200`: `ParentProgramResource`
+- `200`: `Program`
 - `401`: 
 
 ### Program Signup
@@ -211,7 +269,7 @@ List program signups
 
 **Responses:**
 
-- `200`: 
+- `200`: Paginated set of `ProgramSignupResource`
 - `401`: 
 
 #### GET /program_signups/{program_signup}
@@ -246,13 +304,13 @@ Returns a paginated list of registration opportunities (programs) with optional 
 - `filter[past]` (query) - Filter to only past programs.
 - `filter[archived_at]` (query) - Filter by archived status. Pass empty string to exclude archived programs.
 - `filter[deleted_at]` (query) - Filter by deleted status. Pass empty string to exclude deleted programs.
-- `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets.
+- `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.
 - `append` (query) - Append computed attributes (comma-separated). Options: audience, signup_count.
 - `sort` (query) - Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.
 
 **Responses:**
 
-- `200`: 
+- `200`: Paginated set of `RegistrationOpportunity`
 - `401`: 
 
 #### GET /programs/{program}
@@ -262,7 +320,7 @@ Get a registration opportunity
 **Parameters:**
 
 - `program` (path) (required)
-- `include` (query) - Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets.
+- `include` (query) - Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets, occurrences, recurrenceRule.
 - `append` (query) - Append computed attributes (comma-separated). Options: signup_count.
 
 **Responses:**
@@ -284,6 +342,42 @@ Performs an user update request.
 **Request Body:**
 
 Content-Type: `application/json`
+
+- `name` (string,null) - The full name of the user (generated from first/last name).
+- `first_name` (string) - The first name of the user.
+- `last_name` (string) - The last name of the user.
+- `middle_name` (string,null) - The middle name of the user.
+- `preferred_name` (string,null) - The preferred name of the user.
+- `date_of_birth` (string,null) - The date of birth of the user.
+- `email` (string) - A unique email address for the user.
+- `profile_city` (string,null) - The city of the user.
+- `profile_zip` (string,null) - The postal code or zip code of the user.
+- `profile_state` (string,null) - The province or state of the user.
+- `profile_address` (string,null) - The street address of the user.
+- `profile_address_line_2` (string,null) - The second line of the address of the user.
+- `profile_country` (string,null) - The ISO 3166-1 alpha-2 country code of the user.
+- `telephone` (string,null) - A phone number for the user.
+- `custom_form` (object)
+
+**Responses:**
+
+- `200`: `User`
+- `401`: 
+- `403`: 
+- `422`: 
+
+### ParentProgramCalendarEvents
+
+#### GET /parent_programs/calendar_events
+
+
+**Parameters:**
+
+- `from` (query)
+- `to` (query)
+- `query` (query)
+- `filter_from` (query)
+- `filter_to` (query)
 
 **Responses:**
 

@@ -1,6 +1,6 @@
 # Versioning
 
-The API uses **date-based versioning** through request headers. The version format is `YYYY-MM-DD`. The current version is `2026-02-01`.
+The API uses **date-based versioning** through request headers. The version format is `YYYY-MM-DD`. The current version is `2026-03-25`.
 
 ## Sending a version
 
@@ -8,7 +8,7 @@ Pass the version in the `X-Api-Version` header:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "X-Api-Version: 2026-02-01" \
+  -H "X-Api-Version: 2026-03-25" \
   https://api.getcommunal.com/api/parent_programs
 ```
 
@@ -19,7 +19,7 @@ If you omit the header, the current default version is used automatically.
 Every response includes version information:
 
 ```http
-X-Api-Version: 2026-02-01
+X-Api-Version: 2026-03-25
 X-Api-Version-Source: header
 ```
 
@@ -43,7 +43,7 @@ Requesting an unsupported version returns a `400` error before any authenticatio
 ```json
 {
   "message": "Unsupported API version.",
-  "supported_versions": ["2026-02-01"]
+  "supported_versions": ["2026-02-01", "2026-03-25"]
 }
 ```
 
