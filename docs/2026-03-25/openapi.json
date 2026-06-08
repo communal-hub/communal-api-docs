@@ -3,7 +3,7 @@
     "info": {
         "title": "Communal Platform API",
         "version": "2026-03-25",
-        "description": "API documentation for the Communal platform. This document describes version 2026-03-25.\n\nSend the `X-Api-Version` (or `Api-Version`) header with a supported date version on every request. When omitted, the server uses the default version (2026-03-25). Supported versions: 2026-02-01, 2026-03-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
+        "description": "API documentation for the Communal platform. This document describes version 2026-03-25.\n\nOptionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-03-25). Supported versions: 2026-02-01, 2026-03-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
     },
     "servers": [
         {
@@ -111,8 +111,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -162,8 +161,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -235,8 +233,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -335,8 +332,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -382,8 +378,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -460,8 +455,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -560,8 +554,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -597,8 +590,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -610,7 +602,48 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/SendMembershipCardApiRequest"
+                                "type": "object",
+                                "properties": {
+                                    "card_types": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "description": "By default, all card types ['apple', 'google', 'pdf'] will be used if not specified.",
+                                            "enum": [
+                                                "apple",
+                                                "google",
+                                                "pdf"
+                                            ]
+                                        }
+                                    },
+                                    "user": {
+                                        "type": "object",
+                                        "description": "User specific data that will stored on the user profile and used to generate the card. If not supplied during\nthis request, the data stored on the user profile will be used.",
+                                        "properties": {
+                                            "unique_identifier_key": {
+                                                "type": "string",
+                                                "description": "The unique identifier key for the user. This is used to identify the user in the system.\nIn the example below, the unique identifier key is \"MemberID\"."
+                                            },
+                                            "data": {
+                                                "type": "array",
+                                                "description": "Additional metadata that can be included with the user data.\nExample of metadata keys (all in CapitalCase):\n```\n\"MemberID\": \"123456\",\n\"Active\": true,\n\"LastName\": \"Smith\",\n\"FirstName\": \"John\",\n\"MiddleName\": \"Andrew\",\n\"ExpiryDate\": \"12/31/2025\",\n\"PreferredEmail\": \"john@smith.com\",\n\"MemberCardLastUpdatedDateTime\": \"06/03/2025\",\n\"MemberType\": \"Active\"\n```",
+                                                "items": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "required": [
+                                            "unique_identifier_key",
+                                            "data"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "user"
+                                ]
                             }
                         }
                     }
@@ -670,8 +703,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -706,8 +738,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -718,7 +749,23 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ReorderRequest"
+                                "type": "object",
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "minItems": 1
+                                    },
+                                    "prioritized_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "minItems": 1
+                                    }
+                                }
                             }
                         }
                     }
@@ -766,8 +813,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -817,8 +863,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -908,8 +953,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -945,8 +989,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1037,8 +1080,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1196,8 +1238,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1296,8 +1337,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1437,8 +1477,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1546,8 +1585,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1598,8 +1636,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1611,7 +1648,126 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/UpdateUserRequest"
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The full name of the user (generated from first/last name)."
+                                    },
+                                    "first_name": {
+                                        "type": "string",
+                                        "description": "The first name of the user.",
+                                        "maxLength": 255
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "description": "The last name of the user.",
+                                        "maxLength": 255
+                                    },
+                                    "middle_name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The middle name of the user.",
+                                        "maxLength": 255
+                                    },
+                                    "preferred_name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The preferred name of the user.",
+                                        "maxLength": 255
+                                    },
+                                    "date_of_birth": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time",
+                                        "description": "The date of birth of the user."
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "description": "A unique email address for the user."
+                                    },
+                                    "profile_city": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The city of the user."
+                                    },
+                                    "profile_zip": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The postal code or zip code of the user."
+                                    },
+                                    "profile_state": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The province or state of the user."
+                                    },
+                                    "profile_address": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The street address of the user."
+                                    },
+                                    "profile_address_line_2": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The second line of the address of the user."
+                                    },
+                                    "profile_country": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The ISO 3166-1 alpha-2 country code of the user."
+                                    },
+                                    "telephone": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A phone number for the user."
+                                    },
+                                    "custom_form": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "data": {
+                                                "type": [
+                                                    "array",
+                                                    "null"
+                                                ],
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email"
+                                ]
                             }
                         }
                     }
@@ -1704,8 +1860,7 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "required": true,
-                        "description": "API version for this request. This documentation describes version 2026-03-25.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
                         "schema": {
                             "type": "string"
                         },
@@ -1943,58 +2098,6 @@
                 ],
                 "title": "AttendanceSheetResource"
             },
-            "Boundary": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "tenant_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "path": {
-                        "type": "array",
-                        "items": {}
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "id",
-                    "tenant_id",
-                    "created_at",
-                    "updated_at",
-                    "title",
-                    "path",
-                    "deleted_at"
-                ],
-                "title": "Boundary"
-            },
             "CardDeliveryActivityResource": {
                 "type": "object",
                 "properties": {
@@ -2157,293 +2260,6 @@
                     "error_message"
                 ],
                 "title": "CardDeliveryActivityResource"
-            },
-            "Form": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "parent_form_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "creator_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "form_structure": {
-                        "type": "array",
-                        "items": {}
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "tenant_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "form_template_key": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "type": {
-                        "type": "string"
-                    },
-                    "allow_repeat_submissions": {
-                        "type": "boolean"
-                    },
-                    "original_form_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "uuid": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "profile_field_associations": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
-                        "items": {}
-                    },
-                    "bookable_entity_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "link": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "id",
-                    "parent_form_id",
-                    "title",
-                    "creator_id",
-                    "form_structure",
-                    "created_at",
-                    "updated_at",
-                    "deleted_at",
-                    "tenant_id",
-                    "form_template_key",
-                    "type",
-                    "allow_repeat_submissions",
-                    "original_form_id",
-                    "uuid",
-                    "description",
-                    "profile_field_associations",
-                    "bookable_entity_id",
-                    "link",
-                    "status"
-                ],
-                "title": "Form"
-            },
-            "MembershipType": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "tenant_id": {
-                        "type": "integer"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "product_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "type": {
-                        "type": "string"
-                    },
-                    "base_membership_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "metadata": {
-                        "type": "array",
-                        "items": {}
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "renewal_notifications_pre_expiration": {
-                        "type": "integer"
-                    },
-                    "renewal_notifications": {
-                        "type": "integer"
-                    },
-                    "renewal_notifications_post_expiration": {
-                        "type": "integer"
-                    },
-                    "renewal_notifications_pre_expiration_days": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "renewal_notifications_post_expiration_days": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "pre_expiration_leadup": {
-                        "type": "integer"
-                    },
-                    "user_auto_renewals": {
-                        "type": "boolean"
-                    },
-                    "exclude_from_tax": {
-                        "type": "integer"
-                    },
-                    "membership_card_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "hidden": {
-                        "type": "boolean"
-                    },
-                    "visibility_requires_base_membership": {
-                        "type": "boolean"
-                    },
-                    "exclude_from_parent_tenant_fee": {
-                        "type": "boolean"
-                    },
-                    "form_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "sort_order": {
-                        "type": "integer"
-                    },
-                    "disable_default_card": {
-                        "type": "boolean"
-                    },
-                    "manual_order_enabled": {
-                        "type": "boolean"
-                    },
-                    "forced_bundle_with_base": {
-                        "type": "boolean"
-                    },
-                    "waivers": {
-                        "type": "array",
-                        "items": {}
-                    }
-                },
-                "required": [
-                    "id",
-                    "tenant_id",
-                    "title",
-                    "description",
-                    "created_at",
-                    "updated_at",
-                    "product_id",
-                    "deleted_at",
-                    "type",
-                    "base_membership_id",
-                    "metadata",
-                    "status",
-                    "renewal_notifications_pre_expiration",
-                    "renewal_notifications",
-                    "renewal_notifications_post_expiration",
-                    "renewal_notifications_pre_expiration_days",
-                    "renewal_notifications_post_expiration_days",
-                    "pre_expiration_leadup",
-                    "user_auto_renewals",
-                    "exclude_from_tax",
-                    "membership_card_id",
-                    "hidden",
-                    "visibility_requires_base_membership",
-                    "exclude_from_parent_tenant_fee",
-                    "form_id",
-                    "sort_order",
-                    "disable_default_card",
-                    "manual_order_enabled",
-                    "forced_bundle_with_base",
-                    "waivers"
-                ],
-                "title": "MembershipType"
             },
             "MembershipTypeResource": {
                 "type": "object",
@@ -2663,7 +2479,58 @@
                         "type": "array",
                         "description": "Waivers associated with this membership type.",
                         "items": {
-                            "$ref": "#/components/schemas/Waiver"
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "tenant_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "created_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "updated_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "deleted_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "title": {
+                                    "type": "string"
+                                },
+                                "file": {
+                                    "type": "string"
+                                },
+                                "publicUrl": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "tenant_id",
+                                "created_at",
+                                "updated_at",
+                                "deleted_at",
+                                "title",
+                                "file",
+                                "publicUrl"
+                            ]
                         }
                     },
                     "plans": {
@@ -2674,7 +2541,128 @@
                         }
                     },
                     "form": {
-                        "$ref": "#/components/schemas/Form"
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "parent_form_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "creator_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "form_structure": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "created_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "deleted_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "tenant_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "form_template_key": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "allow_repeat_submissions": {
+                                "type": "boolean"
+                            },
+                            "original_form_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "uuid": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "profile_field_associations": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {}
+                            },
+                            "bookable_entity_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "link": {
+                                "type": "string"
+                            },
+                            "status": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "parent_form_id",
+                            "title",
+                            "creator_id",
+                            "form_structure",
+                            "created_at",
+                            "updated_at",
+                            "deleted_at",
+                            "tenant_id",
+                            "form_template_key",
+                            "type",
+                            "allow_repeat_submissions",
+                            "original_form_id",
+                            "uuid",
+                            "description",
+                            "profile_field_associations",
+                            "bookable_entity_id",
+                            "link",
+                            "status"
+                        ]
                     },
                     "audience": {
                         "type": "string"
@@ -2692,12 +2680,157 @@
                         }
                     },
                     "tax_ignore": {
-                        "$ref": "#/components/schemas/TaxIgnore"
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "program_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "deleted_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "created_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "parent_program_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "tenant_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "membership_type_id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "product_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "bookable_entity_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "program_id",
+                            "deleted_at",
+                            "created_at",
+                            "updated_at",
+                            "parent_program_id",
+                            "tenant_id",
+                            "membership_type_id",
+                            "product_id",
+                            "bookable_entity_id"
+                        ]
                     },
                     "waiver_assignments": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/WaiverAssignment"
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "created_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "updated_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "deleted_at": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "format": "date-time"
+                                },
+                                "program_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "membership_type_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "waiver_id": {
+                                    "type": "integer"
+                                },
+                                "tenant_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "volunteer_opportunity_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                },
+                                "parent_program_id": {
+                                    "type": [
+                                        "integer",
+                                        "null"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "created_at",
+                                "updated_at",
+                                "deleted_at",
+                                "program_id",
+                                "membership_type_id",
+                                "waiver_id",
+                                "tenant_id",
+                                "volunteer_opportunity_id",
+                                "parent_program_id"
+                            ]
                         }
                     }
                 },
@@ -2898,10 +3031,216 @@
                         "type": "string"
                     },
                     "membership_type": {
-                        "$ref": "#/components/schemas/MembershipType"
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "tenant_id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "created_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "product_id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "deleted_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "base_membership_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "metadata": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "status": {
+                                "type": "string"
+                            },
+                            "renewal_notifications_pre_expiration": {
+                                "type": "integer"
+                            },
+                            "renewal_notifications": {
+                                "type": "integer"
+                            },
+                            "renewal_notifications_post_expiration": {
+                                "type": "integer"
+                            },
+                            "renewal_notifications_pre_expiration_days": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "renewal_notifications_post_expiration_days": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "pre_expiration_leadup": {
+                                "type": "integer"
+                            },
+                            "user_auto_renewals": {
+                                "type": "boolean"
+                            },
+                            "exclude_from_tax": {
+                                "type": "integer"
+                            },
+                            "membership_card_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "hidden": {
+                                "type": "boolean"
+                            },
+                            "visibility_requires_base_membership": {
+                                "type": "boolean"
+                            },
+                            "exclude_from_parent_tenant_fee": {
+                                "type": "boolean"
+                            },
+                            "form_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "sort_order": {
+                                "type": "integer"
+                            },
+                            "disable_default_card": {
+                                "type": "boolean"
+                            },
+                            "manual_order_enabled": {
+                                "type": "boolean"
+                            },
+                            "forced_bundle_with_base": {
+                                "type": "boolean"
+                            },
+                            "waivers": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "tenant_id",
+                            "title",
+                            "description",
+                            "created_at",
+                            "updated_at",
+                            "product_id",
+                            "deleted_at",
+                            "type",
+                            "base_membership_id",
+                            "metadata",
+                            "status",
+                            "renewal_notifications_pre_expiration",
+                            "renewal_notifications",
+                            "renewal_notifications_post_expiration",
+                            "renewal_notifications_pre_expiration_days",
+                            "renewal_notifications_post_expiration_days",
+                            "pre_expiration_leadup",
+                            "user_auto_renewals",
+                            "exclude_from_tax",
+                            "membership_card_id",
+                            "hidden",
+                            "visibility_requires_base_membership",
+                            "exclude_from_parent_tenant_fee",
+                            "form_id",
+                            "sort_order",
+                            "disable_default_card",
+                            "manual_order_enabled",
+                            "forced_bundle_with_base",
+                            "waivers"
+                        ]
                     },
                     "boundary": {
-                        "$ref": "#/components/schemas/Boundary"
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "tenant_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "created_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "path": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "deleted_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "tenant_id",
+                            "created_at",
+                            "updated_at",
+                            "title",
+                            "path",
+                            "deleted_at"
+                        ]
                     }
                 },
                 "required": [
@@ -4710,272 +5049,6 @@
                 ],
                 "title": "RegistrationOpportunityResource"
             },
-            "ReorderRequest": {
-                "type": "object",
-                "properties": {
-                    "ids": {
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        },
-                        "minItems": 1
-                    },
-                    "prioritized_ids": {
-                        "type": "array",
-                        "items": {
-                            "type": "integer"
-                        },
-                        "minItems": 1
-                    }
-                },
-                "title": "ReorderRequest"
-            },
-            "SendMembershipCardApiRequest": {
-                "type": "object",
-                "properties": {
-                    "card_types": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "description": "By default, all card types ['apple', 'google', 'pdf'] will be used if not specified.",
-                            "enum": [
-                                "apple",
-                                "google",
-                                "pdf"
-                            ]
-                        }
-                    },
-                    "user": {
-                        "type": "object",
-                        "description": "User specific data that will stored on the user profile and used to generate the card. If not supplied during\nthis request, the data stored on the user profile will be used.",
-                        "properties": {
-                            "unique_identifier_key": {
-                                "type": "string",
-                                "description": "The unique identifier key for the user. This is used to identify the user in the system.\nIn the example below, the unique identifier key is \"MemberID\"."
-                            },
-                            "data": {
-                                "type": "array",
-                                "description": "Additional metadata that can be included with the user data.\nExample of metadata keys (all in CapitalCase):\n```\n\"MemberID\": \"123456\",\n\"Active\": true,\n\"LastName\": \"Smith\",\n\"FirstName\": \"John\",\n\"MiddleName\": \"Andrew\",\n\"ExpiryDate\": \"12/31/2025\",\n\"PreferredEmail\": \"john@smith.com\",\n\"MemberCardLastUpdatedDateTime\": \"06/03/2025\",\n\"MemberType\": \"Active\"\n```",
-                                "items": {
-                                    "type": [
-                                        "string",
-                                        "null"
-                                    ]
-                                }
-                            }
-                        },
-                        "required": [
-                            "unique_identifier_key",
-                            "data"
-                        ]
-                    }
-                },
-                "required": [
-                    "user"
-                ],
-                "title": "SendMembershipCardApiRequest"
-            },
-            "TaxIgnore": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "program_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "parent_program_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "tenant_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "membership_type_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "product_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "bookable_entity_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    }
-                },
-                "required": [
-                    "id",
-                    "program_id",
-                    "deleted_at",
-                    "created_at",
-                    "updated_at",
-                    "parent_program_id",
-                    "tenant_id",
-                    "membership_type_id",
-                    "product_id",
-                    "bookable_entity_id"
-                ],
-                "title": "TaxIgnore"
-            },
-            "UpdateUserRequest": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The full name of the user (generated from first/last name)."
-                    },
-                    "first_name": {
-                        "type": "string",
-                        "description": "The first name of the user.",
-                        "maxLength": 255
-                    },
-                    "last_name": {
-                        "type": "string",
-                        "description": "The last name of the user.",
-                        "maxLength": 255
-                    },
-                    "middle_name": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The middle name of the user.",
-                        "maxLength": 255
-                    },
-                    "preferred_name": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The preferred name of the user.",
-                        "maxLength": 255
-                    },
-                    "date_of_birth": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time",
-                        "description": "The date of birth of the user."
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "description": "A unique email address for the user."
-                    },
-                    "profile_city": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The city of the user."
-                    },
-                    "profile_zip": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The postal code or zip code of the user."
-                    },
-                    "profile_state": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The province or state of the user."
-                    },
-                    "profile_address": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The street address of the user."
-                    },
-                    "profile_address_line_2": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The second line of the address of the user."
-                    },
-                    "profile_country": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The ISO 3166-1 alpha-2 country code of the user."
-                    },
-                    "telephone": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "A phone number for the user."
-                    },
-                    "custom_form": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "data": {
-                                "type": [
-                                    "array",
-                                    "null"
-                                ],
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                },
-                "required": [
-                    "first_name",
-                    "last_name",
-                    "email"
-                ],
-                "title": "UpdateUserRequest"
-            },
             "User": {
                 "type": "object",
                 "properties": {
@@ -5283,136 +5356,6 @@
                     "readable_membership_start_date"
                 ],
                 "title": "User"
-            },
-            "Waiver": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "tenant_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "file": {
-                        "type": "string"
-                    },
-                    "publicUrl": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "id",
-                    "tenant_id",
-                    "created_at",
-                    "updated_at",
-                    "deleted_at",
-                    "title",
-                    "file",
-                    "publicUrl"
-                ],
-                "title": "Waiver"
-            },
-            "WaiverAssignment": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "deleted_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "program_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "membership_type_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "waiver_id": {
-                        "type": "integer"
-                    },
-                    "tenant_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "volunteer_opportunity_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "parent_program_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    }
-                },
-                "required": [
-                    "id",
-                    "created_at",
-                    "updated_at",
-                    "deleted_at",
-                    "program_id",
-                    "membership_type_id",
-                    "waiver_id",
-                    "tenant_id",
-                    "volunteer_opportunity_id",
-                    "parent_program_id"
-                ],
-                "title": "WaiverAssignment"
             }
         },
         "responses": {
