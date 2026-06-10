@@ -10,7 +10,7 @@
     "fetch-spec": "node fetch-spec.mjs",
     "generate-config": "node generate-config.mjs",
     "preview": "npm run fetch-spec && npm run generate-config && scalar project preview",
-    "publish": "npm run fetch-spec && npm run generate-config && scalar project publish --slug communal-hub-communal-api-docs --config scalar.config.json"
+    "publish": "SCALAR_ENV=production npm run fetch-spec && npm run generate-config && scalar project publish --slug communal-hub-communal-api-docs --config scalar.config.json"
   },
   "devDependencies": {
     "@scalar/cli": "^1.7.6"

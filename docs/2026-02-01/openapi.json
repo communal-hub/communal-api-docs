@@ -7,14 +7,6 @@
     },
     "servers": [
         {
-            "url": "http://api.community-management.test/api",
-            "description": "Local"
-        },
-        {
-            "url": "https://api.communitymanagement.xyz/api",
-            "description": "Staging"
-        },
-        {
             "url": "https://api.getcommunal.com/api",
             "description": "Prod"
         }
@@ -1779,6 +1771,206 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_fields": {
+            "get": {
+                "operationId": "customProfileField.index",
+                "tags": [
+                    "CustomProfileField"
+                ],
+                "parameters": [
+                    {
+                        "name": "cross_tenant_user_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated collection",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_field_values": {
+            "get": {
+                "operationId": "customProfileFieldValue.index",
+                "tags": [
+                    "CustomProfileFieldValue"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "filter[custom_profile_field_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated collection",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
                                 }
                             }
                         }

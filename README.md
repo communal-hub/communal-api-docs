@@ -14,8 +14,8 @@ Source for the Communal Platform API docs published with [Scalar](https://scalar
 | `npm run fetch-spec` | Download the latest `api.json` from S3 into `docs/openapi.json`, then run `normalize-spec`. |
 | `npm run normalize-spec` | Remove per-path `servers` overrides from `docs/openapi.json` so Try It uses global servers (production central host). |
 | `npm run build` | Generate `public/llms.txt`, `public/llms-endpoints.json`, and `public/llms-summary-map.json` from the OpenAPI spec. |
-| `npm run preview` | Fetch spec, then open a local Scalar preview of this project. |
-| `npm run publish` | Fetch spec, then publish to the configured Scalar project (requires Scalar CLI auth). |
+| `npm run preview` | Fetch spec, then open a local Scalar preview of this project. Keeps all servers (Local/Staging/Prod) selectable. |
+| `npm run publish` | Fetch spec, then publish to the configured Scalar project (requires Scalar CLI auth). Sets `SCALAR_ENV=production`, which reduces the OpenAPI `servers` array to **Prod only** (`https://api.getcommunal.com/api`) so the published "Server" selector offers production alone. |
 
 ## Layout
 
