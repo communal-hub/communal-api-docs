@@ -5,7 +5,7 @@ This guide walks you through your first successful call to the Communal Platform
 ## Prerequisites
 
 1. A Communal account for your organization.
-2. An API key from **My profile → API keys** in Communal. See [Authentication](./authentication.md) for details.
+2. An API key from **My profile → API keys** in Communal. Managers can also issue a key for any user from **People → Users**. See [Authentication](./authentication.md) for details.
 
 ## Base URL
 

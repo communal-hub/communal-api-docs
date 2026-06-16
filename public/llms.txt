@@ -1,8 +1,12 @@
 # Communal Platform API
 
-API documentation for the Communal platform.
+API documentation for the Communal platform. This document describes version 2026-03-25.
 
-Version: 1.1.0
+Optionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-03-25). Supported versions: 2026-02-01, 2026-03-25.
+
+Version-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`).
+
+Version: 2026-03-25
 
 ## Servers
 
@@ -29,6 +33,7 @@ List all digital member card delivery activities
 - `filter[date_from]` (query) - Return activities created on or after the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
 - `filter[date_to]` (query) - Return activities created on or before the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
 - `filter[status]` (query) - Filter activities by delivery status. Supported values: `success`, `failed`.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -40,6 +45,10 @@ List all digital member card delivery activities
 #### GET /attendance_records/export-config
 
 Get export configuration for the current model
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -56,6 +65,7 @@ List attendance records
 - `filter[export]` (query) - When true, request a CSV export.
 - `filter[export_email]` (query) - Email to receive export notification/download link.
 - `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -70,6 +80,7 @@ Get an attendance record
 
 - `attendance_record` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -85,6 +96,7 @@ Export attendance sheets as a single XLSX workbook
 **Parameters:**
 
 - `sheet_ids[]` (query) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -103,6 +115,7 @@ List attendance sheets
 - `filter[parent_program_id]` (query) - Filter by parent program ID.
 - `filter[date]` (query) - Filter by date (YYYY-MM-DD).
 - `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -117,6 +130,7 @@ Get an attendance sheet
 
 - `attendance_sheet` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -134,6 +148,10 @@ configuration of which card types to send.
 This endpoint can also be used to create
 and update user specific data that will be used to generate the card. If an email supplied
 is not found, a new user will be created with the additional data supplied.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Request Body:**
 
@@ -158,6 +176,7 @@ Archive or unarchive a membership type
 **Parameters:**
 
 - `id` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -167,6 +186,10 @@ Archive or unarchive a membership type
 #### POST /membership_types/reorder
 
 Reorder items by an ordered array of IDs
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Request Body:**
 
@@ -186,6 +209,10 @@ Content-Type: `application/json`
 
 Disable manual ordering and return to natural ordering
 
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
 **Responses:**
 
 - `200`: 
@@ -196,6 +223,10 @@ Disable manual ordering and return to natural ordering
 #### GET /membership_types
 
 List all membership types in the system
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -209,6 +240,7 @@ Retrieve a membership type
 **Parameters:**
 
 - `membership_type` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -222,6 +254,10 @@ Retrieve a membership type
 List programs
 Returns a paginated list of programs. Registration opportunities (sessions) are
 excluded by default for performance - use `?include=programs` to include them.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -238,6 +274,7 @@ opportunities (sessions) with pricing information.
 **Parameters:**
 
 - `parent_program` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -266,6 +303,7 @@ List program signups
 - `filter[program[archived_at]]` (query) - Filter by program archived status. Pass empty string to exclude archived programs.
 - `filter[program[deleted_at]]` (query) - Filter by program deleted status. Pass empty string to exclude deleted programs.
 - `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -280,6 +318,7 @@ Get a program signup
 
 - `program_signup` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
@@ -307,10 +346,11 @@ Returns a paginated list of registration opportunities (programs) with optional 
 - `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.
 - `append` (query) - Append computed attributes (comma-separated). Options: audience, signup_count.
 - `sort` (query) - Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
-- `200`: Paginated set of `RegistrationOpportunity`
+- `200`: Paginated set of `RegistrationOpportunityResource`
 - `401`: 
 
 #### GET /programs/{program}
@@ -322,10 +362,11 @@ Get a registration opportunity
 - `program` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets, occurrences, recurrenceRule.
 - `append` (query) - Append computed attributes (comma-separated). Options: signup_count.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
-- `200`: `RegistrationOpportunity`
+- `200`: `RegistrationOpportunityResource`
 - `401`: 
 
 ### User
@@ -338,6 +379,7 @@ Performs an user update request.
 **Parameters:**
 
 - `user` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Request Body:**
 
@@ -366,22 +408,37 @@ Content-Type: `application/json`
 - `403`: 
 - `422`: 
 
-### ParentProgramCalendarEvents
+### CustomProfileField
 
-#### GET /parent_programs/calendar_events
+#### GET /custom_profile_fields
 
 
 **Parameters:**
 
-- `from` (query)
-- `to` (query)
-- `query` (query)
-- `filter_from` (query)
-- `filter_to` (query)
+- `cross_tenant_user_id` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
 **Responses:**
 
-- `200`: 
+- `200`: Paginated collection
+- `401`: 
+- `403`: 
+- `422`: 
+
+### CustomProfileFieldValue
+
+#### GET /custom_profile_field_values
+
+
+**Parameters:**
+
+- `filter[user_id]` (query)
+- `filter[custom_profile_field_id]` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Responses:**
+
+- `200`: Paginated collection
 - `401`: 
 - `403`: 
 - `422`: 

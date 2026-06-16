@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs'
-import { VERSIONS, specPath } from './versions.mjs'
+import { VERSIONS, specPath, registryUrl, IS_PRODUCTION } from './versions.mjs'
 
 // Generates scalar.config.json from a single shared navigation template plus the
 // VERSIONS list. Every version reuses the same guides and tabs; only the
@@ -12,7 +12,7 @@ const INFO = {
 }
 
 const SITE_CONFIG = {
-  subdomain: 'communal',
+  customDomain: 'docs.getcommunal.com',
   favicon: './public/logo-icon.svg',
   logo: {
     darkMode: './public/logo-dark.svg',
@@ -102,12 +102,21 @@ const DOCS_GROUP = {
   },
 }
 
-/** API Reference route for a given version (the only per-version difference). */
+/**
+ * API Reference route for a given version (the only per-version difference).
+ *
+ * Production builds reference the shared, versioned registry API by URL so
+ * `scalar project publish` reuses the single registry entry instead of uploading
+ * each version as its own document (which created communal-platform-api-1, ...).
+ * Preview/local builds read the on-disk spec so unpublished spec changes are
+ * previewable.
+ */
 function referenceRoute(version) {
+  const source = IS_PRODUCTION ? { url: registryUrl(version) } : { filepath: specPath(version) }
   return {
     type: 'openapi',
     title: 'Communal Platform API',
-    filepath: specPath(version),
+    ...source,
     mode: 'nested',
     icon: 'phosphor/regular/brackets-curly',
   }
@@ -134,4 +143,5 @@ const config = {
 }
 
 writeFileSync('scalar.config.json', JSON.stringify(config, null, 2) + '\n', 'utf8')
-console.log(`generate-config: wrote scalar.config.json with ${VERSIONS.length} version(s): ${VERSIONS.map((v) => v.date).join(', ')}`)
+const refSource = IS_PRODUCTION ? 'registry URLs' : 'local filepaths'
+console.log(`generate-config: wrote scalar.config.json with ${VERSIONS.length} version(s): ${VERSIONS.map((v) => v.date).join(', ')} (reference: ${refSource})`)

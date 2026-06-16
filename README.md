@@ -1,6 +1,6 @@
 # Communal API documentation
 
-Source for the Communal Platform API docs published with [Scalar](https://scalar.com/). Guides live in [`docs/`](docs/); the OpenAPI description is [`docs/openapi.json`](docs/openapi.json). Navigation uses **Scalar 2.0** in [`scalar.config.json`](scalar.config.json) (Scalar expects this exact filename for preview and hosted Docs): top tabs (**Get Started** first, then **API Reference**), grouped guide sections (**Basics** / **Platform guides** with nested modules—**Programs** contains programs, registration opportunities, program signups, and attendance; **Membership** is its own section; **Activity & users** contains activities and users), and the reference in **nested** mode with **`x-tagGroups`** (applied by [`normalize-openapi.mjs`](normalize-openapi.mjs) after each `fetch-spec`).
+Source for the Communal Platform API docs published with [Scalar](https://scalar.com/). Guides live in [`docs/`](docs/); the OpenAPI description is [`docs/openapi.json`](docs/openapi.json). Navigation uses **Scalar 2.0** in [`scalar.config.json`](scalar.config.json) (Scalar expects this exact filename for preview and hosted Docs): top tabs (**Get Started** first, then **API Reference**), grouped guide sections (**Basics** / **Platform guides** with nested modules—**Programs** contains programs, registration opportunities, program signups, and attendance; **Membership** is its own section; **Activities** and **Users** are each their own section), and the reference in **nested** mode with **`x-tagGroups`** (applied by [`normalize-openapi.mjs`](normalize-openapi.mjs) after each `fetch-spec`).
 
 ## Prerequisites
 
@@ -11,11 +11,12 @@ Source for the Communal Platform API docs published with [Scalar](https://scalar
 
 | Command | Purpose |
 |---------|---------|
-| `npm run fetch-spec` | Download the latest `api.json` from S3 into `docs/openapi.json`, then run `normalize-spec`. |
-| `npm run normalize-spec` | Remove per-path `servers` overrides from `docs/openapi.json` so Try It uses global servers (production central host). |
+| `npm run fetch-spec` | Download each version's spec from S3 into `docs/<date>/openapi.json` (per [`versions.mjs`](versions.mjs)), then normalize each. |
+| `npm run normalize-spec` | Remove per-path `servers` overrides from a version's spec so Try It uses global servers (production central host). |
 | `npm run build` | Generate `public/llms.txt`, `public/llms-endpoints.json`, and `public/llms-summary-map.json` from the OpenAPI spec. |
-| `npm run preview` | Fetch spec, then open a local Scalar preview of this project. Keeps all servers (Local/Staging/Prod) selectable. |
-| `npm run publish` | Fetch spec, then publish to the configured Scalar project (requires Scalar CLI auth). Sets `SCALAR_ENV=production`, which reduces the OpenAPI `servers` array to **Prod only** (`https://api.getcommunal.com/api`) so the published "Server" selector offers production alone. |
+| `npm run preview` | Fetch specs, then open a local Scalar preview. Reference reads the on-disk specs (preview unpublished spec changes); keeps all servers (Local/Staging/Prod) selectable. |
+| `npm run publish-registry` | Publish every version's spec to the single registry API `@getcommunal/communal-platform-api`, each as its own registry **version** (requires Scalar CLI auth). |
+| `npm run publish` | Fetch specs, publish them to the registry, then publish the docs project (requires Scalar CLI auth). Runs in `SCALAR_ENV=production`, which (a) reduces the OpenAPI `servers` array to **Prod only** (`https://api.getcommunal.com/api`) and (b) points each docs version's reference at the shared versioned registry API, so the registry shows **one** entry with a version selector rather than `communal-platform-api`, `communal-platform-api-1`, … |
 
 ## Layout
 

@@ -9,7 +9,7 @@ Key attributes on a user:
 - **Name fields** — `first_name`, `last_name`, `middle_name`, `preferred_name`
 - **Contact** — `email`, `telephone`
 - **Address** — `profile_address`, `profile_city`, `profile_state`, `profile_zip`, `profile_country`
-- **Custom data** — `custom_form` for organization-specific profile fields
+- **Custom data** — organization-specific custom profile fields, exposed through dedicated read endpoints
 
 ## How the pieces connect
 
@@ -38,9 +38,9 @@ Key relationships when querying the API:
 
 The user update endpoint is designed for **profile sync** — pushing corrected or enriched data from an external system (CRM, membership database, school information system) into Communal. Required fields are `first_name`, `last_name`, and `email`. All other fields are optional and nullable.
 
-### Custom form data
+### Custom profile fields
 
-Users can have organization-specific profile fields captured through `custom_form`. This is an object with an `id` (the form template) and a `data` array of field values. Use this to store and update custom data that doesn't fit the standard profile fields.
+Organizations can define custom profile fields beyond the standard identity, contact, and address fields. The API exposes these through two read-only endpoints: `custom_profile_fields` for the field definitions and `custom_profile_field_values` for the stored values, filterable by user. See [Read custom profile fields](./custom-profile-fields.md) for details.
 
 ### Manager vs member access
 
@@ -51,7 +51,10 @@ API access to user data follows a manager/member permission model. Manager API k
 | Concept | API path | OpenAPI tag |
 |---------|----------|-------------|
 | User | `/users` | **User** |
+| Custom profile field | `/custom_profile_fields` | **Custom Profile Field** |
+| Custom profile field value | `/custom_profile_field_values` | **Custom Profile Field Value** |
 
 ## What's next
 
 - [Update user profiles](./update-user-profiles.md) — sync user data from external systems
+- [Read custom profile fields](./custom-profile-fields.md) — list custom field definitions and a user's stored values

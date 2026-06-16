@@ -1,6 +1,6 @@
 # Update user profiles
 
-The user update endpoint lets your integration push corrected or enriched profile data into Communal from an external system — a CRM, school information system, or membership database. This guide shows you how to update a user's identity, contact, and address fields, and how to set custom profile data.
+The user update endpoint lets your integration push corrected or enriched profile data into Communal from an external system — a CRM, school information system, or membership database. This guide shows you how to update a user's identity, contact, and address fields, and how to read their custom profile fields.
 
 ## Before you begin
 
@@ -51,27 +51,25 @@ curl -X PUT "https://api.getcommunal.com/api/users/89" \
 
 All address fields are nullable — pass `null` to clear a field.
 
-## 3. Set custom profile data
+## 3. Read custom profile fields
 
-Organizations can define custom profile fields captured through forms. Use the `custom_form` object to update these fields by passing the form template ID and an array of field values.
+Organizations can define custom profile fields beyond the standard identity, contact, and address fields. These are exposed through two read-only endpoints — one for the field definitions, one for a user's stored values.
 
 ```bash
-curl -X PUT "https://api.getcommunal.com/api/users/89" \
+# List the field definitions, with each field's values embedded
+curl -X GET "https://api.getcommunal.com/api/custom_profile_fields?include=values" \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Accept: application/json" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "first_name": "Jane",
-    "last_name": "Doe",
-    "email": "jane.doe@example.com",
-    "custom_form": {
-      "id": 5,
-      "data": ["Beginner", "No dietary restrictions"]
-    }
-  }'
+  -H "Accept: application/json"
 ```
 
-The `custom_form.id` must reference a valid form template configured in your organization. The `data` array values map to the fields defined in that template, in order.
+```bash
+# Read the stored values for a single user
+curl -X GET "https://api.getcommunal.com/api/custom_profile_field_values?filter[user_id]=89" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Accept: application/json"
+```
+
+These endpoints are read-only. For the full reference — embedding parent fields, mapping values to definitions, and paging through results — see [Read custom profile fields](./custom-profile-fields.md).
 
 ## 4. Handle errors
 
@@ -79,12 +77,13 @@ The update endpoint returns specific error codes:
 
 - **`401`** — Authentication failed. Check your API key.
 - **`403`** — Authorization failed. Your API key doesn't have permission to update this user. Non-manager keys can only update the authenticated user's own record.
-- **`422`** — Validation failed. Common causes: missing required fields (`first_name`, `last_name`, `email`), duplicate email address within the organization, or invalid `custom_form.id`.
+- **`422`** — Validation failed. Common causes: missing required fields (`first_name`, `last_name`, `email`) or a duplicate email address within the organization.
 
 > **Important:** The `email` field must be unique within your organization. If another user already has that email, the update returns a `422` validation error.
 
 ## What's next
 
+- [Read custom profile fields](./custom-profile-fields.md) — list custom field definitions and a user's stored values
 - [Track card deliveries](./track-card-deliveries.md) — monitor membership card delivery attempts for users
 - [Send membership cards](./send-membership-cards.md) — deliver digital cards (which can also create or update user data)
 - See the **User** endpoint in the API Reference for the complete list of writable fields

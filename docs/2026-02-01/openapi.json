@@ -16,6 +16,12 @@
             "name": "User"
         },
         {
+            "name": "Custom Profile Field"
+        },
+        {
+            "name": "Custom Profile Field Value"
+        },
+        {
             "name": "Registration Opportunity"
         },
         {
@@ -420,7 +426,7 @@
                     {
                         "name": "filter[parent_program_id]",
                         "in": "query",
-                        "description": "Filter by parent program ID.",
+                        "description": "Filter by program ID.",
                         "schema": {
                             "type": "integer"
                         },
@@ -566,6 +572,576 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_fields": {
+            "get": {
+                "operationId": "customProfileField.index",
+                "description": "Returns a paginated list of the tenant's custom profile fields. Use\n`?include=values` to embed each field's stored values.",
+                "summary": "List custom profile fields",
+                "tags": [
+                    "Custom Profile Field"
+                ],
+                "parameters": [
+                    {
+                        "name": "cross_tenant_user_id",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `CustomProfileFieldResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CustomProfileFieldResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "customProfileField.store",
+                "description": "Creates a new custom profile field for the tenant. Set `for_child_tenants`\nto also propagate the field to child tenants.",
+                "summary": "Create custom profile field",
+                "tags": [
+                    "Custom Profile Field"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "display_on_membership_card": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "for_child_tenants": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "user_editable": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`CustomProfileFieldResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomProfileFieldResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_fields/{id}": {
+            "put": {
+                "operationId": "customProfileField.update",
+                "description": "Updates an existing custom profile field by id. Set `for_child_tenants`\nto also propagate the change to child tenants.",
+                "summary": "Update custom profile field",
+                "tags": [
+                    "Custom Profile Field"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "display_on_membership_card": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "for_child_tenants": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "user_editable": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`CustomProfileFieldResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomProfileFieldResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "const": "Resource missing."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_field_values": {
+            "get": {
+                "operationId": "customProfileFieldValue.index",
+                "description": "Returns a paginated list of stored custom profile field values. Filter by\n`user_id` or `custom_profile_field_id`, and use `?include=customProfileField`\nto embed the parent field.",
+                "summary": "List custom profile field values",
+                "tags": [
+                    "Custom Profile Field Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "filter[custom_profile_field_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "integer",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `CustomProfileFieldValueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CustomProfileFieldValueResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "customProfileFieldValue.store",
+                "description": "Stores a value for a custom profile field. Empty values are ignored, and\nvalues cannot be modified from a parent tenant.",
+                "summary": "Create custom profile field value",
+                "tags": [
+                    "Custom Profile Field Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    },
+                                    "custom_profile_field_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "user_id",
+                                    "custom_profile_field_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`CustomProfileFieldValueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/CustomProfileFieldValueResource"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Profile field cleared"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/custom_profile_field_values/{id}": {
+            "put": {
+                "operationId": "customProfileFieldValue.update",
+                "description": "Updates a stored custom profile field value by id. Submitting an empty\nvalue clears (deletes) the record.",
+                "summary": "Update custom profile field value",
+                "tags": [
+                    "Custom Profile Field Value"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "value": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    },
+                                    "custom_profile_field_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "user_id",
+                                    "custom_profile_field_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`CustomProfileFieldValueResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/CustomProfileFieldValueResource"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Profile field cleared"
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "const": "Resource missing."
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1107,7 +1683,7 @@
                     {
                         "name": "filter[program_id]",
                         "in": "query",
-                        "description": "Filter by program ID. Supports comma-separated values for multiple programs.",
+                        "description": "Filter by registration opportunity ID. Supports comma-separated values for multiple registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1116,7 +1692,7 @@
                     {
                         "name": "filter[program[parent_program_id]]",
                         "in": "query",
-                        "description": "Filter by parent program ID. Returns signups for all child programs under this parent.",
+                        "description": "Filter by program ID. Returns signups for all registration opportunities under this program.",
                         "schema": {
                             "type": "integer"
                         },
@@ -1134,7 +1710,7 @@
                     {
                         "name": "filter[query]",
                         "in": "query",
-                        "description": "Search by program name, user name, user email, guest name, additional member name, or guest email.",
+                        "description": "Search by registration opportunity name, user name, user email, guest name, additional member name, or guest email.",
                         "schema": {
                             "type": "string"
                         },
@@ -1143,7 +1719,7 @@
                     {
                         "name": "filter[status]",
                         "in": "query",
-                        "description": "Filter by program time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.",
+                        "description": "Filter by registration opportunity time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.",
                         "schema": {
                             "type": "string"
                         },
@@ -1161,7 +1737,7 @@
                     {
                         "name": "filter[event_start_date]",
                         "in": "query",
-                        "description": "Filter by program event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing programs.",
+                        "description": "Filter by registration opportunity event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1170,7 +1746,7 @@
                     {
                         "name": "filter[upcoming]",
                         "in": "query",
-                        "description": "Filter to signups for upcoming programs only.",
+                        "description": "Filter to signups for upcoming registration opportunities only.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1178,7 +1754,7 @@
                     {
                         "name": "filter[past]",
                         "in": "query",
-                        "description": "Filter to signups for past programs only.",
+                        "description": "Filter to signups for past registration opportunities only.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1186,7 +1762,7 @@
                     {
                         "name": "filter[ongoing]",
                         "in": "query",
-                        "description": "Filter to signups for ongoing programs only.",
+                        "description": "Filter to signups for ongoing registration opportunities only.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1203,7 +1779,7 @@
                     {
                         "name": "filter[program[archived_at]]",
                         "in": "query",
-                        "description": "Filter by program archived status. Pass empty string to exclude archived programs.",
+                        "description": "Filter by registration opportunity archived status. Pass empty string to exclude archived registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1212,7 +1788,7 @@
                     {
                         "name": "filter[program[deleted_at]]",
                         "in": "query",
-                        "description": "Filter by program deleted status. Pass empty string to exclude deleted programs.",
+                        "description": "Filter by registration opportunity deleted status. Pass empty string to exclude deleted registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1356,7 +1932,7 @@
         "/programs": {
             "get": {
                 "operationId": "programs.index",
-                "description": "Returns a paginated list of registration opportunities (programs) with optional filtering.",
+                "description": "Returns a paginated list of registration opportunities with optional filtering.",
                 "summary": "List registration opportunities",
                 "tags": [
                     "Registration Opportunity"
@@ -1365,7 +1941,7 @@
                     {
                         "name": "filter[parent_program_id]",
                         "in": "query",
-                        "description": "Filter by parent program ID.",
+                        "description": "Filter by program ID.",
                         "schema": {
                             "type": "integer"
                         },
@@ -1383,7 +1959,7 @@
                     {
                         "name": "filter[query]",
                         "in": "query",
-                        "description": "Search programs by name (partial match).",
+                        "description": "Search registration opportunities by name (partial match).",
                         "schema": {
                             "type": "string"
                         },
@@ -1392,7 +1968,7 @@
                     {
                         "name": "filter[with_participants]",
                         "in": "query",
-                        "description": "Filter to only programs that have participants.",
+                        "description": "Filter to only registration opportunities that have participants.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1400,7 +1976,7 @@
                     {
                         "name": "filter[can_register]",
                         "in": "query",
-                        "description": "Filter to only programs the authenticated user can register for.",
+                        "description": "Filter to only registration opportunities the authenticated user can register for.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1408,7 +1984,7 @@
                     {
                         "name": "filter[upcoming]",
                         "in": "query",
-                        "description": "Filter to only upcoming programs.",
+                        "description": "Filter to only upcoming registration opportunities.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1416,7 +1992,7 @@
                     {
                         "name": "filter[past]",
                         "in": "query",
-                        "description": "Filter to only past programs.",
+                        "description": "Filter to only past registration opportunities.",
                         "schema": {
                             "type": "boolean"
                         }
@@ -1424,7 +2000,7 @@
                     {
                         "name": "filter[archived_at]",
                         "in": "query",
-                        "description": "Filter by archived status. Pass empty string to exclude archived programs.",
+                        "description": "Filter by archived status. Pass empty string to exclude archived registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1433,7 +2009,7 @@
                     {
                         "name": "filter[deleted_at]",
                         "in": "query",
-                        "description": "Filter by deleted status. Pass empty string to exclude deleted programs.",
+                        "description": "Filter by deleted status. Pass empty string to exclude deleted registration opportunities.",
                         "schema": {
                             "type": "string"
                         },
@@ -1609,6 +2185,74 @@
             }
         },
         "/users/{user}": {
+            "get": {
+                "operationId": "users.show",
+                "summary": "Show a user",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related data. Options: card, family, roles,permissions, files.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "family"
+                    },
+                    {
+                        "name": "filter[tenant_id]",
+                        "in": "query",
+                        "description": "For parent tenants, optionally show users from a child tenant or all visible child tenants.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "all"
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-02-01"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
             "put": {
                 "operationId": "users.update",
                 "description": "Performs an user update request.",
@@ -1771,360 +2415,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/User"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    }
-                }
-            }
-        },
-        "/custom_profile_fields": {
-            "get": {
-                "operationId": "customProfileField.index",
-                "tags": [
-                    "CustomProfileField"
-                ],
-                "parameters": [
-                    {
-                        "name": "cross_tenant_user_id",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "integer",
-                                "null"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "X-Api-Version",
-                        "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "2026-02-01"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Paginated collection",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "current_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "from": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "last_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "per_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "to": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "total": {
-                                            "type": "integer",
-                                            "minimum": 0
-                                        }
-                                    },
-                                    "required": [
-                                        "data",
-                                        "current_page",
-                                        "from",
-                                        "last_page",
-                                        "per_page",
-                                        "to",
-                                        "total"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    }
-                }
-            }
-        },
-        "/custom_profile_field_values": {
-            "get": {
-                "operationId": "customProfileFieldValue.index",
-                "tags": [
-                    "CustomProfileFieldValue"
-                ],
-                "parameters": [
-                    {
-                        "name": "filter[user_id]",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "integer",
-                                "null"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "filter[custom_profile_field_id]",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "integer",
-                                "null"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "X-Api-Version",
-                        "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "2026-02-01"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Paginated collection",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {}
-                                        },
-                                        "current_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "from": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "last_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "per_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
-                                        "to": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "total": {
-                                            "type": "integer",
-                                            "minimum": 0
-                                        }
-                                    },
-                                    "required": [
-                                        "data",
-                                        "current_page",
-                                        "from",
-                                        "last_page",
-                                        "per_page",
-                                        "to",
-                                        "total"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/AuthorizationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    }
-                }
-            }
-        },
-        "/parent_programs/calendar_events": {
-            "get": {
-                "operationId": "parent_programs.calendar_events",
-                "tags": [
-                    "ParentProgramCalendarEvents"
-                ],
-                "parameters": [
-                    {
-                        "name": "from",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "to",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "query",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "maxLength": 255
-                        }
-                    },
-                    {
-                        "name": "filter_from",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "filter_to",
-                        "in": "query",
-                        "schema": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "X-Api-Version",
-                        "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "example": "2026-02-01"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string"
-                                                            },
-                                                            "parentProgramId": {
-                                                                "type": [
-                                                                    "integer",
-                                                                    "null"
-                                                                ]
-                                                            },
-                                                            "title": {
-                                                                "type": "string"
-                                                            },
-                                                            "start": {
-                                                                "type": "string"
-                                                            },
-                                                            "end": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "id",
-                                                            "parentProgramId",
-                                                            "title",
-                                                            "start",
-                                                            "end"
-                                                        ]
-                                                    }
-                                                }
-                                            },
-                                            "required": [
-                                                "data"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string"
-                                                    },
-                                                    "minItems": 0,
-                                                    "maxItems": 0,
-                                                    "additionalItems": false
-                                                }
-                                            },
-                                            "required": [
-                                                "data"
-                                            ]
-                                        }
-                                    ]
                                 }
                             }
                         }
@@ -2452,6 +2742,326 @@
                     "error_message"
                 ],
                 "title": "CardDeliveryActivityResource"
+            },
+            "CustomProfileFieldResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "display_on_membership_card": {
+                        "type": "boolean"
+                    },
+                    "user_editable": {
+                        "type": "boolean"
+                    },
+                    "locked": {
+                        "type": "boolean"
+                    },
+                    "parent_profile_field_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomProfileFieldValueResource"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "name",
+                    "display_on_membership_card",
+                    "user_editable",
+                    "locked",
+                    "parent_profile_field_id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at"
+                ],
+                "title": "CustomProfileFieldResource"
+            },
+            "CustomProfileFieldValueResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "value": {
+                        "type": "string"
+                    },
+                    "user_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "custom_profile_field_id": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "custom_profile_field": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "tenant_id",
+                    "value",
+                    "user_id",
+                    "custom_profile_field_id",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at"
+                ],
+                "title": "CustomProfileFieldValueResource"
+            },
+            "FamilyMember": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            45
+                        ]
+                    },
+                    "user_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            89
+                        ]
+                    },
+                    "guest_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "examples": [
+                            "Sarah Doe"
+                        ]
+                    },
+                    "email": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "sarah.doe@example.com"
+                        ]
+                    },
+                    "telephone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "555-987-6543"
+                        ]
+                    },
+                    "gender": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Female"
+                        ]
+                    },
+                    "date_of_birth": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "YYYY-MM-DD",
+                        "examples": [
+                            "2015-03-15"
+                        ]
+                    },
+                    "age": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            10
+                        ]
+                    },
+                    "allergies": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Peanut allergy"
+                        ]
+                    },
+                    "medical": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Carries an EpiPen. No other conditions."
+                        ]
+                    },
+                    "primary": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-01-25T12:00:00.000000Z"
+                        ]
+                    },
+                    "emergency": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "family_id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "telephone": {
+                                "type": "string"
+                            },
+                            "created_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "updated_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "family_id",
+                            "name",
+                            "telephone",
+                            "created_at",
+                            "updated_at"
+                        ],
+                        "description": "Relations"
+                    }
+                },
+                "required": [
+                    "id",
+                    "user_id",
+                    "guest_id",
+                    "name",
+                    "email",
+                    "telephone",
+                    "gender",
+                    "date_of_birth",
+                    "age",
+                    "allergies",
+                    "medical",
+                    "primary",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at"
+                ],
+                "title": "FamilyMember"
             },
             "MembershipTypeResource": {
                 "type": "object",
@@ -3462,14 +4072,14 @@
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "description": "Unique identifier for the parent program.",
+                        "description": "Unique identifier for the program.",
                         "examples": [
                             5
                         ]
                     },
                     "title": {
                         "type": "string",
-                        "description": "Display name of the parent program shown to users.",
+                        "description": "Display name of the program shown to users.",
                         "examples": [
                             "Summer Sports Programs"
                         ]
@@ -3479,7 +4089,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Detailed description of the parent program, may contain HTML.",
+                        "description": "Detailed description of the program, may contain HTML.",
                         "examples": [
                             "A collection of exciting summer sports programs for all ages."
                         ]
@@ -3490,7 +4100,7 @@
                             "null"
                         ],
                         "format": "ISO 8601 (UTC)",
-                        "description": "When the program's events begin. All child programs run within this window.",
+                        "description": "When the program's events begin. All registration opportunities run within this window.",
                         "examples": [
                             "2025-06-01T12:00:00.000000Z"
                         ]
@@ -3501,7 +4111,7 @@
                             "null"
                         ],
                         "format": "ISO 8601 (UTC)",
-                        "description": "When the program's events end. All child programs run within this window.",
+                        "description": "When the program's events end. All registration opportunities run within this window.",
                         "examples": [
                             "2025-08-31T15:00:00.000000Z"
                         ]
@@ -3564,7 +4174,7 @@
                     },
                     "is_event": {
                         "type": "boolean",
-                        "description": "Whether this parent program represents a single event rather than a program series.",
+                        "description": "Whether this program represents a single event rather than a series of registration opportunities.",
                         "examples": [
                             false
                         ]
@@ -3625,14 +4235,14 @@
                     },
                     "total_signups": {
                         "type": "integer",
-                        "description": "Total active signups across child programs.",
+                        "description": "Total active signups across registration opportunities.",
                         "examples": [
                             86
                         ]
                     },
                     "reserved_spots": {
                         "type": "integer",
-                        "description": "Number of spots reserved by capped child programs.",
+                        "description": "Number of spots reserved by capped registration opportunities.",
                         "examples": [
                             60
                         ]
@@ -3659,7 +4269,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Number of spots available to uncapped child programs.",
+                        "description": "Number of spots available to uncapped registration opportunities.",
                         "examples": [
                             60
                         ]
@@ -3689,7 +4299,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Audience demographic label for this parent program.",
+                        "description": "Audience demographic label for this program.",
                         "examples": [
                             "Youth (Ages 8-12)"
                         ]
@@ -3699,7 +4309,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Instructor or facilitator name shown for this parent program.",
+                        "description": "Instructor or facilitator name shown for this program.",
                         "examples": [
                             "Jane Coach"
                         ]
@@ -3827,7 +4437,7 @@
                     },
                     "display_only": {
                         "type": "boolean",
-                        "description": "Whether this parent program is display-only and not intended for signup.",
+                        "description": "Whether this program is display-only and not intended for signup.",
                         "examples": [
                             false
                         ]
@@ -3854,7 +4464,7 @@
                     },
                     "multiple_signups": {
                         "type": "boolean",
-                        "description": "Whether users may submit multiple signups for this parent program.",
+                        "description": "Whether users may submit multiple signups for this program.",
                         "examples": [
                             false
                         ]
@@ -3875,7 +4485,7 @@
                     },
                     "waitlist_enabled": {
                         "type": "boolean",
-                        "description": "Whether waitlist functionality is enabled for this parent program.",
+                        "description": "Whether waitlist functionality is enabled for this program.",
                         "examples": [
                             true
                         ]
@@ -3889,7 +4499,7 @@
                     },
                     "show_participant_list": {
                         "type": "boolean",
-                        "description": "Whether participants can view the participant list for this parent program.",
+                        "description": "Whether participants can view the participant list for this program.",
                         "examples": [
                             true
                         ]
@@ -3903,7 +4513,7 @@
                     },
                     "pay_by_cash": {
                         "type": "boolean",
-                        "description": "Whether this parent program allows cash payment option.",
+                        "description": "Whether this program allows cash payment option.",
                         "examples": [
                             false
                         ]
@@ -3927,7 +4537,7 @@
                     },
                     "ignores_tax_rates": {
                         "type": "boolean",
-                        "description": "Whether this parent program is configured to ignore tenant tax rates.",
+                        "description": "Whether this program is configured to ignore tenant tax rates.",
                         "examples": [
                             false
                         ]
@@ -3948,7 +4558,7 @@
                     },
                     "block_facility_calendars": {
                         "type": "boolean",
-                        "description": "Whether facility calendars should be blocked by this parent program.",
+                        "description": "Whether facility calendars should be blocked by this program.",
                         "examples": [
                             false
                         ]
@@ -4010,7 +4620,7 @@
                     },
                     "volunteer_opportunities_ids": {
                         "type": "array",
-                        "description": "Volunteer opportunity identifiers linked to this parent program.",
+                        "description": "Volunteer opportunity identifiers linked to this program.",
                         "examples": [
                             [
                                 3,
@@ -4024,7 +4634,7 @@
                     },
                     "facility_ids": {
                         "type": "array",
-                        "description": "Facility identifiers linked to this parent program.",
+                        "description": "Facility identifiers linked to this program.",
                         "examples": [
                             [
                                 2,
@@ -4103,7 +4713,7 @@
                     },
                     "registration_opportunities": {
                         "type": "string",
-                        "description": "Child programs available for registration under this parent program."
+                        "description": "Registration opportunities available for registration under this program."
                     },
                     "member_pricing_savings": {
                         "type": [
@@ -4142,11 +4752,11 @@
                     },
                     "volunteer_opportunities": {
                         "type": "string",
-                        "description": "Volunteer opportunities associated with this parent program."
+                        "description": "Volunteer opportunities associated with this program."
                     },
                     "waiver_assignments": {
                         "type": "string",
-                        "description": "Waiver assignments associated with this parent program."
+                        "description": "Waiver assignments associated with this program."
                     },
                     "tags": {
                         "type": "string"
@@ -4489,7 +5099,7 @@
                     },
                     "program": {
                         "type": "string",
-                        "description": "Program this signup belongs to."
+                        "description": "Registration opportunity this signup belongs to."
                     },
                     "transaction": {
                         "type": "string",
@@ -4516,7 +5126,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Comma-separated list of activities from the parent program.",
+                        "description": "Comma-separated list of activities from the program.",
                         "examples": [
                             "Basketball, Soccer, Volleyball"
                         ]
@@ -4997,7 +5607,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Highest price tier available for this program.",
+                        "description": "Highest price tier available for this registration opportunity.",
                         "examples": [
                             15000
                         ]
@@ -5007,7 +5617,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Total number of active signups for this program.",
+                        "description": "Total number of active signups for this registration opportunity.",
                         "examples": [
                             18
                         ]
@@ -5017,7 +5627,7 @@
                             "boolean",
                             "null"
                         ],
-                        "description": "Whether the program has reached its capacity limit.",
+                        "description": "Whether the registration opportunity has reached its capacity limit.",
                         "examples": [
                             false
                         ]
@@ -5027,7 +5637,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Number of spots remaining before the program is full.",
+                        "description": "Number of spots remaining before the registration opportunity is full.",
                         "examples": [
                             7
                         ]
@@ -5037,7 +5647,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Number of signups the authenticated user has for this program.",
+                        "description": "Number of signups the authenticated user has for this registration opportunity.",
                         "examples": [
                             1
                         ]
@@ -5057,7 +5667,7 @@
                             "boolean",
                             "null"
                         ],
-                        "description": "Whether the program is free for volunteers.",
+                        "description": "Whether the registration opportunity is free for volunteers.",
                         "examples": [
                             true
                         ]
@@ -5077,7 +5687,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Stripe product_id the participant must hold for this signup. Populated only when\nthe parent program's `participant_must_hold_membership` toggle is on AND the\n`participant_membership_enforcement` feature flag is on AND the authenticated user\nqualifies for a membership-gated price tier. Null in every other case. Gated by\n`?append=...` / `?include=...` like the other computed-for-user fields.",
+                        "description": "Stripe product_id the participant must hold for this signup. Populated only when\nthe program's `participant_must_hold_membership` toggle is on AND the\n`participant_membership_enforcement` feature flag is on AND the authenticated user\nqualifies for a membership-gated price tier. Null in every other case. Gated by\n`?append=...` / `?include=...` like the other computed-for-user fields.",
                         "examples": [
                             "prod_abc123"
                         ]
@@ -5117,14 +5727,14 @@
                             "boolean",
                             "null"
                         ],
-                        "description": "Whether the authenticated user is eligible to purchase this program.",
+                        "description": "Whether the authenticated user is eligible to purchase this registration opportunity.",
                         "examples": [
                             true
                         ]
                     },
                     "required_membership_names": {
                         "type": "array",
-                        "description": "Distinct membership titles that grant access to purchase this program.\nThe field is omitted from the response entirely when the include is not\nrequested; when requested, it is always an array (possibly empty).",
+                        "description": "Distinct membership titles that grant access to purchase this registration opportunity.\nThe field is omitted from the response entirely when the include is not\nrequested; when requested, it is always an array (possibly empty).",
                         "examples": [
                             [
                                 "Base Membership",
@@ -5137,15 +5747,15 @@
                     },
                     "signups": {
                         "type": "string",
-                        "description": "Signups registered for this program."
+                        "description": "Signups registered for this registration opportunity."
                     },
                     "parent_program": {
                         "type": "string",
-                        "description": "Parent program this program belongs to."
+                        "description": "Program this registration opportunity belongs to."
                     },
                     "prices": {
                         "type": "string",
-                        "description": "Pricing tiers available for this program."
+                        "description": "Pricing tiers available for this registration opportunity."
                     },
                     "metadata": {
                         "type": "string"
@@ -5155,11 +5765,11 @@
                     },
                     "waitlist_signups": {
                         "type": "string",
-                        "description": "Users on the waitlist for this program."
+                        "description": "Users on the waitlist for this registration opportunity."
                     },
                     "attendance_sheets": {
                         "type": "string",
-                        "description": "Attendance sheets for this program."
+                        "description": "Attendance sheets for this registration opportunity."
                     },
                     "occurrences": {
                         "type": "string",
@@ -5167,7 +5777,7 @@
                     },
                     "recurrence_rule": {
                         "type": "string",
-                        "description": "Recurrence pattern that generated this program's occurrences,\nwhen the admin authored the schedule via the recurring builder.\nDisplay metadata only — `occurrences` is the operational source\nof truth for queries and registration."
+                        "description": "Recurrence pattern that generated this registration opportunity's occurrences,\nwhen the admin authored the schedule via the recurring builder.\nDisplay metadata only — `occurrences` is the operational source\nof truth for queries and registration."
                     }
                 },
                 "required": [
@@ -5548,9 +6158,82 @@
                     "readable_membership_start_date"
                 ],
                 "title": "User"
+            },
+            "UserResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "telephone": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "middle_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "preferred_name": {
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    },
+                    "subscriptions": {
+                        "type": "string"
+                    },
+                    "family": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FamilyMember"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "email",
+                    "date_of_birth"
+                ],
+                "title": "UserResource"
             }
         },
         "responses": {
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
             "AuthenticationException": {
                 "description": "Unauthenticated",
                 "content": {
@@ -5650,10 +6333,17 @@
             ]
         },
         {
-            "name": "Activity & users",
+            "name": "Activity",
             "tags": [
-                "Activity",
-                "User"
+                "Activity"
+            ]
+        },
+        {
+            "name": "Users",
+            "tags": [
+                "User",
+                "Custom Profile Field",
+                "Custom Profile Field Value"
             ]
         }
     ]

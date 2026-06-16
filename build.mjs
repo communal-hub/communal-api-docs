@@ -1,11 +1,16 @@
 import { writeFileSync } from 'fs'
 import { specUrl, DEFAULT_VERSION } from './versions.mjs'
+import { HIDDEN_TAGS, HIDDEN_METHODS } from './normalize-openapi.mjs'
 
 // llms.txt tracks the current (default) API version.
 const SPEC_URL = specUrl(DEFAULT_VERSION)
 
 const res = await fetch(SPEC_URL)
 const spec = await res.json()
+
+// Operations carrying a hidden tag are excluded from every generated artifact,
+// mirroring normalizeSpec so the published spec and llms.txt stay in sync.
+const isHidden = (op) => Array.isArray(op?.tags) && op.tags.some((tag) => HIDDEN_TAGS.has(tag))
 
 // Helper to generate markdown for a single endpoint
 function endpointToMarkdown(path, method, op) {
@@ -105,7 +110,8 @@ if (spec.components?.securitySchemes) {
 const tagGroups = {}
 for (const [path, methods] of Object.entries(spec.paths || {})) {
   for (const [method, op] of Object.entries(methods)) {
-    if (['get', 'post', 'put', 'patch', 'delete'].includes(method)) {
+    if (['get', 'post', 'put', 'patch', 'delete'].includes(method) && !HIDDEN_METHODS.has(method)) {
+      if (isHidden(op)) continue
       const tag = op.tags?.[0] || 'Other'
       if (!tagGroups[tag]) tagGroups[tag] = []
       tagGroups[tag].push({ path, method, op })
@@ -178,6 +184,7 @@ for (const [tag, eps] of Object.entries(tagGroups)) {
 const summaryMap = {}
 for (const [path, methods] of Object.entries(spec.paths || {})) {
   for (const [method, op] of Object.entries(methods)) {
+    if (HIDDEN_METHODS.has(method) || isHidden(op)) continue
     const key = `${method.toUpperCase()} ${path}`
     if (op.summary) summaryMap[op.summary.trim()] = key
     if (op.operationId) summaryMap[op.operationId] = key

@@ -6,7 +6,7 @@
     "description": "Documentation and API reference for organizations building on Communal."
   },
   "siteConfig": {
-    "subdomain": "communal",
+    "customDomain": "docs.getcommunal.com",
     "favicon": "./public/logo-icon.svg",
     "logo": {
       "darkMode": "./public/logo-dark.svg",
@@ -202,7 +202,7 @@
         "/reference": {
           "type": "openapi",
           "title": "Communal Platform API",
-          "filepath": "docs/2026-03-25/openapi.json",
+          "url": "https://registry.scalar.com/@getcommunal/apis/communal-platform-api/2026-03-25?format=json",
           "mode": "nested",
           "icon": "phosphor/regular/brackets-curly"
         }
@@ -396,7 +396,7 @@
         "/reference": {
           "type": "openapi",
           "title": "Communal Platform API",
-          "filepath": "docs/2026-02-01/openapi.json",
+          "url": "https://registry.scalar.com/@getcommunal/apis/communal-platform-api/2026-02-01?format=json",
           "mode": "nested",
           "icon": "phosphor/regular/brackets-curly"
         }

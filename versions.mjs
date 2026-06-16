@@ -19,6 +19,15 @@
 
 const S3_BASE = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs'
 
+// Scalar Registry coordinates. Every version publishes to this ONE registry API
+// (@<namespace>/<slug>) as a distinct registry *version*, so the Scalar dashboard
+// shows a single "API Document" with a version selector instead of one entry per
+// version (which is what produced communal-platform-api + communal-platform-api-1).
+// `publish-registry.mjs` uploads the specs; the production docs reference routes
+// point at `registryUrl(version)` (see generate-config.mjs).
+export const REGISTRY_NAMESPACE = 'getcommunal'
+export const REGISTRY_SLUG = 'communal-platform-api'
+
 // The only API server exposed in production builds. Specs ship with Local,
 // Staging, and Prod entries; `npm run publish` filters the global `servers`
 // array down to this one so the published "Server" selector offers Prod alone.
@@ -48,4 +57,14 @@ export function specUrl(version) {
 /** Local path the spec is written to (one directory per version). */
 export function specPath(version) {
   return `docs/${version.date}/openapi.json`
+}
+
+/**
+ * Scalar Registry document URL for a version. All versions share one slug; the
+ * trailing path segment selects the registry version. Used by the production
+ * docs reference route so the published reference reads from the single
+ * versioned registry API rather than a separate uploaded document.
+ */
+export function registryUrl(version) {
+  return `https://registry.scalar.com/@${REGISTRY_NAMESPACE}/apis/${REGISTRY_SLUG}/${version.date}?format=json`
 }
