@@ -15,3 +15,4 @@ Integrators building internal tools, automations, or member-facing experiences *
 
 - [Getting started](./getting-started.md) — make your first authenticated request.
 - [Authentication](./authentication.md) — API keys and the `Authorization` header.
+- [MCP server](./mcp-server.md) — connect the API to an AI assistant such as Claude Code or Cursor.

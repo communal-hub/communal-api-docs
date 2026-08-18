@@ -70,6 +70,12 @@
                   "title": "Versioning",
                   "filepath": "docs/versioning.md",
                   "icon": "phosphor/regular/git-branch"
+                },
+                "mcp-server": {
+                  "type": "page",
+                  "title": "MCP server",
+                  "filepath": "docs/mcp-server.md",
+                  "icon": "phosphor/regular/robot"
                 }
               }
             },
@@ -264,6 +270,12 @@
                   "title": "Versioning",
                   "filepath": "docs/versioning.md",
                   "icon": "phosphor/regular/git-branch"
+                },
+                "mcp-server": {
+                  "type": "page",
+                  "title": "MCP server",
+                  "filepath": "docs/mcp-server.md",
+                  "icon": "phosphor/regular/robot"
                 }
               }
             },

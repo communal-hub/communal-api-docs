@@ -32,3 +32,4 @@ Replace `YOUR_API_KEY` with the secret from **My profile → API keys**.
 
 - [Using the API](./using-the-api.md) — pagination, filters, `include` / `sort`, and common errors.
 - **API Reference** — try requests and inspect schemas for every path.
+- [MCP server](./mcp-server.md) — let an AI assistant search and call the API for you.

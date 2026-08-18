@@ -43,6 +43,7 @@ const DOCS_GROUP = {
         authentication: { type: 'page', title: 'Authentication', filepath: 'docs/authentication.md', icon: 'phosphor/regular/key' },
         'using-the-api': { type: 'page', title: 'Using the API', filepath: 'docs/using-the-api.md', icon: 'phosphor/regular/code' },
         versioning: { type: 'page', title: 'Versioning', filepath: 'docs/versioning.md', icon: 'phosphor/regular/git-branch' },
+        'mcp-server': { type: 'page', title: 'MCP server', filepath: 'docs/mcp-server.md', icon: 'phosphor/regular/robot' },
       },
     },
     platform: {
