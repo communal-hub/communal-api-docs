@@ -112,7 +112,7 @@ List attendance sheets
 **Parameters:**
 
 - `filter[registration_opportunity_id]` (query) - Filter by registration opportunity ID.
-- `filter[parent_program_id]` (query) - Filter by parent program ID.
+- `filter[parent_program_id]` (query) - Filter by program ID.
 - `filter[date]` (query) - Filter by date (YYYY-MM-DD).
 - `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
@@ -136,6 +136,155 @@ Get an attendance sheet
 
 - `200`: `AttendanceSheetResource`
 - `401`: 
+
+### Custom Profile Field
+
+#### GET /custom_profile_fields
+
+List custom profile fields
+Returns a paginated list of the tenant's custom profile fields. Use
+`?include=values` to embed each field's stored values.
+
+**Parameters:**
+
+- `cross_tenant_user_id` (query)
+- `cross_tenant_values` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Responses:**
+
+- `200`: Paginated set of `CustomProfileFieldResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### POST /custom_profile_fields
+
+Create custom profile field
+Creates a new custom profile field for the tenant. Set `for_child_tenants`
+to also propagate the field to child tenants.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `name` (string)
+- `display_on_membership_card` (boolean,null)
+- `for_child_tenants` (boolean,null)
+- `user_editable` (boolean,null)
+
+**Responses:**
+
+- `200`: `CustomProfileFieldResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### PUT /custom_profile_fields/{id}
+
+Update custom profile field
+Updates an existing custom profile field by id. Set `for_child_tenants`
+to also propagate the change to child tenants.
+
+**Parameters:**
+
+- `id` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `name` (string)
+- `display_on_membership_card` (boolean,null)
+- `for_child_tenants` (boolean,null)
+- `user_editable` (boolean,null)
+
+**Responses:**
+
+- `200`: `CustomProfileFieldResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
+### Custom Profile Field Value
+
+#### GET /custom_profile_field_values
+
+List custom profile field values
+Returns a paginated list of stored custom profile field values. Filter by
+`user_id` or `custom_profile_field_id`, and use `?include=customProfileField`
+to embed the parent field.
+
+**Parameters:**
+
+- `filter[user_id]` (query)
+- `filter[custom_profile_field_id]` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Responses:**
+
+- `200`: Paginated set of `CustomProfileFieldValueResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### POST /custom_profile_field_values
+
+Create custom profile field value
+Stores a value for a custom profile field. Empty values are ignored, and
+values cannot be modified from a parent tenant.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `value` (string,null)
+- `user_id` (integer)
+- `custom_profile_field_id` (integer)
+
+**Responses:**
+
+- `200`: `CustomProfileFieldValueResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### PUT /custom_profile_field_values/{id}
+
+Update custom profile field value
+Updates a stored custom profile field value by id. Submitting an empty
+value clears (deletes) the record.
+
+**Parameters:**
+
+- `id` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `value` (string,null)
+- `user_id` (integer)
+- `custom_profile_field_id` (integer)
+
+**Responses:**
+
+- `200`: `CustomProfileFieldValueResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
 
 ### Membership Card
 
@@ -171,7 +320,21 @@ this request, the data stored on the user profile will be used.
 
 #### POST /membership_types/{id}/archive
 
-Archive or unarchive a membership type
+Archive a membership type
+
+**Parameters:**
+
+- `id` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Responses:**
+
+- `200`: `MembershipTypeResource`
+- `401`: 
+
+#### POST /membership_types/{id}/unarchive
+
+Unarchive a membership type
 
 **Parameters:**
 
@@ -289,19 +452,20 @@ List program signups
 
 **Parameters:**
 
-- `filter[program_id]` (query) - Filter by program ID. Supports comma-separated values for multiple programs.
-- `filter[program[parent_program_id]]` (query) - Filter by parent program ID. Returns signups for all child programs under this parent.
+- `filter[program_id]` (query) - Filter by registration opportunity ID. Supports comma-separated values for multiple registration opportunities.
+- `filter[program[parent_program_id]]` (query) - Filter by program ID. Returns signups for all registration opportunities under this program.
 - `filter[user_id]` (query) - Filter by user ID. Non-managers can only filter to their own ID.
-- `filter[query]` (query) - Search by program name, user name, user email, guest name, additional member name, or guest email.
-- `filter[status]` (query) - Filter by program time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.
+- `filter[query]` (query) - Search by registration opportunity name, user name, user email, guest name, additional member name, or guest email.
+- `filter[status]` (query) - Filter by registration opportunity time status. Supports multiple comma-separated values. Options: ongoing, upcoming, past.
+- `filter[signup_status]` (query) - Manager-only signup lifecycle filter. Options: active, cancelled, cancelled:member, cancelled:admin. Defaults to active.
 - `filter[timeScope]` (query) - Simple time scope filter. Options: upcoming (includes ongoing and active), past, all.
-- `filter[event_start_date]` (query) - Filter by program event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing programs.
-- `filter[upcoming]` (query) - Filter to signups for upcoming programs only.
-- `filter[past]` (query) - Filter to signups for past programs only.
-- `filter[ongoing]` (query) - Filter to signups for ongoing programs only.
+- `filter[event_start_date]` (query) - Filter by registration opportunity event date range. Pass as array: filter[event_start_date][0]=start&filter[event_start_date][1]=end. Includes ongoing registration opportunities.
+- `filter[upcoming]` (query) - Filter to signups for upcoming registration opportunities only.
+- `filter[past]` (query) - Filter to signups for past registration opportunities only.
+- `filter[ongoing]` (query) - Filter to signups for ongoing registration opportunities only.
 - `filter[withTrashed]` (query) - Include soft-deleted signups. Defaults to excluding deleted.
-- `filter[program[archived_at]]` (query) - Filter by program archived status. Pass empty string to exclude archived programs.
-- `filter[program[deleted_at]]` (query) - Filter by program deleted status. Pass empty string to exclude deleted programs.
+- `filter[program[archived_at]]` (query) - Filter by registration opportunity archived status. Pass empty string to exclude archived registration opportunities.
+- `filter[program[deleted_at]]` (query) - Filter by registration opportunity deleted status. Pass empty string to exclude deleted registration opportunities.
 - `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
 
@@ -330,19 +494,19 @@ Get a program signup
 #### GET /programs
 
 List registration opportunities
-Returns a paginated list of registration opportunities (programs) with optional filtering.
+Returns a paginated list of registration opportunities with optional filtering.
 
 **Parameters:**
 
-- `filter[parent_program_id]` (query) - Filter by parent program ID.
+- `filter[parent_program_id]` (query) - Filter by program ID.
 - `filter[status]` (query) - Filter by status. Supports multiple comma-separated values. Options: active, upcoming, past, ongoing, archived.
-- `filter[query]` (query) - Search programs by name (partial match).
-- `filter[with_participants]` (query) - Filter to only programs that have participants.
-- `filter[can_register]` (query) - Filter to only programs the authenticated user can register for.
-- `filter[upcoming]` (query) - Filter to only upcoming programs.
-- `filter[past]` (query) - Filter to only past programs.
-- `filter[archived_at]` (query) - Filter by archived status. Pass empty string to exclude archived programs.
-- `filter[deleted_at]` (query) - Filter by deleted status. Pass empty string to exclude deleted programs.
+- `filter[query]` (query) - Search registration opportunities by name (partial match).
+- `filter[with_participants]` (query) - Filter to only registration opportunities that have participants.
+- `filter[can_register]` (query) - Filter to only registration opportunities the authenticated user can register for.
+- `filter[upcoming]` (query) - Filter to only upcoming registration opportunities.
+- `filter[past]` (query) - Filter to only past registration opportunities.
+- `filter[archived_at]` (query) - Filter by archived status. Pass empty string to exclude archived registration opportunities.
+- `filter[deleted_at]` (query) - Filter by deleted status. Pass empty string to exclude deleted registration opportunities.
 - `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.
 - `append` (query) - Append computed attributes (comma-separated). Options: audience, signup_count.
 - `sort` (query) - Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.
@@ -371,6 +535,25 @@ Get a registration opportunity
 
 ### User
 
+#### GET /users/{user}
+
+Show a user
+
+**Parameters:**
+
+- `user` (path) (required)
+- `include` (query) - Include related data. Options: card, family, roles,permissions, files.
+- `filter[tenant_id]` (query) - For parent tenants, optionally show users from a child tenant or all visible child tenants.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+
+**Responses:**
+
+- `200`: `UserResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
 #### PUT /users/{user}
 
 Update a user
@@ -390,55 +573,10 @@ Content-Type: `application/json`
 - `last_name` (string) - The last name of the user.
 - `middle_name` (string,null) - The middle name of the user.
 - `preferred_name` (string,null) - The preferred name of the user.
-- `date_of_birth` (string,null) - The date of birth of the user.
-- `email` (string) - A unique email address for the user.
-- `profile_city` (string,null) - The city of the user.
-- `profile_zip` (string,null) - The postal code or zip code of the user.
-- `profile_state` (string,null) - The province or state of the user.
-- `profile_address` (string,null) - The street address of the user.
-- `profile_address_line_2` (string,null) - The second line of the address of the user.
-- `profile_country` (string,null) - The ISO 3166-1 alpha-2 country code of the user.
-- `telephone` (string,null) - A phone number for the user.
-- `custom_form` (object)
 
 **Responses:**
 
 - `200`: `User`
-- `401`: 
-- `403`: 
-- `422`: 
-
-### CustomProfileField
-
-#### GET /custom_profile_fields
-
-
-**Parameters:**
-
-- `cross_tenant_user_id` (query)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
-
-**Responses:**
-
-- `200`: Paginated collection
-- `401`: 
-- `403`: 
-- `422`: 
-
-### CustomProfileFieldValue
-
-#### GET /custom_profile_field_values
-
-
-**Parameters:**
-
-- `filter[user_id]` (query)
-- `filter[custom_profile_field_id]` (query)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
-
-**Responses:**
-
-- `200`: Paginated collection
 - `401`: 
 - `403`: 
 - `422`: 

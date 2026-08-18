@@ -596,6 +596,16 @@
                         }
                     },
                     {
+                        "name": "cross_tenant_values",
+                        "in": "query",
+                        "schema": {
+                            "type": [
+                                "boolean",
+                                "null"
+                            ]
+                        }
+                    },
+                    {
                         "name": "X-Api-Version",
                         "in": "header",
                         "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
@@ -1255,7 +1265,50 @@
         "/membership_types/{id}/archive": {
             "post": {
                 "operationId": "membershipType.archive",
-                "summary": "Archive or unarchive a membership type",
+                "summary": "Archive a membership type",
+                "tags": [
+                    "Membership Type"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`MembershipTypeResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MembershipTypeResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership_types/{id}/unarchive": {
+            "post": {
+                "operationId": "membershipType.unarchive",
+                "summary": "Unarchive a membership type",
                 "tags": [
                     "Membership Type"
                 ],
@@ -1724,6 +1777,15 @@
                             "type": "string"
                         },
                         "example": "ongoing,upcoming"
+                    },
+                    {
+                        "name": "filter[signup_status]",
+                        "in": "query",
+                        "description": "Manager-only signup lifecycle filter. Options: active, cancelled, cancelled:member, cancelled:admin. Defaults to active.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "cancelled:member"
                     },
                     {
                         "name": "filter[timeScope]",
@@ -2280,7 +2342,6 @@
                     }
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
@@ -2318,92 +2379,8 @@
                                         ],
                                         "description": "The preferred name of the user.",
                                         "maxLength": 255
-                                    },
-                                    "date_of_birth": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "format": "date-time",
-                                        "description": "The date of birth of the user."
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "description": "A unique email address for the user."
-                                    },
-                                    "profile_city": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The city of the user."
-                                    },
-                                    "profile_zip": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The postal code or zip code of the user."
-                                    },
-                                    "profile_state": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The province or state of the user."
-                                    },
-                                    "profile_address": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The street address of the user."
-                                    },
-                                    "profile_address_line_2": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The second line of the address of the user."
-                                    },
-                                    "profile_country": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "The ISO 3166-1 alpha-2 country code of the user."
-                                    },
-                                    "telephone": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "description": "A phone number for the user."
-                                    },
-                                    "custom_form": {
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer"
-                                            },
-                                            "data": {
-                                                "type": [
-                                                    "array",
-                                                    "null"
-                                                ],
-                                                "items": {
-                                                    "type": "string"
-                                                }
-                                            }
-                                        }
                                     }
-                                },
-                                "required": [
-                                    "first_name",
-                                    "last_name",
-                                    "email"
-                                ]
+                                }
                             }
                         }
                     }
@@ -2522,6 +2499,7 @@
                     },
                     "registration_opportunity_ids": {
                         "type": "array",
+                        "description": "Registration opportunity identifiers linked to this attendance sheet.",
                         "examples": [
                             [
                                 42,
@@ -2561,7 +2539,9 @@
                             "2025-01-20T14:45:00.000000Z"
                         ]
                     },
-                    "parentProgram": {},
+                    "parentProgram": {
+                        "description": "Program this attendance sheet belongs to (derived from first registration opportunity)."
+                    },
                     "registrationOpportunities": {
                         "type": "string",
                         "description": "Registration opportunities this attendance sheet includes."
@@ -2573,6 +2553,7 @@
                 },
                 "required": [
                     "id",
+                    "registration_opportunity_ids",
                     "date",
                     "created_at",
                     "updated_at",
@@ -2894,6 +2875,15 @@
                             89
                         ]
                     },
+                    "invited_user_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            91
+                        ]
+                    },
                     "guest_id": {
                         "type": [
                             "integer",
@@ -2979,6 +2969,12 @@
                             false
                         ]
                     },
+                    "pending_invite": {
+                        "type": "boolean",
+                        "examples": [
+                            true
+                        ]
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "ISO 8601 (UTC)",
@@ -3047,6 +3043,7 @@
                 "required": [
                     "id",
                     "user_id",
+                    "invited_user_id",
                     "guest_id",
                     "name",
                     "email",
@@ -3057,6 +3054,7 @@
                     "allergies",
                     "medical",
                     "primary",
+                    "pending_invite",
                     "created_at",
                     "updated_at",
                     "deleted_at"
@@ -3207,6 +3205,12 @@
                             false
                         ]
                     },
+                    "hide_starting_at_price": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
                     "visibility_requires_base_membership": {
                         "type": "boolean",
                         "examples": [
@@ -3275,6 +3279,26 @@
                         ],
                         "examples": [
                             null
+                        ]
+                    },
+                    "user_blocked_from_membership_checkout": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the authenticated member is blocked from purchasing a\nmembership because their coverage is provided through a family\ngroup holder's membership instead. Only computed on the show\nendpoint for an authenticated member; null otherwise (e.g. guests,\nor contexts that don't compute this, such as the index listing).",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "user_can_purchase": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the authenticated member can purchase this membership type\naccording to MembershipTypePolicy::purchase. Only computed on the\nshow endpoint for authenticated members; null otherwise.",
+                        "examples": [
+                            true
                         ]
                     },
                     "waivers": {
@@ -3655,6 +3679,7 @@
                     "exclude_from_tax",
                     "membership_card_id",
                     "hidden",
+                    "hide_starting_at_price",
                     "visibility_requires_base_membership",
                     "forced_bundle_with_base",
                     "exclude_from_parent_tenant_fee",
@@ -3665,6 +3690,8 @@
                     "created_at",
                     "updated_at",
                     "deleted_at",
+                    "user_blocked_from_membership_checkout",
+                    "user_can_purchase",
                     "waivers",
                     "plans"
                 ],
@@ -3955,6 +3982,9 @@
                             "forced_bundle_with_base": {
                                 "type": "boolean"
                             },
+                            "hide_starting_at_price": {
+                                "type": "boolean"
+                            },
                             "waivers": {
                                 "type": "array",
                                 "items": {}
@@ -3990,6 +4020,7 @@
                             "disable_default_card",
                             "manual_order_enabled",
                             "forced_bundle_with_base",
+                            "hide_starting_at_price",
                             "waivers"
                         ]
                     },
@@ -5085,6 +5116,27 @@
                             "2025-05-25T10:00:00.000000Z"
                         ]
                     },
+                    "cancelled_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "description": "Timestamp set only when the signup was intentionally cancelled.",
+                        "examples": [
+                            "2025-05-25T10:00:00.000000Z"
+                        ]
+                    },
+                    "cancellation_actor": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Role of the user who intentionally cancelled the signup.",
+                        "examples": [
+                            "member"
+                        ]
+                    },
                     "user": {
                         "type": "string",
                         "description": "User who created this signup."
@@ -5162,6 +5214,8 @@
                     "created_at",
                     "updated_at",
                     "deleted_timestamp",
+                    "cancelled_at",
+                    "cancellation_actor",
                     "list_of_activities"
                 ],
                 "title": "ProgramSignupResource"
@@ -6187,13 +6241,22 @@
                         "type": "string"
                     },
                     "date_of_birth": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "created_at": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "updated_at": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "subscriptions": {
                         "type": "string"
