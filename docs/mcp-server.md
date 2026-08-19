@@ -1,88 +1,53 @@
 # MCP server
 
-The Communal Platform API is available as a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server. Connect it to an AI coding assistant or chat client — Claude Code, Claude, Cursor, VS Code — and the assistant can search this API's operations and make real requests on your behalf.
+Communal exposes a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server for your organization. Connect it to an AI assistant — Claude Code, Claude, Cursor, VS Code — and the assistant can work with your Communal data on your behalf: programs and registration, signups, membership, attendance, and users.
 
 ## Server details
 
 | | |
 |---|---|
-| **Name** | Communal Platform API |
-| **URL** | `https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a` |
+| **URL** | `https://<your-subdomain>.getcommunal.com/mcp` |
 | **Transport** | Streamable HTTP |
-| **Hosted by** | [Scalar](https://scalar.com/), generated from this documentation's OpenAPI document |
-| **API version served** | `2026-03-25` (see [Choosing an API version](#choosing-an-api-version)) |
-| **Target API** | `https://api.getcommunal.com/api` |
+| **Authentication** | OAuth — you sign in to Communal in a browser; no API key required |
 
-## What the assistant can do
+### Finding your server URL
 
-The server exposes three tools:
+`<your-subdomain>` is your organization's own Communal address — the part before `.getcommunal.com` in the URL you use to sign in. It is not a literal value to copy; every organization has its own.
 
-| Tool | Purpose |
-|------|---------|
-| `summarize-openapi-specs` | Top-level summary of the API: title, version, servers, and every available path. |
-| `search-openapi-operations` | Search operations by plain-language question and return the matching parameters and schemas. |
-| `execute-request` | Send a real HTTP request to `https://api.getcommunal.com/api`. |
+To find it, sign in to Communal and look at your browser's address bar. Take the address you sign in at and add `/mcp` to the end.
 
-`execute-request` only accepts a server URL that the OpenAPI document declares, so the assistant cannot point it at another host. It **can** issue writes (`POST`, `PATCH`, `DELETE`) — archiving a membership type or sending membership cards, for example — so review tool calls before approving them, or use a client mode that prompts for each one.
+For an organization that signs in at `https://example.getcommunal.com`, the MCP server URL is `https://example.getcommunal.com/mcp`. Your own subdomain goes where `example` is — it is a stand-in, not a working address.
+
+If you are not sure which address to use, ask your Communal administrator.
+
+This is the one place Communal uses your organization's subdomain. The REST API stays at `https://api.getcommunal.com/api` for every organization, where your API key alone determines which organization you reach — see [Authentication](./authentication.md).
 
 ## Add the server
 
-Register the server URL with your client and include your Communal API key as an `Authorization` header. The server forwards that header to the Communal API on each request — see [Authentication](#authentication) below.
+Setup is the same everywhere: register your server URL from [above](#finding-your-server-url), then complete the browser sign-in your client prompts for. Replace `<your-subdomain>` in each example with your organization's own — the URLs below will not work as written. There is no key or secret to configure, so these config files are safe to commit.
 
 ### Claude Code
 
 ```bash
-claude mcp add --transport http communal-platform-api \
-  https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a \
-  --header "Authorization: Bearer YOUR_API_KEY"
+claude mcp add --transport http communal https://<your-subdomain>.getcommunal.com/mcp
 ```
 
-Verify the connection with `/mcp`.
-
-The command writes JSON config you can also author by hand. To share the server with your team, add `--scope project` (or create `.mcp.json` yourself) and reference an environment variable so the committed file holds no secret and each developer supplies their own key:
+Run `/mcp` and choose the server to start the sign-in. Add `--scope project` to share it with your team through a committed `.mcp.json` — each person authenticates as themselves. The equivalent JSON:
 
 ```json
 {
   "mcpServers": {
-    "communal-platform-api": {
+    "communal": {
       "type": "http",
-      "url": "https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a",
-      "headers": {
-        "Authorization": "Bearer ${COMMUNAL_API_KEY}"
-      }
+      "url": "https://<your-subdomain>.getcommunal.com/mcp"
     }
   }
 }
 ```
 
-### Claude Desktop
+### Claude (desktop and web)
 
-Claude Desktop's **Settings → Connectors** UI takes a URL but has no field for custom headers. To send your key, run the server through the [`mcp-remote`](https://github.com/geelen/mcp-remote) proxy in `claude_desktop_config.json` instead:
-
-```json
-{
-  "mcpServers": {
-    "communal-platform-api": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a",
-        "--header",
-        "Authorization:${AUTH_HEADER}"
-      ],
-      "env": {
-        "AUTH_HEADER": "Bearer YOUR_API_KEY"
-      }
-    }
-  }
-}
-```
-
-The key goes in `env`, and `--header` uses `Authorization:${AUTH_HEADER}` with **no space after the colon**. This is deliberate: Claude Desktop on Windows and some Cursor versions mangle spaces inside `args`, so the space lives in the environment variable value instead.
-
-### Claude (web)
-
-claude.ai has no local process to proxy through, so add the server under **Settings → Connectors → Add custom connector** and supply your key in conversation — see [Clients that can't send custom headers](#clients-that-cant-send-custom-headers).
+Open **Settings → Connectors → Add custom connector**, paste the server URL, and complete the sign-in when prompted.
 
 ### Cursor
 
@@ -91,39 +56,25 @@ Create `~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one:
 ```json
 {
   "mcpServers": {
-    "communal-platform-api": {
-      "url": "https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
+    "communal": {
+      "url": "https://<your-subdomain>.getcommunal.com/mcp"
     }
   }
 }
 ```
 
-A project-level `.cursor/mcp.json` is committed to source control, so put your key in the global `~/.cursor/mcp.json` instead, or leave a placeholder for each developer to fill in.
+Cursor shows the server as needing authentication until you complete the sign-in from its MCP settings.
 
 ### VS Code
 
-Create `.vscode/mcp.json` in your workspace. Use an `input` so the key is prompted for and stored by VS Code rather than written into the file:
+Create `.vscode/mcp.json` in your workspace:
 
 ```json
 {
-  "inputs": [
-    {
-      "id": "communal-api-key",
-      "type": "promptString",
-      "description": "Communal API key",
-      "password": true
-    }
-  ],
   "servers": {
-    "communal-platform-api": {
+    "communal": {
       "type": "http",
-      "url": "https://mcp.scalar.com/mcp/1e999a58-2315-4da2-8ede-03506313f73a",
-      "headers": {
-        "Authorization": "Bearer ${input:communal-api-key}"
-      }
+      "url": "https://<your-subdomain>.getcommunal.com/mcp"
     }
   }
 }
@@ -131,59 +82,38 @@ Create `.vscode/mcp.json` in your workspace. Use an `input` so the key is prompt
 
 ### Other clients
 
-Any client that supports remote MCP servers over streamable HTTP works — register the URL and, if the client asks for a transport, choose HTTP (not stdio; there is no command to run and nothing to install). Set the same `Authorization` header wherever the client allows custom headers.
+Any client supporting remote MCP servers over streamable HTTP with OAuth works. Register the URL and, if the client asks for a transport, choose HTTP — there is no command to run and nothing to install. Clients that cannot perform an OAuth browser flow cannot connect.
 
 ## Authentication
 
-The Communal API authenticates with a bearer token, exactly as it does for a direct HTTP call — see [Authentication](./authentication.md) for how to issue and rotate a key.
+The server uses OAuth. The first time your client connects, it opens Communal in a browser, you sign in, and you approve access for that client. The client stores the resulting token and refreshes it as needed; you re-authenticate only when access expires or is revoked.
 
-The MCP server uses **passthrough authentication**: it does not store a credential. Whatever `Authorization` header your client sends is forwarded to `https://api.getcommunal.com/api` for that request and nothing else. Practically, that means:
+What this means in practice:
 
-- **Each person uses their own key.** A key inherits the permissions of the Communal user it belongs to, so an assistant can only reach what that person can reach.
-- **Scalar never holds your key.** It is relayed per request, not saved on the server.
-- **Connecting without a key still works** — the assistant can read the API description and search operations. Only `execute-request` calls fail, with `401`.
+- **You act as yourself.** The assistant reaches exactly what your Communal user can reach, and no more. Permissions follow your role.
+- **No secrets in config.** Nothing above contains a credential, so `.mcp.json`, `.cursor/mcp.json`, and `.vscode/mcp.json` can all be committed without leaking anything.
+- **Each teammate signs in separately.** A shared config gives everyone the server, not each other's access.
 
-Keep the key out of committed files. Every example above either uses a global config outside the repository or a prompted input; an `.mcp.json` or `.cursor/mcp.json` that ships a live key leaks it to everyone with repository access.
+API keys are not used for MCP. They remain the way to authenticate direct HTTP calls to the REST API — see [Authentication](./authentication.md).
 
-### Clients that can't send custom headers
+## What the assistant can do
 
-A few clients — claude.ai chief among them — let you add a remote MCP server by URL but offer no place for custom headers and no local proxy to work around it. In that case, give the key to the assistant in conversation instead:
+Once connected, your client lists the tools the server offers — `/mcp` in Claude Code, or the MCP panel in Cursor and VS Code. Check that list to see what is available to you, since it reflects your permissions.
 
-> Use the Communal Platform API MCP server. Send `Authorization: Bearer sk_live_…` on every request.
-
-The assistant then attaches the header to each `execute-request` call. This works, but the key lives in the conversation transcript — use a dedicated key and [rotate it](./authentication.md#rotating-an-api-key) afterwards.
-
-A request with no key, or a bad one, comes back as:
-
-```json
-{ "message": "Unauthenticated." }
-```
-
-## Choosing an API version
-
-The server describes the current version, `2026-03-25`. To have the assistant target the older supported version, ask it to send the `X-Api-Version` header on requests:
-
-> Send `X-Api-Version: 2026-02-01` on every Communal request.
-
-Ask the assistant rather than setting the header in your MCP client config: passthrough relays only the credential header, so any other header you configure on the connection stops at the MCP server and never reaches the API.
-
-Responses echo `X-Api-Version` and `X-Api-Version-Source` so you can confirm which version handled the call. See [Versioning](./versioning.md) for the full rules, including deprecation and sunset behavior.
+Assume the assistant can **change data**, not just read it — creating and archiving records, or sending membership cards, for example. Review tool calls before approving them, or use a client mode that prompts for each one. What an assistant can do is bounded by your own Communal role, so if you want a narrower blast radius, sign in as a user with narrower access.
 
 ## Things to ask for
 
-Once the server is connected and authenticated:
-
 - "List our parent programs and summarize the ones with open registration."
-- "Which endpoints return attendance data, and what filters do they accept?"
-- "Fetch program signups for program 42 with the user and program included."
-- "Show me the schema for a membership type before I create one."
+- "How many people signed up for program 101, and how many attended?"
+- "Which membership types are currently active, and how are they ordered?"
+- "Show me the attendance records for last week's sessions."
 
 ## Troubleshooting
 
 | Symptom | Cause |
 |---------|-------|
-| Every request returns `401 Unauthenticated` | No `Authorization: Bearer YOUR_API_KEY` header reached the API. Check that your client sends it, or that it supports custom headers at all — see [Authentication](#authentication). |
-| `403 Forbidden` on a specific action | The key is valid, but its user lacks permission for that action in Communal. |
-| `400 Unsupported API version.` | An `X-Api-Version` value outside `2026-02-01` and `2026-03-25`. The response lists supported versions. |
+| The client reports the server needs authentication | The OAuth flow has not been completed, or the token expired. Re-run the sign-in from your client's MCP settings (`/mcp` in Claude Code). |
+| `404`, or the client cannot reach the server | The subdomain is wrong. An address that is not a Communal organization returns `404` rather than an authentication prompt, so check it against the one you sign in at — see [Finding your server URL](#finding-your-server-url). |
+| An action is refused | Your Communal role does not permit it. Roles are managed in Communal, not in the MCP client. |
 | The server connects but exposes no tools | The client registered it as a stdio/command server. Re-add it as a remote HTTP server. |
-| `422` with an `errors` object | Request validation failed. See [Errors](./using-the-api.md#errors) for the shape. |
