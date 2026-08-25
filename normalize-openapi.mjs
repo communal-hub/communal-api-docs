@@ -17,7 +17,11 @@ export const TAG_GROUPS = [
   },
   {
     name: 'Membership',
-    tags: ['Membership Type', 'Membership Card'],
+    tags: ['Membership Type', 'Membership Card', 'User Membership'],
+  },
+  {
+    name: 'Transactions',
+    tags: ['Transaction'],
   },
   {
     name: 'Activity',
@@ -110,8 +114,44 @@ export function normalizeSpec(filePath, { productionOnly = false } = {}) {
     tags: group.tags.filter((tag) => !HIDDEN_TAGS.has(tag)),
   })).filter((group) => group.tags.length > 0)
 
+  assertEveryTagIsGrouped(spec, filePath)
+
   writeFileSync(filePath, JSON.stringify(spec, null, 4) + '\n', 'utf8')
   return removed
+}
+
+/**
+ * Scalar builds the reference sidebar from `x-tagGroups`, so an operation whose
+ * tag belongs to no group renders nowhere — the endpoint ships in the spec but
+ * is invisible on the site. That failed silently when the API introduced the
+ * `Transaction` and `User Membership` tags, so a new tag is now a build error:
+ * add it to TAG_GROUPS (or to HIDDEN_TAGS to drop it deliberately).
+ */
+function assertEveryTagIsGrouped(spec, filePath) {
+  const grouped = new Set((spec['x-tagGroups'] ?? []).flatMap((group) => group.tags))
+  const ungrouped = new Map()
+
+  for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
+    for (const [method, op] of Object.entries(pathItem ?? {})) {
+      if (!METHODS.has(method) || !op || typeof op !== 'object') continue
+      for (const tag of op.tags ?? []) {
+        if (grouped.has(tag) || HIDDEN_TAGS.has(tag)) continue
+        if (!ungrouped.has(tag)) ungrouped.set(tag, [])
+        ungrouped.get(tag).push(`${method.toUpperCase()} ${path}`)
+      }
+    }
+  }
+
+  if (ungrouped.size === 0) return
+
+  const detail = [...ungrouped]
+    .map(([tag, ops]) => `  - ${tag}: ${ops.join(', ')}`)
+    .join('\n')
+  throw new Error(
+    `normalize-openapi: ${filePath} has tag(s) missing from TAG_GROUPS, so their operations ` +
+      `would be hidden from the reference sidebar:\n${detail}\n` +
+      `Add each tag to TAG_GROUPS in normalize-openapi.mjs (or to HIDDEN_TAGS to drop it).`,
+  )
 }
 
 // CLI: `node normalize-openapi.mjs [path]` (defaults to the current version's spec).

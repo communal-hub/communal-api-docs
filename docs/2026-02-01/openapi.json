@@ -7,6 +7,14 @@
     },
     "servers": [
         {
+            "url": "http://api.community-management.test/api",
+            "description": "Local"
+        },
+        {
+            "url": "https://api.communitymanagement.xyz/api",
+            "description": "Staging"
+        },
+        {
             "url": "https://api.getcommunal.com/api",
             "description": "Prod"
         }
@@ -8945,7 +8953,14 @@
             "name": "Membership",
             "tags": [
                 "Membership Type",
-                "Membership Card"
+                "Membership Card",
+                "User Membership"
+            ]
+        },
+        {
+            "name": "Transactions",
+            "tags": [
+                "Transaction"
             ]
         },
         {
