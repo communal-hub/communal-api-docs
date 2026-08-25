@@ -2,8 +2,8 @@
     "openapi": "3.1.0",
     "info": {
         "title": "Communal Platform API",
-        "version": "2026-02-01",
-        "description": "API documentation for the Communal platform. This document describes version 2026-02-01.\n\nOptionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-08-25). Supported versions: 2026-02-01, 2026-03-25, 2026-08-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
+        "version": "2026-08-25",
+        "description": "API documentation for the Communal platform. This document describes version 2026-08-25.\n\nOptionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-08-25). Supported versions: 2026-02-01, 2026-03-25, 2026-08-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
     },
     "servers": [
         {
@@ -115,11 +115,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -168,11 +168,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -262,11 +262,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -361,11 +361,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -440,11 +440,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -528,11 +528,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -627,11 +627,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -689,11 +689,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -776,11 +776,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -862,11 +862,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -971,11 +971,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1058,11 +1058,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -1152,11 +1152,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -1249,11 +1249,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -1362,11 +1362,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1405,11 +1405,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1440,11 +1440,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -1517,11 +1517,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1567,11 +1567,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1657,11 +1657,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1693,11 +1693,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1776,11 +1776,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -1867,11 +1867,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2056,11 +2056,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2155,11 +2155,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2249,11 +2249,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2436,11 +2436,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2544,11 +2544,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2780,16 +2780,16 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Paginated set of `TransactionResourceV20260325`",
+                        "description": "Paginated set of `TransactionResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2798,7 +2798,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/TransactionResourceV20260325"
+                                                "$ref": "#/components/schemas/TransactionResource"
                                             }
                                         },
                                         "current_page": {
@@ -2871,11 +2871,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2943,11 +2943,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -2994,11 +2994,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "requestBody": {
@@ -3219,11 +3219,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -3316,11 +3316,11 @@
                     {
                         "name": "X-Api-Version",
                         "in": "header",
-                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-02-01.",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "2026-02-01"
+                        "example": "2026-08-25"
                     }
                 ],
                 "responses": {
@@ -7679,661 +7679,6 @@
                     "owner"
                 ],
                 "title": "TransactionResource"
-            },
-            "TransactionResourceV20260325": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "examples": [
-                            1042
-                        ]
-                    },
-                    "amount": {
-                        "type": "integer",
-                        "description": "Signed integer cents; negative for refunds.",
-                        "examples": [
-                            5000
-                        ]
-                    },
-                    "original_amount": {
-                        "type": "integer",
-                        "description": "Pre-discount amount, in integer cents.",
-                        "examples": [
-                            5000
-                        ]
-                    },
-                    "discount_amount": {
-                        "type": "integer",
-                        "description": "original_amount minus amount, in integer cents.",
-                        "examples": [
-                            0
-                        ]
-                    },
-                    "tax_amount": {
-                        "type": "integer",
-                        "description": "Tax collected, in integer cents.",
-                        "examples": [
-                            0
-                        ]
-                    },
-                    "fees": {
-                        "type": "integer",
-                        "description": "Platform + processing fees, in integer cents.",
-                        "examples": [
-                            175
-                        ]
-                    },
-                    "currency": {
-                        "type": "string",
-                        "description": "ISO 4217 currency code.",
-                        "examples": [
-                            "usd"
-                        ]
-                    },
-                    "type": {
-                        "type": "integer",
-                        "description": "The integer-backed \\App\\Enums\\TransactionType value. See readable_type for its label.",
-                        "examples": [
-                            1
-                        ]
-                    },
-                    "transaction_id": {
-                        "type": "string",
-                        "description": "The Stripe charge id.",
-                        "examples": [
-                            "ch_1AbCdEfGhIjKlMnO"
-                        ]
-                    },
-                    "associated_transaction_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "transaction_id of the original charge this transaction refunds, if any.",
-                        "examples": [
-                            "ch_1AbCdEfGhIjKlMnO"
-                        ]
-                    },
-                    "refund_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The Stripe refund id, if this transaction is a refund.",
-                        "examples": [
-                            "re_1AbCdEfGhIjKlMnO"
-                        ]
-                    },
-                    "payment_refund_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The Stripe payment refund id, if applicable.",
-                        "examples": [
-                            "pyr_1AbCdEfGhIjKlMnO"
-                        ]
-                    },
-                    "dispute_transaction_id": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "transaction_id of the disputed charge, if this transaction is a chargeback.",
-                        "examples": [
-                            "ch_1AbCdEfGhIjKlMnO"
-                        ]
-                    },
-                    "payment_method": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "Payment method used, e.g. \"card\" or \"interac\".",
-                        "examples": [
-                            "card"
-                        ]
-                    },
-                    "credit_card": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "Card brand string.",
-                        "examples": [
-                            "Visa"
-                        ]
-                    },
-                    "metadata": {
-                        "type": "object",
-                        "description": "Curated, whitelisted subset of the transaction's stored metadata. Internal-only\nkeys (e.g. internal_flag, trigger_tax_receipt) are stripped before serialization.",
-                        "examples": [
-                            {
-                                "description": "Membership renewal",
-                                "cheque_number": "42"
-                            }
-                        ],
-                        "properties": {
-                            "description": {
-                                "type": "string"
-                            },
-                            "reason": {
-                                "type": "string"
-                            },
-                            "notes": {
-                                "type": "string"
-                            },
-                            "cheque_number": {
-                                "type": "string"
-                            },
-                            "issued_by": {
-                                "type": "string"
-                            },
-                            "document": {
-                                "type": "string"
-                            },
-                            "row": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "examples": [
-                            "2026-01-15T18:32:00.000000Z"
-                        ]
-                    },
-                    "effective_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "The timestamp the transaction is effective as of (used for reporting/sorting).",
-                        "examples": [
-                            "2026-01-15T18:32:00.000000Z"
-                        ]
-                    },
-                    "readable_type": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "description": "Human-readable label for the type enum value.",
-                        "examples": [
-                            "Charge"
-                        ]
-                    },
-                    "readable_created_at": {
-                        "type": "string",
-                        "description": "Human-readable, tenant-timezone formatted creation date.",
-                        "examples": [
-                            "Jan 15, 2026"
-                        ]
-                    },
-                    "item_summary": {
-                        "type": "string",
-                        "description": "Human-readable summary of what was purchased.",
-                        "examples": [
-                            "Membership for Adult (Monthly)"
-                        ]
-                    },
-                    "net_amount": {
-                        "type": "integer",
-                        "description": "net_amount = amount - fees + tax_amount, in integer cents.",
-                        "examples": [
-                            4825
-                        ]
-                    },
-                    "net_fees": {
-                        "type": "integer",
-                        "description": "Fees net of any related refund, in integer cents.",
-                        "examples": [
-                            175
-                        ]
-                    },
-                    "remaining_to_refund": {
-                        "type": "integer",
-                        "description": "Amount still refundable, in integer cents.",
-                        "examples": [
-                            5000
-                        ]
-                    },
-                    "has_dispute": {
-                        "type": "boolean",
-                        "description": "Populated by ProgramSignup::transaction() via withExists; falls back to false on\nresources loaded outside that relation. Treat null/undefined as \"unknown\" (do NOT\nuse as an authoritative gate).",
-                        "examples": [
-                            false
-                        ]
-                    },
-                    "associated_bookings": {
-                        "type": "array",
-                        "description": "Ids of bookings tied to this transaction's invoice.",
-                        "examples": [
-                            [
-                                42
-                            ]
-                        ],
-                        "items": {
-                            "type": "integer"
-                        }
-                    },
-                    "associated_booking_requests": {
-                        "type": "array",
-                        "description": "Ids of booking requests tied to this transaction's invoice.",
-                        "examples": [
-                            []
-                        ],
-                        "items": {
-                            "type": "integer"
-                        }
-                    },
-                    "owner": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "description": "Minimal owner (frontend only needs email/name/id). Owner may be an\nAccount, Guest, or Organization, and email is nullable on those.",
-                        "examples": [
-                            {
-                                "id": 7,
-                                "user_id": 7,
-                                "email": "member@example.com",
-                                "name": "Jane Doe"
-                            }
-                        ],
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "user_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "email": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "name": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "id",
-                            "user_id",
-                            "email",
-                            "name"
-                        ]
-                    },
-                    "invoice": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "description": "Minimal invoice with bookings; only present when the `invoice` relation is loaded.",
-                        "examples": [
-                            {
-                                "id": 12,
-                                "stripe_invoice_number": "INV-0012",
-                                "uuid": "9c1b3f2a-...",
-                                "bookings": [
-                                    {
-                                        "id": 42,
-                                        "starting_at": "2026-01-15T18:00:00.000000Z",
-                                        "readable_start_time": "6:00 PM",
-                                        "bookable_entity": {
-                                            "name": "Court 1"
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "stripe_invoice_number": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "uuid": {
-                                "type": "string"
-                            },
-                            "bookings": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "starting_at": {
-                                            "type": "string"
-                                        },
-                                        "readable_start_time": {
-                                            "type": "string"
-                                        },
-                                        "bookable_entity": {
-                                            "type": [
-                                                "object",
-                                                "null"
-                                            ],
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "name"
-                                            ]
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "starting_at",
-                                        "readable_start_time",
-                                        "bookable_entity"
-                                    ]
-                                }
-                            }
-                        },
-                        "required": [
-                            "id",
-                            "stripe_invoice_number",
-                            "uuid",
-                            "bookings"
-                        ]
-                    },
-                    "associated_transaction": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "description": "Minimal associated transaction so refunds can link back to the original charge's\ninvoice and bookings; only present when the `associatedTransaction` relation is loaded.",
-                        "examples": [
-                            {
-                                "id": 9,
-                                "invoice": {
-                                    "id": 12,
-                                    "stripe_invoice_number": "INV-0012",
-                                    "uuid": "9c1b3f2a-...",
-                                    "bookings": [
-                                        {
-                                            "id": 42,
-                                            "starting_at": "2026-01-15T18:00:00.000000Z",
-                                            "readable_start_time": "6:00 PM"
-                                        }
-                                    ]
-                                }
-                            }
-                        ],
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "invoice": {
-                                "type": [
-                                    "object",
-                                    "null"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "integer"
-                                    },
-                                    "stripe_invoice_number": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ]
-                                    },
-                                    "uuid": {
-                                        "type": "string"
-                                    },
-                                    "bookings": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer"
-                                                },
-                                                "starting_at": {
-                                                    "type": "string"
-                                                },
-                                                "readable_start_time": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "id",
-                                                "starting_at",
-                                                "readable_start_time"
-                                            ]
-                                        }
-                                    }
-                                },
-                                "required": [
-                                    "id",
-                                    "stripe_invoice_number",
-                                    "uuid",
-                                    "bookings"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "id",
-                            "invoice"
-                        ]
-                    },
-                    "promotion_code": {
-                        "type": "object",
-                        "description": "Promotion code with coupon info; only present when the `promotionCode` relation is loaded.",
-                        "examples": [
-                            {
-                                "id": 3,
-                                "name": "SUMMER10",
-                                "coupon": {
-                                    "id": 5,
-                                    "name": "10% Off",
-                                    "percent_off": 10,
-                                    "amount_off": null
-                                }
-                            }
-                        ],
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "name": {
-                                "type": "string"
-                            },
-                            "coupon": {
-                                "type": [
-                                    "object",
-                                    "null"
-                                ],
-                                "properties": {
-                                    "id": {
-                                        "type": "integer"
-                                    },
-                                    "name": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ]
-                                    },
-                                    "percent_off": {
-                                        "type": [
-                                            "number",
-                                            "null"
-                                        ]
-                                    },
-                                    "amount_off": {
-                                        "type": [
-                                            "integer",
-                                            "null"
-                                        ]
-                                    }
-                                },
-                                "required": [
-                                    "id",
-                                    "name",
-                                    "percent_off",
-                                    "amount_off"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "id",
-                            "name",
-                            "coupon"
-                        ]
-                    },
-                    "tags": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
-                        "description": "Tags attached to this transaction. Optional/absent field: only present on the\nindex endpoint with `include=tags`; the key is entirely absent otherwise,\nincluding on the show endpoint, which does not support `include`.",
-                        "examples": [
-                            [
-                                {
-                                    "id": 1,
-                                    "name": "Offline",
-                                    "is_system": true
-                                }
-                            ]
-                        ],
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "is_system": {
-                                    "type": "boolean"
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "name",
-                                "is_system"
-                            ]
-                        }
-                    },
-                    "transaction_line_items": {
-                        "type": "array",
-                        "description": "Minimal transaction line items (avoids expensive Program appends); only present when\nthe `transactionLineItems` relation is loaded. `transaction_line_itemable` is a minimal\nid/name pair for the purchased item (e.g. a Program or Product).",
-                        "examples": [
-                            [
-                                {
-                                    "id": 88,
-                                    "quantity": 1,
-                                    "item_name": "Adult Registration",
-                                    "amount": 5000,
-                                    "tax_amount": 0,
-                                    "transaction_line_itemable": {
-                                        "id": 4,
-                                        "name": "Youth Basketball"
-                                    }
-                                }
-                            ]
-                        ],
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "quantity": {
-                                    "type": "integer"
-                                },
-                                "item_name": {
-                                    "type": "string"
-                                },
-                                "amount": {
-                                    "type": "integer"
-                                },
-                                "tax_amount": {
-                                    "type": "integer"
-                                },
-                                "transaction_line_itemable": {
-                                    "type": [
-                                        "object",
-                                        "null"
-                                    ],
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer"
-                                        },
-                                        "name": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        }
-                                    },
-                                    "required": [
-                                        "id",
-                                        "name"
-                                    ]
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "quantity",
-                                "item_name",
-                                "amount",
-                                "tax_amount",
-                                "transaction_line_itemable"
-                            ]
-                        }
-                    },
-                    "description": {
-                        "type": "null"
-                    }
-                },
-                "required": [
-                    "id",
-                    "amount",
-                    "original_amount",
-                    "discount_amount",
-                    "tax_amount",
-                    "fees",
-                    "currency",
-                    "type",
-                    "transaction_id",
-                    "associated_transaction_id",
-                    "refund_id",
-                    "payment_refund_id",
-                    "dispute_transaction_id",
-                    "payment_method",
-                    "credit_card",
-                    "metadata",
-                    "created_at",
-                    "effective_at",
-                    "readable_type",
-                    "readable_created_at",
-                    "item_summary",
-                    "net_amount",
-                    "net_fees",
-                    "remaining_to_refund",
-                    "has_dispute",
-                    "associated_bookings",
-                    "associated_booking_requests",
-                    "owner",
-                    "description"
-                ],
-                "title": "TransactionResourceV20260325"
             },
             "User": {
                 "type": "object",

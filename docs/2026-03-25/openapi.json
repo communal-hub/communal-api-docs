@@ -3,7 +3,7 @@
     "info": {
         "title": "Communal Platform API",
         "version": "2026-03-25",
-        "description": "API documentation for the Communal platform. This document describes version 2026-03-25.\n\nOptionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-03-25). Supported versions: 2026-02-01, 2026-03-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
+        "description": "API documentation for the Communal platform. This document describes version 2026-03-25.\n\nOptionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-08-25). Supported versions: 2026-02-01, 2026-03-25, 2026-08-25.\n\nVersion-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`)."
     },
     "servers": [
         {
@@ -34,10 +34,16 @@
             "name": "Membership Type"
         },
         {
+            "name": "User Membership"
+        },
+        {
             "name": "Membership Card"
         },
         {
             "name": "Activity"
+        },
+        {
+            "name": "Transaction"
         },
         {
             "name": "Attendance Sheet"
@@ -144,6 +150,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -180,6 +189,28 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview.",
+                                            "examples": [
+                                                "This action is unauthorized."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -222,11 +253,11 @@
                     {
                         "name": "include",
                         "in": "query",
-                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup.",
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "programSignup"
+                        "example": "programSignup.program"
                     },
                     {
                         "name": "X-Api-Version",
@@ -321,11 +352,11 @@
                     {
                         "name": "include",
                         "in": "query",
-                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup.",
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.",
                         "schema": {
                             "type": "string"
                         },
-                        "example": "attendanceSheet,programSignup"
+                        "example": "attendanceSheet,programSignup.program"
                     },
                     {
                         "name": "X-Api-Version",
@@ -350,6 +381,28 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview.",
+                                            "examples": [
+                                                "This action is unauthorized."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -357,7 +410,7 @@
         "/attendance_sheets/export": {
             "get": {
                 "operationId": "attendanceSheet.export",
-                "summary": "Export attendance sheets as a single XLSX workbook",
+                "summary": "Export attendance sheets as CSV or PDF files",
                 "tags": [
                     "Attendance Sheet"
                 ],
@@ -374,6 +427,17 @@
                         }
                     },
                     {
+                        "name": "format",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv",
+                                "pdf"
+                            ]
+                        }
+                    },
+                    {
                         "name": "X-Api-Version",
                         "in": "header",
                         "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
@@ -387,9 +451,20 @@
                     "200": {
                         "description": "",
                         "content": {
-                            "application/json": {
+                            "text/html": {
                                 "schema": {
                                     "type": "string"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Transfer-Encoding": {
+                                "required": true,
+                                "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                        "chunked"
+                                    ]
                                 }
                             }
                         }
@@ -572,6 +647,12 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1377,14 +1458,16 @@
                                         "items": {
                                             "type": "integer"
                                         },
-                                        "minItems": 1
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "prioritized_ids": {
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
                                         },
-                                        "minItems": 1
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     }
                                 }
                             }
@@ -1598,6 +1681,89 @@
                 }
             }
         },
+        "/parent_programs/options": {
+            "get": {
+                "operationId": "parentProgram.options",
+                "description": "Purpose-built for filter dropdowns that need every program for the\ntenant: paginates in SQL, selects only the columns an option list\nrenders, and serializes no relations (tags, registration opportunities,\noccurrences). Prefer this over index() for pickers.",
+                "summary": "List programs as slim dropdown options",
+                "tags": [
+                    "Program"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `ParentProgramOptionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ParentProgramOptionResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/parent_programs": {
             "get": {
                 "operationId": "parent_programs.index",
@@ -1721,6 +1887,28 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview.",
+                                            "examples": [
+                                                "This action is unauthorized."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1987,6 +2175,147 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview.",
+                                            "examples": [
+                                                "This action is unauthorized."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/programs/options": {
+            "get": {
+                "operationId": "program.options",
+                "description": "Purpose-built for filter dropdowns that need every registration\nopportunity for the tenant: paginates in SQL, selects only the columns\nan option list renders, and serializes no relations or computed\npricing attributes. Prefer this over index() for pickers.",
+                "summary": "List registration opportunities as slim dropdown options",
+                "tags": [
+                    "Registration Opportunity"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[parent_program_id]",
+                        "in": "query",
+                        "description": "Filter to registration opportunities under this program.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 5
+                    },
+                    {
+                        "name": "filter[archived_at]",
+                        "in": "query",
+                        "description": "Filter by archived status. Pass empty string to exclude archived registration opportunities.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "filter[deleted_at]",
+                        "in": "query",
+                        "description": "Filter by deleted status. Pass empty string to exclude deleted registration opportunities.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": ""
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search registration opportunities by name (partial match).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "basketball"
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `RegistrationOpportunityOptionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/RegistrationOpportunityOptionResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -2242,6 +2571,337 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "An error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview.",
+                                            "examples": [
+                                                "This action is unauthorized."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "get": {
+                "operationId": "transactions.index",
+                "description": "Paginated, filterable, and sortable transaction ledger for reporting and\nmanaged-API-key consumers. Every row is scoped to the current tenant.",
+                "summary": "List transactions",
+                "tags": [
+                    "Transaction"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[range]",
+                        "in": "query",
+                        "description": "Filter to transactions whose effective date falls between two dates. Pass as comma-separated start,end (or an array): filter[range]=2025-01-01,2025-01-31.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-01-01,2025-01-31"
+                    },
+                    {
+                        "name": "filter[starting_at]",
+                        "in": "query",
+                        "description": "Filter to transactions with an effective date on or after this date.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-01-01"
+                    },
+                    {
+                        "name": "filter[ending_at]",
+                        "in": "query",
+                        "description": "Filter to transactions with an effective date on or before this date (end of day).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2025-01-31"
+                    },
+                    {
+                        "name": "filter[type]",
+                        "in": "query",
+                        "description": "Filter by transaction type. Supports comma-separated values. Options: membership, program, charge, invoice, donation, booking, refund, transfer. Each option (other than refund) matches both the charge and its refund type.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "membership,program"
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search transactions by related user/guest/account name or email, or by program signup id (subscription schedule lookup).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "jane"
+                    },
+                    {
+                        "name": "filter[membership_type_id]",
+                        "in": "query",
+                        "description": "Filter to transactions for the given membership type (plan product) id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 5
+                    },
+                    {
+                        "name": "filter[amount]",
+                        "in": "query",
+                        "description": "Filter by amount in dollars. Pass a bare value for an exact match, or prefix with lte: / gte: for a range bound.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "gte:25.00"
+                    },
+                    {
+                        "name": "filter[id]",
+                        "in": "query",
+                        "description": "Filter by exact transaction id. Supports comma-separated values.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1042,1043"
+                    },
+                    {
+                        "name": "filter[payout_id]",
+                        "in": "query",
+                        "description": "Filter by exact payout id.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7"
+                    },
+                    {
+                        "name": "filter[subscription_schedule_id]",
+                        "in": "query",
+                        "description": "Filter by the local subscription schedule id (transactions.subscription_schedule_id). This is not the Stripe `sub_sched_...` id, which lives on subscription_schedules.stripe_schedule_id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 812
+                    },
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "description": "Filter by exact owning user id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 42
+                    },
+                    {
+                        "name": "filter[promotion_code_id]",
+                        "in": "query",
+                        "description": "Filter by exact promotion code id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 3
+                    },
+                    {
+                        "name": "filter[tags]",
+                        "in": "query",
+                        "description": "Filter by tag name(s). Supports comma-separated values.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Offline,Cheque"
+                    },
+                    {
+                        "name": "filter[with_product]",
+                        "in": "query",
+                        "description": "Filter to transactions associated with the given product (membership/plan) id. Takes a product id, not a boolean — it matches both transaction line items and invoice items for that product.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 17
+                    },
+                    {
+                        "name": "filter[with_parent_program]",
+                        "in": "query",
+                        "description": "Filter to transactions associated with the given parent program id(s), including the refunds of those charges. Takes parent program id(s), not a boolean. Supports comma-separated values.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "43,44"
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Only these two options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "tags,invoice.bookings.bookableEntity"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort by effective date (falls back to created_at). Options: -created_at (descending) or created_at (ascending).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "-created_at"
+                    },
+                    {
+                        "name": "page[number]",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "page[size]",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `TransactionResourceV20260325`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TransactionResourceV20260325"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/transactions/{transaction}": {
+            "get": {
+                "operationId": "transactions.show",
+                "description": "Returns a single transaction, scoped to the current tenant. Relations\nare always eager-loaded to match the fields the resource can return\n(e.g. invoice, associated_transaction, promotion_code); unlike the\nindex endpoint, this endpoint does not accept `include` or `append`.\nThe `tags` field is only ever populated via `include=tags` on the index\nendpoint, so it is never present in this response.",
+                "summary": "Get a transaction",
+                "tags": [
+                    "Transaction"
+                ],
+                "parameters": [
+                    {
+                        "name": "transaction",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`TransactionResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/TransactionResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     }
                 }
             }
@@ -2342,6 +3002,7 @@
                     }
                 ],
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
@@ -2379,8 +3040,92 @@
                                         ],
                                         "description": "The preferred name of the user.",
                                         "maxLength": 255
+                                    },
+                                    "date_of_birth": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time",
+                                        "description": "The date of birth of the user."
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "description": "A unique email address for the user."
+                                    },
+                                    "profile_city": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The city of the user."
+                                    },
+                                    "profile_zip": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The postal code or zip code of the user."
+                                    },
+                                    "profile_state": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The province or state of the user."
+                                    },
+                                    "profile_address": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The street address of the user."
+                                    },
+                                    "profile_address_line_2": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The second line of the address of the user."
+                                    },
+                                    "profile_country": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "The ISO 3166-1 alpha-2 country code of the user."
+                                    },
+                                    "telephone": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "description": "A phone number for the user."
+                                    },
+                                    "custom_form": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "data": {
+                                                "type": [
+                                                    "array",
+                                                    "null"
+                                                ],
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
                                     }
-                                }
+                                },
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "email"
+                                ]
                             }
                         }
                     }
@@ -2401,6 +3146,202 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/user_memberships": {
+            "get": {
+                "operationId": "user_memberships.index",
+                "description": "Returns a paginated list of the memberships members hold, including the\nmembership type and pricing plan each one is on. Filter by member,\nactive/expired state, or expiry date range.",
+                "summary": "List user memberships",
+                "tags": [
+                    "User Membership"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "filter[active]",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[expired]",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "filter[expires_starting_at]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "filter[expires_ending_at]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    {
+                        "name": "page[number]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page[size]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 500
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `UserMembershipResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UserMembershipResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/user_memberships/{user_membership}": {
+            "get": {
+                "operationId": "user_memberships.show",
+                "description": "Returns a single held membership with its membership type and pricing\nplan.",
+                "summary": "Get a user membership",
+                "tags": [
+                    "User Membership"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_membership",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-03-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserMembershipResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserMembershipResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
@@ -2454,6 +3395,13 @@
                             "Left early due to illness"
                         ]
                     },
+                    "can_update": {
+                        "type": "boolean",
+                        "description": "Whether the current viewer may update this record.",
+                        "examples": [
+                            true
+                        ]
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "ISO 8601 (UTC)",
@@ -2483,6 +3431,7 @@
                     "program_signup_id",
                     "status",
                     "notes",
+                    "can_update",
                     "created_at",
                     "updated_at"
                 ],
@@ -2514,6 +3463,13 @@
                         "type": "string",
                         "examples": [
                             "2025-06-15"
+                        ]
+                    },
+                    "can_update": {
+                        "type": "boolean",
+                        "description": "Whether the current viewer may update or delete this sheet.",
+                        "examples": [
+                            true
                         ]
                     },
                     "recordsCount": {
@@ -2555,9 +3511,9 @@
                     "id",
                     "registration_opportunity_ids",
                     "date",
+                    "can_update",
                     "created_at",
-                    "updated_at",
-                    "parentProgram"
+                    "updated_at"
                 ],
                 "title": "AttendanceSheetResource"
             },
@@ -3367,127 +4323,134 @@
                         }
                     },
                     "form": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "parent_form_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "parent_form_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "creator_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "form_structure": {
+                                        "type": "array",
+                                        "items": {}
+                                    },
+                                    "created_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "updated_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "deleted_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "tenant_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "form_template_key": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "allow_repeat_submissions": {
+                                        "type": "boolean"
+                                    },
+                                    "original_form_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "uuid": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "description": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "profile_field_associations": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {}
+                                    },
+                                    "bookable_entity_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "link": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "parent_form_id",
+                                    "title",
+                                    "creator_id",
+                                    "form_structure",
+                                    "created_at",
+                                    "updated_at",
+                                    "deleted_at",
+                                    "tenant_id",
+                                    "form_template_key",
+                                    "type",
+                                    "allow_repeat_submissions",
+                                    "original_form_id",
+                                    "uuid",
+                                    "description",
+                                    "profile_field_associations",
+                                    "bookable_entity_id",
+                                    "link",
+                                    "status"
                                 ]
                             },
-                            "title": {
-                                "type": "string"
-                            },
-                            "creator_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "form_structure": {
-                                "type": "array",
-                                "items": {}
-                            },
-                            "created_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "updated_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "deleted_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "tenant_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "form_template_key": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "type": {
-                                "type": "string"
-                            },
-                            "allow_repeat_submissions": {
-                                "type": "boolean"
-                            },
-                            "original_form_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "uuid": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "description": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "profile_field_associations": {
-                                "type": [
-                                    "array",
-                                    "null"
-                                ],
-                                "items": {}
-                            },
-                            "bookable_entity_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "link": {
-                                "type": "string"
-                            },
-                            "status": {
-                                "type": "string"
+                            {
+                                "type": "null"
                             }
-                        },
-                        "required": [
-                            "id",
-                            "parent_form_id",
-                            "title",
-                            "creator_id",
-                            "form_structure",
-                            "created_at",
-                            "updated_at",
-                            "deleted_at",
-                            "tenant_id",
-                            "form_template_key",
-                            "type",
-                            "allow_repeat_submissions",
-                            "original_form_id",
-                            "uuid",
-                            "description",
-                            "profile_field_associations",
-                            "bookable_entity_id",
-                            "link",
-                            "status"
                         ]
                     },
                     "audience": {
@@ -3506,80 +4469,87 @@
                         }
                     },
                     "tax_ignore": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "program_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "program_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "deleted_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "created_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "updated_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "parent_program_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "tenant_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "membership_type_id": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "product_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "bookable_entity_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "program_id",
+                                    "deleted_at",
+                                    "created_at",
+                                    "updated_at",
+                                    "parent_program_id",
+                                    "tenant_id",
+                                    "membership_type_id",
+                                    "product_id",
+                                    "bookable_entity_id"
                                 ]
                             },
-                            "deleted_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "created_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "updated_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "parent_program_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "tenant_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "membership_type_id": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
-                            },
-                            "product_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
-                            },
-                            "bookable_entity_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
-                                ]
+                            {
+                                "type": "null"
                             }
-                        },
-                        "required": [
-                            "id",
-                            "program_id",
-                            "deleted_at",
-                            "created_at",
-                            "updated_at",
-                            "parent_program_id",
-                            "tenant_id",
-                            "membership_type_id",
-                            "product_id",
-                            "bookable_entity_id"
                         ]
                     },
                     "waiver_assignments": {
@@ -3696,6 +4666,45 @@
                     "plans"
                 ],
                 "title": "MembershipTypeResource"
+            },
+            "ParentProgramOptionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "title": {
+                        "type": "string",
+                        "examples": [
+                            "Youth Sports"
+                        ]
+                    },
+                    "draft": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "archived_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "draft",
+                    "archived_at"
+                ],
+                "title": "ParentProgramOptionResource"
             },
             "PlanResource": {
                 "type": "object",
@@ -4025,54 +5034,61 @@
                         ]
                     },
                     "boundary": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer"
-                            },
-                            "tenant_id": {
-                                "type": [
-                                    "integer",
-                                    "null"
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "tenant_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "created_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "updated_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "path": {
+                                        "type": "array",
+                                        "items": {}
+                                    },
+                                    "deleted_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "tenant_id",
+                                    "created_at",
+                                    "updated_at",
+                                    "title",
+                                    "path",
+                                    "deleted_at"
                                 ]
                             },
-                            "created_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "updated_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
-                            },
-                            "title": {
-                                "type": "string"
-                            },
-                            "path": {
-                                "type": "array",
-                                "items": {}
-                            },
-                            "deleted_at": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
-                                "format": "date-time"
+                            {
+                                "type": "null"
                             }
-                        },
-                        "required": [
-                            "id",
-                            "tenant_id",
-                            "created_at",
-                            "updated_at",
-                            "title",
-                            "path",
-                            "deleted_at"
                         ]
                     }
                 },
@@ -4864,8 +5880,7 @@
                     "created_at",
                     "updated_at",
                     "deleted_at",
-                    "archived_at",
-                    "member_pricing_savings"
+                    "archived_at"
                 ],
                 "title": "Program"
             },
@@ -5092,6 +6107,36 @@
                             }
                         ]
                     },
+                    "program_name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Registration opportunity name, selected via join on the list\nendpoint so the table can render without including the full\n`program` resource. Omitted when the query does not join programs.",
+                        "examples": [
+                            "Youth Basketball Camp"
+                        ]
+                    },
+                    "parent_program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Program ID of the signup's registration opportunity, selected via\njoin on the list endpoint. Omitted when the query does not join programs.",
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "program_free": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Whether the registration opportunity is free, selected via join on\nthe list endpoint. Omitted when the query does not join programs.",
+                        "examples": [
+                            false
+                        ]
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "ISO 8601 (UTC)",
@@ -5215,10 +6260,107 @@
                     "updated_at",
                     "deleted_timestamp",
                     "cancelled_at",
-                    "cancellation_actor",
-                    "list_of_activities"
+                    "cancellation_actor"
                 ],
                 "title": "ProgramSignupResource"
+            },
+            "RegistrationOpportunityOptionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "examples": [
+                            "Youth Basketball Camp"
+                        ]
+                    },
+                    "parent_program_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            5
+                        ]
+                    },
+                    "form_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            12
+                        ]
+                    },
+                    "class_limit": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            30
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "examples": [
+                            "Upcoming"
+                        ]
+                    },
+                    "ongoing": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "event_start_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-07-01T09:00:00.000000Z"
+                        ]
+                    },
+                    "event_end_date": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "ISO 8601 (UTC)",
+                        "examples": [
+                            "2025-07-05T16:00:00.000000Z"
+                        ]
+                    },
+                    "archived_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "parent_program_id",
+                    "form_id",
+                    "class_limit",
+                    "status",
+                    "ongoing",
+                    "event_start_date",
+                    "event_end_date",
+                    "archived_at"
+                ],
+                "title": "RegistrationOpportunityOptionResource"
             },
             "RegistrationOpportunityResource": {
                 "type": "object",
@@ -5883,27 +7025,1315 @@
                     "collect_additional_information",
                     "form_id",
                     "created_at",
-                    "updated_at",
-                    "member_savings",
-                    "price_for_user",
-                    "num_signups_remaining_for_user",
-                    "lowest_price_excluded",
-                    "highest_price",
-                    "signup_count",
-                    "is_full",
-                    "spots_remaining",
-                    "user_signup_count",
-                    "volunteer_price",
-                    "volunteer_price_is_free",
-                    "price_id_for_user",
-                    "required_membership_id_for_user",
-                    "price_recurs_for_user",
-                    "price_interval_for_user",
-                    "price_interval_count_for_user",
-                    "can_user_purchase",
-                    "required_membership_names"
+                    "updated_at"
                 ],
                 "title": "RegistrationOpportunityResource"
+            },
+            "TransactionResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            1042
+                        ]
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "description": "Signed integer cents; negative for refunds.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "original_amount": {
+                        "type": "integer",
+                        "description": "Pre-discount amount, in integer cents.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "discount_amount": {
+                        "type": "integer",
+                        "description": "original_amount minus amount, in integer cents.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "tax_amount": {
+                        "type": "integer",
+                        "description": "Tax collected, in integer cents.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "fees": {
+                        "type": "integer",
+                        "description": "Platform + processing fees, in integer cents.",
+                        "examples": [
+                            175
+                        ]
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO 4217 currency code.",
+                        "examples": [
+                            "usd"
+                        ]
+                    },
+                    "type": {
+                        "type": "integer",
+                        "description": "The integer-backed \\App\\Enums\\TransactionType value. See readable_type for its label.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "description": "The Stripe charge id.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "associated_transaction_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "transaction_id of the original charge this transaction refunds, if any.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "refund_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The Stripe refund id, if this transaction is a refund.",
+                        "examples": [
+                            "re_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "payment_refund_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The Stripe payment refund id, if applicable.",
+                        "examples": [
+                            "pyr_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "dispute_transaction_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "transaction_id of the disputed charge, if this transaction is a chargeback.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "payment_method": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Payment method used, e.g. \"card\" or \"interac\".",
+                        "examples": [
+                            "card"
+                        ]
+                    },
+                    "credit_card": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Card brand string.",
+                        "examples": [
+                            "Visa"
+                        ]
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "description": "Curated, whitelisted subset of the transaction's stored metadata. Internal-only\nkeys (e.g. internal_flag, trigger_tax_receipt) are stripped before serialization.",
+                        "examples": [
+                            {
+                                "description": "Membership renewal",
+                                "cheque_number": "42"
+                            }
+                        ],
+                        "properties": {
+                            "description": {
+                                "type": "string"
+                            },
+                            "reason": {
+                                "type": "string"
+                            },
+                            "notes": {
+                                "type": "string"
+                            },
+                            "cheque_number": {
+                                "type": "string"
+                            },
+                            "issued_by": {
+                                "type": "string"
+                            },
+                            "document": {
+                                "type": "string"
+                            },
+                            "row": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "examples": [
+                            "2026-01-15T18:32:00.000000Z"
+                        ]
+                    },
+                    "effective_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The timestamp the transaction is effective as of (used for reporting/sorting).",
+                        "examples": [
+                            "2026-01-15T18:32:00.000000Z"
+                        ]
+                    },
+                    "readable_type": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable label for the type enum value.",
+                        "examples": [
+                            "Charge"
+                        ]
+                    },
+                    "readable_created_at": {
+                        "type": "string",
+                        "description": "Human-readable, tenant-timezone formatted creation date.",
+                        "examples": [
+                            "Jan 15, 2026"
+                        ]
+                    },
+                    "item_summary": {
+                        "type": "string",
+                        "description": "Human-readable summary of what was purchased.",
+                        "examples": [
+                            "Membership for Adult (Monthly)"
+                        ]
+                    },
+                    "net_amount": {
+                        "type": "integer",
+                        "description": "net_amount = amount - fees + tax_amount, in integer cents.",
+                        "examples": [
+                            4825
+                        ]
+                    },
+                    "net_fees": {
+                        "type": "integer",
+                        "description": "Fees net of any related refund, in integer cents.",
+                        "examples": [
+                            175
+                        ]
+                    },
+                    "remaining_to_refund": {
+                        "type": "integer",
+                        "description": "Amount still refundable, in integer cents.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "has_dispute": {
+                        "type": "boolean",
+                        "description": "Populated by ProgramSignup::transaction() via withExists; falls back to false on\nresources loaded outside that relation. Treat null/undefined as \"unknown\" (do NOT\nuse as an authoritative gate).",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "associated_bookings": {
+                        "type": "array",
+                        "description": "Ids of bookings tied to this transaction's invoice.",
+                        "examples": [
+                            [
+                                42
+                            ]
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "associated_booking_requests": {
+                        "type": "array",
+                        "description": "Ids of booking requests tied to this transaction's invoice.",
+                        "examples": [
+                            []
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "owner": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal owner (frontend only needs email/name/id). Owner may be an\nAccount, Guest, or Organization, and email is nullable on those.",
+                        "examples": [
+                            {
+                                "id": 7,
+                                "user_id": 7,
+                                "email": "member@example.com",
+                                "name": "Jane Doe"
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "user_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "email": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "user_id",
+                            "email",
+                            "name"
+                        ]
+                    },
+                    "invoice": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal invoice with bookings; only present when the `invoice` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 12,
+                                "stripe_invoice_number": "INV-0012",
+                                "uuid": "9c1b3f2a-...",
+                                "bookings": [
+                                    {
+                                        "id": 42,
+                                        "starting_at": "2026-01-15T18:00:00.000000Z",
+                                        "readable_start_time": "6:00 PM",
+                                        "bookable_entity": {
+                                            "name": "Court 1"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "stripe_invoice_number": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "uuid": {
+                                "type": "string"
+                            },
+                            "bookings": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "starting_at": {
+                                            "type": "string"
+                                        },
+                                        "readable_start_time": {
+                                            "type": "string"
+                                        },
+                                        "bookable_entity": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "name"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "starting_at",
+                                        "readable_start_time",
+                                        "bookable_entity"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "stripe_invoice_number",
+                            "uuid",
+                            "bookings"
+                        ]
+                    },
+                    "associated_transaction": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal associated transaction so refunds can link back to the original charge's\ninvoice and bookings; only present when the `associatedTransaction` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 9,
+                                "invoice": {
+                                    "id": 12,
+                                    "stripe_invoice_number": "INV-0012",
+                                    "uuid": "9c1b3f2a-...",
+                                    "bookings": [
+                                        {
+                                            "id": 42,
+                                            "starting_at": "2026-01-15T18:00:00.000000Z",
+                                            "readable_start_time": "6:00 PM"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "invoice": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "stripe_invoice_number": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "uuid": {
+                                        "type": "string"
+                                    },
+                                    "bookings": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "starting_at": {
+                                                    "type": "string"
+                                                },
+                                                "readable_start_time": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starting_at",
+                                                "readable_start_time"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "stripe_invoice_number",
+                                    "uuid",
+                                    "bookings"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "invoice"
+                        ]
+                    },
+                    "promotion_code": {
+                        "type": "object",
+                        "description": "Promotion code with coupon info; only present when the `promotionCode` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 3,
+                                "name": "SUMMER10",
+                                "coupon": {
+                                    "id": 5,
+                                    "name": "10% Off",
+                                    "percent_off": 10,
+                                    "amount_off": null
+                                }
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "coupon": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "percent_off": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "amount_off": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "percent_off",
+                                    "amount_off"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name",
+                            "coupon"
+                        ]
+                    },
+                    "tags": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Tags attached to this transaction. Optional/absent field: only present on the\nindex endpoint with `include=tags`; the key is entirely absent otherwise,\nincluding on the show endpoint, which does not support `include`.",
+                        "examples": [
+                            [
+                                {
+                                    "id": 1,
+                                    "name": "Offline",
+                                    "is_system": true
+                                }
+                            ]
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "is_system": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name",
+                                "is_system"
+                            ]
+                        }
+                    },
+                    "transaction_line_items": {
+                        "type": "array",
+                        "description": "Minimal transaction line items (avoids expensive Program appends); only present when\nthe `transactionLineItems` relation is loaded. `transaction_line_itemable` is a minimal\nid/name pair for the purchased item (e.g. a Program or Product).",
+                        "examples": [
+                            [
+                                {
+                                    "id": 88,
+                                    "quantity": 1,
+                                    "item_name": "Adult Registration",
+                                    "amount": 5000,
+                                    "tax_amount": 0,
+                                    "transaction_line_itemable": {
+                                        "id": 4,
+                                        "name": "Youth Basketball"
+                                    }
+                                }
+                            ]
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "type": "integer"
+                                },
+                                "item_name": {
+                                    "type": "string"
+                                },
+                                "amount": {
+                                    "type": "integer"
+                                },
+                                "tax_amount": {
+                                    "type": "integer"
+                                },
+                                "transaction_line_itemable": {
+                                    "type": [
+                                        "object",
+                                        "null"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "quantity",
+                                "item_name",
+                                "amount",
+                                "tax_amount",
+                                "transaction_line_itemable"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "amount",
+                    "original_amount",
+                    "discount_amount",
+                    "tax_amount",
+                    "fees",
+                    "currency",
+                    "type",
+                    "transaction_id",
+                    "associated_transaction_id",
+                    "refund_id",
+                    "payment_refund_id",
+                    "dispute_transaction_id",
+                    "payment_method",
+                    "credit_card",
+                    "metadata",
+                    "created_at",
+                    "effective_at",
+                    "readable_type",
+                    "readable_created_at",
+                    "item_summary",
+                    "net_amount",
+                    "net_fees",
+                    "remaining_to_refund",
+                    "has_dispute",
+                    "associated_bookings",
+                    "associated_booking_requests",
+                    "owner"
+                ],
+                "title": "TransactionResource"
+            },
+            "TransactionResourceV20260325": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            1042
+                        ]
+                    },
+                    "amount": {
+                        "type": "integer",
+                        "description": "Signed integer cents; negative for refunds.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "original_amount": {
+                        "type": "integer",
+                        "description": "Pre-discount amount, in integer cents.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "discount_amount": {
+                        "type": "integer",
+                        "description": "original_amount minus amount, in integer cents.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "tax_amount": {
+                        "type": "integer",
+                        "description": "Tax collected, in integer cents.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "fees": {
+                        "type": "integer",
+                        "description": "Platform + processing fees, in integer cents.",
+                        "examples": [
+                            175
+                        ]
+                    },
+                    "currency": {
+                        "type": "string",
+                        "description": "ISO 4217 currency code.",
+                        "examples": [
+                            "usd"
+                        ]
+                    },
+                    "type": {
+                        "type": "integer",
+                        "description": "The integer-backed \\App\\Enums\\TransactionType value. See readable_type for its label.",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "description": "The Stripe charge id.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "associated_transaction_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "transaction_id of the original charge this transaction refunds, if any.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "refund_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The Stripe refund id, if this transaction is a refund.",
+                        "examples": [
+                            "re_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "payment_refund_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The Stripe payment refund id, if applicable.",
+                        "examples": [
+                            "pyr_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "dispute_transaction_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "transaction_id of the disputed charge, if this transaction is a chargeback.",
+                        "examples": [
+                            "ch_1AbCdEfGhIjKlMnO"
+                        ]
+                    },
+                    "payment_method": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Payment method used, e.g. \"card\" or \"interac\".",
+                        "examples": [
+                            "card"
+                        ]
+                    },
+                    "credit_card": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Card brand string.",
+                        "examples": [
+                            "Visa"
+                        ]
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "description": "Curated, whitelisted subset of the transaction's stored metadata. Internal-only\nkeys (e.g. internal_flag, trigger_tax_receipt) are stripped before serialization.",
+                        "examples": [
+                            {
+                                "description": "Membership renewal",
+                                "cheque_number": "42"
+                            }
+                        ],
+                        "properties": {
+                            "description": {
+                                "type": "string"
+                            },
+                            "reason": {
+                                "type": "string"
+                            },
+                            "notes": {
+                                "type": "string"
+                            },
+                            "cheque_number": {
+                                "type": "string"
+                            },
+                            "issued_by": {
+                                "type": "string"
+                            },
+                            "document": {
+                                "type": "string"
+                            },
+                            "row": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "examples": [
+                            "2026-01-15T18:32:00.000000Z"
+                        ]
+                    },
+                    "effective_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The timestamp the transaction is effective as of (used for reporting/sorting).",
+                        "examples": [
+                            "2026-01-15T18:32:00.000000Z"
+                        ]
+                    },
+                    "readable_type": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Human-readable label for the type enum value.",
+                        "examples": [
+                            "Charge"
+                        ]
+                    },
+                    "readable_created_at": {
+                        "type": "string",
+                        "description": "Human-readable, tenant-timezone formatted creation date.",
+                        "examples": [
+                            "Jan 15, 2026"
+                        ]
+                    },
+                    "item_summary": {
+                        "type": "string",
+                        "description": "Human-readable summary of what was purchased.",
+                        "examples": [
+                            "Membership for Adult (Monthly)"
+                        ]
+                    },
+                    "net_amount": {
+                        "type": "integer",
+                        "description": "net_amount = amount - fees + tax_amount, in integer cents.",
+                        "examples": [
+                            4825
+                        ]
+                    },
+                    "net_fees": {
+                        "type": "integer",
+                        "description": "Fees net of any related refund, in integer cents.",
+                        "examples": [
+                            175
+                        ]
+                    },
+                    "remaining_to_refund": {
+                        "type": "integer",
+                        "description": "Amount still refundable, in integer cents.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "has_dispute": {
+                        "type": "boolean",
+                        "description": "Populated by ProgramSignup::transaction() via withExists; falls back to false on\nresources loaded outside that relation. Treat null/undefined as \"unknown\" (do NOT\nuse as an authoritative gate).",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "associated_bookings": {
+                        "type": "array",
+                        "description": "Ids of bookings tied to this transaction's invoice.",
+                        "examples": [
+                            [
+                                42
+                            ]
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "associated_booking_requests": {
+                        "type": "array",
+                        "description": "Ids of booking requests tied to this transaction's invoice.",
+                        "examples": [
+                            []
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "owner": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal owner (frontend only needs email/name/id). Owner may be an\nAccount, Guest, or Organization, and email is nullable on those.",
+                        "examples": [
+                            {
+                                "id": 7,
+                                "user_id": 7,
+                                "email": "member@example.com",
+                                "name": "Jane Doe"
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "user_id": {
+                                "type": [
+                                    "integer",
+                                    "null"
+                                ]
+                            },
+                            "email": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "user_id",
+                            "email",
+                            "name"
+                        ]
+                    },
+                    "invoice": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal invoice with bookings; only present when the `invoice` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 12,
+                                "stripe_invoice_number": "INV-0012",
+                                "uuid": "9c1b3f2a-...",
+                                "bookings": [
+                                    {
+                                        "id": 42,
+                                        "starting_at": "2026-01-15T18:00:00.000000Z",
+                                        "readable_start_time": "6:00 PM",
+                                        "bookable_entity": {
+                                            "name": "Court 1"
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "stripe_invoice_number": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "uuid": {
+                                "type": "string"
+                            },
+                            "bookings": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "starting_at": {
+                                            "type": "string"
+                                        },
+                                        "readable_start_time": {
+                                            "type": "string"
+                                        },
+                                        "bookable_entity": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "name"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "starting_at",
+                                        "readable_start_time",
+                                        "bookable_entity"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "stripe_invoice_number",
+                            "uuid",
+                            "bookings"
+                        ]
+                    },
+                    "associated_transaction": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Minimal associated transaction so refunds can link back to the original charge's\ninvoice and bookings; only present when the `associatedTransaction` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 9,
+                                "invoice": {
+                                    "id": 12,
+                                    "stripe_invoice_number": "INV-0012",
+                                    "uuid": "9c1b3f2a-...",
+                                    "bookings": [
+                                        {
+                                            "id": 42,
+                                            "starting_at": "2026-01-15T18:00:00.000000Z",
+                                            "readable_start_time": "6:00 PM"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "invoice": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "stripe_invoice_number": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "uuid": {
+                                        "type": "string"
+                                    },
+                                    "bookings": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "starting_at": {
+                                                    "type": "string"
+                                                },
+                                                "readable_start_time": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "starting_at",
+                                                "readable_start_time"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "stripe_invoice_number",
+                                    "uuid",
+                                    "bookings"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "invoice"
+                        ]
+                    },
+                    "promotion_code": {
+                        "type": "object",
+                        "description": "Promotion code with coupon info; only present when the `promotionCode` relation is loaded.",
+                        "examples": [
+                            {
+                                "id": 3,
+                                "name": "SUMMER10",
+                                "coupon": {
+                                    "id": 5,
+                                    "name": "10% Off",
+                                    "percent_off": 10,
+                                    "amount_off": null
+                                }
+                            }
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "coupon": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "percent_off": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "amount_off": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "percent_off",
+                                    "amount_off"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name",
+                            "coupon"
+                        ]
+                    },
+                    "tags": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Tags attached to this transaction. Optional/absent field: only present on the\nindex endpoint with `include=tags`; the key is entirely absent otherwise,\nincluding on the show endpoint, which does not support `include`.",
+                        "examples": [
+                            [
+                                {
+                                    "id": 1,
+                                    "name": "Offline",
+                                    "is_system": true
+                                }
+                            ]
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "is_system": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name",
+                                "is_system"
+                            ]
+                        }
+                    },
+                    "transaction_line_items": {
+                        "type": "array",
+                        "description": "Minimal transaction line items (avoids expensive Program appends); only present when\nthe `transactionLineItems` relation is loaded. `transaction_line_itemable` is a minimal\nid/name pair for the purchased item (e.g. a Program or Product).",
+                        "examples": [
+                            [
+                                {
+                                    "id": 88,
+                                    "quantity": 1,
+                                    "item_name": "Adult Registration",
+                                    "amount": 5000,
+                                    "tax_amount": 0,
+                                    "transaction_line_itemable": {
+                                        "id": 4,
+                                        "name": "Youth Basketball"
+                                    }
+                                }
+                            ]
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "quantity": {
+                                    "type": "integer"
+                                },
+                                "item_name": {
+                                    "type": "string"
+                                },
+                                "amount": {
+                                    "type": "integer"
+                                },
+                                "tax_amount": {
+                                    "type": "integer"
+                                },
+                                "transaction_line_itemable": {
+                                    "type": [
+                                        "object",
+                                        "null"
+                                    ],
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "name"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "quantity",
+                                "item_name",
+                                "amount",
+                                "tax_amount",
+                                "transaction_line_itemable"
+                            ]
+                        }
+                    },
+                    "description": {
+                        "type": "null"
+                    }
+                },
+                "required": [
+                    "id",
+                    "amount",
+                    "original_amount",
+                    "discount_amount",
+                    "tax_amount",
+                    "fees",
+                    "currency",
+                    "type",
+                    "transaction_id",
+                    "associated_transaction_id",
+                    "refund_id",
+                    "payment_refund_id",
+                    "dispute_transaction_id",
+                    "payment_method",
+                    "credit_card",
+                    "metadata",
+                    "created_at",
+                    "effective_at",
+                    "readable_type",
+                    "readable_created_at",
+                    "item_summary",
+                    "net_amount",
+                    "net_fees",
+                    "remaining_to_refund",
+                    "has_dispute",
+                    "associated_bookings",
+                    "associated_booking_requests",
+                    "owner",
+                    "description"
+                ],
+                "title": "TransactionResourceV20260325"
             },
             "User": {
                 "type": "object",
@@ -6151,6 +8581,9 @@
                     "active": {
                         "type": "string"
                     },
+                    "two_factor_enabled": {
+                        "type": "string"
+                    },
                     "base_membership_plan": {
                         "type": "null"
                     },
@@ -6207,11 +8640,131 @@
                     "referrer",
                     "anonymized_at",
                     "active",
+                    "two_factor_enabled",
                     "base_membership_plan",
                     "membership_start_date",
                     "readable_membership_start_date"
                 ],
                 "title": "User"
+            },
+            "UserMembershipResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "The unique identifier of the user membership.",
+                        "examples": [
+                            1234
+                        ]
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "description": "The id of the member who holds this membership.",
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Current membership state. `retrying` means the last renewal\npayment failed and further attempts are scheduled.",
+                        "examples": [
+                            "active"
+                        ]
+                    },
+                    "will_auto_renew": {
+                        "type": "boolean",
+                        "description": "Whether the membership renews automatically at the end of the\ncurrent period.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "ends_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of when the current membership period ends.",
+                        "examples": [
+                            "2026-12-31T23:59:59.000000Z"
+                        ]
+                    },
+                    "renewed_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of the most recent renewal, or null if the\nmembership has never renewed.",
+                        "examples": [
+                            "2026-01-01T00:00:00.000000Z"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of when the membership was created.",
+                        "examples": [
+                            "2025-06-15T14:30:00.000000Z"
+                        ]
+                    },
+                    "membership_type": {
+                        "type": "object",
+                        "description": "The membership type this membership belongs to. Included when\nthe relation is loaded, which both endpoints always do.",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title"
+                        ]
+                    },
+                    "plan": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "The pricing plan the membership is billed on. Included when the\nrelation is loaded, which both endpoints always do. `amount` is\nin the smallest currency unit (e.g. cents).",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "nickname": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "amount": {
+                                "type": "integer"
+                            },
+                            "interval": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "nickname",
+                            "amount",
+                            "interval"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "user_id",
+                    "status",
+                    "will_auto_renew",
+                    "ends_at",
+                    "renewed_at",
+                    "created_at"
+                ],
+                "title": "UserMembershipResource"
             },
             "UserResource": {
                 "type": "object",

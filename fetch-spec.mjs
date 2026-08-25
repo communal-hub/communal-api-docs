@@ -1,10 +1,16 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
-import { VERSIONS, specUrl, specPath, IS_PRODUCTION } from './versions.mjs'
+import { specUrl, specPath, IS_PRODUCTION } from './versions.mjs'
 import { normalizeSpec } from './normalize-openapi.mjs'
+import { syncVersions } from './sync-versions.mjs'
+
+const { versions, changed, newVersion, frozenVersion } = await syncVersions()
+if (changed) {
+  console.log(`fetch-spec: detected new version ${newVersion} -- updated versions.mjs (${frozenVersion} frozen)`)
+}
 
 // Fetch and normalize every version's OpenAPI document into docs/<date>/openapi.json.
-for (const version of VERSIONS) {
+for (const version of versions) {
   const url = specUrl(version)
   const dest = specPath(version)
 
