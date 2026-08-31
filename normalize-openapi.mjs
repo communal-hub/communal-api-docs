@@ -16,6 +16,10 @@ export const TAG_GROUPS = [
     tags: ['Program Signup'],
   },
   {
+    name: 'Facilities',
+    tags: ['Facility', 'Booking', 'Booking Request'],
+  },
+  {
     name: 'Membership',
     tags: ['Membership Type', 'Membership Card', 'User Membership'],
   },

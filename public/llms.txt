@@ -1,12 +1,12 @@
 # Communal Platform API
 
-API documentation for the Communal platform. This document describes version 2026-03-25.
+API documentation for the Communal platform. This document describes version 2026-08-25.
 
-Optionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-03-25). Supported versions: 2026-02-01, 2026-03-25.
+Optionally send the `X-Api-Version` (or `Api-Version`) header with a supported date version. When omitted, the server uses the default version (2026-08-25). Supported versions: 2026-02-01, 2026-03-25, 2026-08-25.
 
 Version-specific docs: `/docs/api/{version}` (e.g. `/docs/api/2026-03-25`).
 
-Version: 2026-03-25
+Version: 2026-08-25
 
 ## Servers
 
@@ -33,12 +33,13 @@ List all digital member card delivery activities
 - `filter[date_from]` (query) - Return activities created on or after the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
 - `filter[date_to]` (query) - Return activities created on or before the provided date. Format: ISO 8601 date/datetime (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS).
 - `filter[status]` (query) - Filter activities by delivery status. Supported values: `success`, `failed`.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: 
 - `401`: 
+- `403`: 
 
 ### Attendance Record
 
@@ -48,12 +49,13 @@ Get export configuration for the current model
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: 
 - `401`: 
+- `403`: An error
 
 #### GET /attendance_records
 
@@ -64,8 +66,8 @@ List attendance records
 - `filter[attendance_sheet_id]` (query) - Filter by attendance sheet ID.
 - `filter[export]` (query) - When true, request a CSV export.
 - `filter[export_email]` (query) - Email to receive export notification/download link.
-- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -79,24 +81,26 @@ Get an attendance record
 **Parameters:**
 
 - `attendance_record` (path) (required)
-- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: `AttendanceRecordResource`
 - `401`: 
+- `403`: An error
 
 ### Attendance Sheet
 
 #### GET /attendance_sheets/export
 
-Export attendance sheets as a single XLSX workbook
+Export attendance sheets as CSV or PDF files
 
 **Parameters:**
 
 - `sheet_ids[]` (query) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `format` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -115,7 +119,7 @@ List attendance sheets
 - `filter[parent_program_id]` (query) - Filter by program ID.
 - `filter[date]` (query) - Filter by date (YYYY-MM-DD).
 - `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -130,12 +134,122 @@ Get an attendance sheet
 
 - `attendance_sheet` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: `AttendanceSheetResource`
 - `401`: 
+- `403`: 
+- `422`: 
+
+### Booking
+
+#### GET /bookings
+
+List bookings
+Paginated facility bookings for the current organization. Members see
+their own bookings; managers see all bookings. Nested write, export, and
+search routes on this controller stay undocumented.
+
+**Parameters:**
+
+- `filter[user_id]` (query) - Filter by owning user id. Members are limited to their own bookings regardless of this value.
+- `filter[bookable_entity]` (query) - Filter by facility (bookable entity) id(s), including child facilities of a parent. Comma-separated for multiple.
+- `filter[id]` (query) - Filter by exact booking id(s), comma-separated.
+- `filter[recurring_id]` (query) - Filter by the recurring series id.
+- `filter[uuid]` (query) - Filter by exact booking uuid.
+- `filter[starting_at]` (query) - Filter to bookings that start on or after this date/time.
+- `filter[ending_at]` (query) - Filter to bookings that end on or before this date/time.
+- `filter[query]` (query) - Search bookings by owner name or email, facility name, or booking id.
+- `filter[associated_booking_id]` (query) - Filter by the parent booking id for linked/child bookings. Pass an empty value to match bookings with no parent.
+- `filter[only_recurring]` (query) - When true, only bookings that belong to a recurring series.
+- `filter[tags]` (query) - Filter by tag name(s), comma-separated.
+- `filter[with_product]` (query) - Filter to bookings associated with the given product id.
+- `include` (query) - Include related resources (comma-separated). Options: user, guest, bookableEntity, bookableEntity.parent, associatedBooking, organization, bookingItems, tags, formSubmissions, recurringBooking, facilities, bookingContactDetails, products.
+- `append` (query) - Append computed attributes (comma-separated). Options include readable_start_time, readable_end_time, owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, participants.
+- `sort` (query) - Sort field. Options: id, starting_at, ending_at. Prefix with - for descending.
+- `page[number]` (query) - Page number for pagination.
+- `page[size]` (query) - Number of results per page.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
+- `500`: 
+
+#### GET /bookings/{booking}
+
+Get a booking
+Returns a single facility booking, scoped to the current tenant.
+
+**Parameters:**
+
+- `booking` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.parent.form, bookableEntity.form, notes, organization, tags, user, guest, formSubmissions, facilities, bookingItems, bookingContactDetails, recurringBooking, products, invoices.transactions.
+- `append` (query) - Append computed attributes (comma-separated). Options include combined_notes, owner_name, owner_email, owner_telephone, participants, facilities_with_cost, created_by.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `404`: 
+
+### Booking Request
+
+#### GET /booking_requests
+
+List booking requests
+Paginated booking requests for the current tenant. Members see their own
+requests; facility managers and super admins see the full list. The
+default row is a curated payload (schedule, cost, owner, facility, state).
+Pass `include` / `append` for the richer relations the product UI uses.
+
+**Parameters:**
+
+- `filter[query]` (query) - Search by owner name, facility name, or organization name.
+- `filter[bookable_entity_id]` (query) - Filter by bookable entity id(s). Also matches child facilities of a parent entity. Comma-separated.
+- `filter[booking_state_id]` (query) - Filter by booking state id(s). Comma-separated. Include the declined sentinel to also return declined requests.
+- `filter[user_id]` (query) - Filter by owning member id. Non-managers may only use their own id.
+- `filter[starting_at]` (query) - Filter to requests that start on or after this datetime.
+- `filter[ending_at]` (query) - Filter to requests that end on or before this datetime.
+- `filter[uuid]` (query) - Look up a single request by its public uuid.
+- `filter[recurring_id]` (query) - Filter to requests in a recurring series.
+- `filter[tags]` (query) - Filter by tag name(s). Comma-separated.
+- `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, organization, bookingItems, tags, bookingContactDetails, recurringBooking, formSubmissions, files, notes, facilities.
+- `append` (query) - Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, participant_name (facility managers and super admins only).
+- `sort` (query) - Sort by id, starting_at, or ending_at. Prefix with - for descending.
+- `page[number]` (query) - Page number for pagination.
+- `page[size]` (query) - Number of results per page.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `BookingRequestResource`
+- `401`: 
+
+#### GET /booking_requests/{booking_request}
+
+Get a booking request
+Returns a single booking request. Members may only view their own;
+facility managers and super admins may view any request in the tenant.
+
+**Parameters:**
+
+- `booking_request` (path) (required)
+- `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, files, notes, organization, recurringBooking, tags, formSubmissions, formSubmissions.form, bookingContactDetails, bookingItems, facilities.
+- `append` (query) - Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, participant_name (facility managers and super admins only).
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: `BookingRequestResource`
+- `401`: 
+- `404`: 
 
 ### Custom Profile Field
 
@@ -149,7 +263,7 @@ Returns a paginated list of the tenant's custom profile fields. Use
 
 - `cross_tenant_user_id` (query)
 - `cross_tenant_values` (query)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -166,7 +280,7 @@ to also propagate the field to child tenants.
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -193,7 +307,7 @@ to also propagate the change to child tenants.
 **Parameters:**
 
 - `id` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -225,7 +339,7 @@ to embed the parent field.
 
 - `filter[user_id]` (query)
 - `filter[custom_profile_field_id]` (query)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -242,7 +356,7 @@ values cannot be modified from a parent tenant.
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -268,7 +382,7 @@ value clears (deletes) the record.
 **Parameters:**
 
 - `id` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -286,6 +400,51 @@ Content-Type: `application/json`
 - `404`: 
 - `422`: 
 
+### Facility
+
+#### GET /facilities
+
+List facilities
+Returns a paginated list of the spaces and resources members can book,
+with their booking rules and membership requirements. Filter by booking
+type, parent facility, archived state, or a free-text name search.
+
+**Parameters:**
+
+- `filter[type]` (query)
+- `filter[parent_id]` (query)
+- `filter[status]` (query)
+- `filter[query]` (query)
+- `include` (query)
+- `page[number]` (query)
+- `page[size]` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `FacilityResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### GET /facilities/{facility}
+
+Get a facility
+Returns a single space or resource with its booking rules and membership
+requirements. Archived facilities are returned as well as active ones.
+
+**Parameters:**
+
+- `facility` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: `FacilityResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
 ### Membership Card
 
 #### POST /membership_cards/send
@@ -300,7 +459,7 @@ is not found, a new user will be created with the additional data supplied.
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -325,7 +484,7 @@ Archive a membership type
 **Parameters:**
 
 - `id` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -339,7 +498,7 @@ Unarchive a membership type
 **Parameters:**
 
 - `id` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -352,7 +511,7 @@ Reorder items by an ordered array of IDs
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -374,7 +533,7 @@ Disable manual ordering and return to natural ordering
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -389,7 +548,7 @@ List all membership types in the system
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -403,7 +562,7 @@ Retrieve a membership type
 **Parameters:**
 
 - `membership_type` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -411,6 +570,23 @@ Retrieve a membership type
 - `401`: 
 
 ### Program
+
+#### GET /parent_programs/options
+
+List programs as slim dropdown options
+Purpose-built for filter dropdowns that need every program for the
+tenant: paginates in SQL, selects only the columns an option list
+renders, and serializes no relations (tags, registration opportunities,
+occurrences). Prefer this over index() for pickers.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `ParentProgramOptionResource`
+- `401`: 
 
 #### GET /parent_programs
 
@@ -420,7 +596,7 @@ excluded by default for performance - use `?include=programs` to include them.
 
 **Parameters:**
 
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -437,12 +613,13 @@ opportunities (sessions) with pricing information.
 **Parameters:**
 
 - `parent_program` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: `Program`
 - `401`: 
+- `403`: An error
 
 ### Program Signup
 
@@ -467,7 +644,7 @@ List program signups
 - `filter[program[archived_at]]` (query) - Filter by registration opportunity archived status. Pass empty string to exclude archived registration opportunities.
 - `filter[program[deleted_at]]` (query) - Filter by registration opportunity deleted status. Pass empty string to exclude deleted registration opportunities.
 - `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -482,14 +659,36 @@ Get a program signup
 
 - `program_signup` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: additionalMember, additionalMember.emergency, files, guest, program, program.parentProgram, transaction, user, user.family, user.family.emergency, formSubmissions, subscriptionSchedule.config.configurable, subscriptionSchedule.paymentsReceived, attendanceRecords.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: `ProgramSignupResource`
 - `401`: 
+- `403`: An error
 
 ### Registration Opportunity
+
+#### GET /programs/options
+
+List registration opportunities as slim dropdown options
+Purpose-built for filter dropdowns that need every registration
+opportunity for the tenant: paginates in SQL, selects only the columns
+an option list renders, and serializes no relations or computed
+pricing attributes. Prefer this over index() for pickers.
+
+**Parameters:**
+
+- `filter[parent_program_id]` (query) - Filter to registration opportunities under this program.
+- `filter[archived_at]` (query) - Filter by archived status. Pass empty string to exclude archived registration opportunities.
+- `filter[deleted_at]` (query) - Filter by deleted status. Pass empty string to exclude deleted registration opportunities.
+- `filter[query]` (query) - Search registration opportunities by name (partial match).
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `RegistrationOpportunityOptionResource`
+- `401`: 
 
 #### GET /programs
 
@@ -510,7 +709,7 @@ Returns a paginated list of registration opportunities with optional filtering.
 - `include` (query) - Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.
 - `append` (query) - Append computed attributes (comma-separated). Options: audience, signup_count.
 - `sort` (query) - Sort results by field. Prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -526,12 +725,70 @@ Get a registration opportunity
 - `program` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets, occurrences, recurrenceRule.
 - `append` (query) - Append computed attributes (comma-separated). Options: signup_count.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
 - `200`: `RegistrationOpportunityResource`
 - `401`: 
+- `403`: An error
+
+### Transaction
+
+#### GET /transactions
+
+List transactions
+Paginated, filterable, and sortable transaction ledger for reporting and
+managed-API-key consumers. Every row is scoped to the current tenant.
+
+**Parameters:**
+
+- `filter[range]` (query) - Filter to transactions whose effective date falls between two dates. Pass as comma-separated start,end (or an array): filter[range]=2025-01-01,2025-01-31.
+- `filter[starting_at]` (query) - Filter to transactions with an effective date on or after this date.
+- `filter[ending_at]` (query) - Filter to transactions with an effective date on or before this date (end of day).
+- `filter[type]` (query) - Filter by transaction type. Supports comma-separated values. Options: membership, program, charge, invoice, donation, booking, refund, transfer. Each option (other than refund) matches both the charge and its refund type.
+- `filter[query]` (query) - Search transactions by related user/guest/account name or email, or by program signup id (subscription schedule lookup).
+- `filter[membership_type_id]` (query) - Filter to transactions for the given membership type (plan product) id.
+- `filter[amount]` (query) - Filter by amount in dollars. Pass a bare value for an exact match, or prefix with lte: / gte: for a range bound.
+- `filter[id]` (query) - Filter by exact transaction id. Supports comma-separated values.
+- `filter[payout_id]` (query) - Filter by exact payout id.
+- `filter[subscription_schedule_id]` (query) - Filter by the local subscription schedule id (transactions.subscription_schedule_id). This is not the Stripe `sub_sched_...` id, which lives on subscription_schedules.stripe_schedule_id.
+- `filter[user_id]` (query) - Filter by exact owning user id.
+- `filter[promotion_code_id]` (query) - Filter by exact promotion code id.
+- `filter[tags]` (query) - Filter by tag name(s). Supports comma-separated values.
+- `filter[with_product]` (query) - Filter to transactions associated with the given product (membership/plan) id. Takes a product id, not a boolean — it matches both transaction line items and invoice items for that product.
+- `filter[with_parent_program]` (query) - Filter to transactions associated with the given parent program id(s), including the refunds of those charges. Takes parent program id(s), not a boolean. Supports comma-separated values.
+- `include` (query) - Include related resources (comma-separated). Only these two options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).
+- `sort` (query) - Sort by effective date (falls back to created_at). Options: -created_at (descending) or created_at (ascending).
+- `page[number]` (query) - Page number for pagination.
+- `page[size]` (query) - Number of results per page.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `TransactionResource`
+- `401`: 
+
+#### GET /transactions/{transaction}
+
+Get a transaction
+Returns a single transaction, scoped to the current tenant. Relations
+are always eager-loaded to match the fields the resource can return
+(e.g. invoice, associated_transaction, promotion_code); unlike the
+index endpoint, this endpoint does not accept `include` or `append`.
+The `tags` field is only ever populated via `include=tags` on the index
+endpoint, so it is never present in this response.
+
+**Parameters:**
+
+- `transaction` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: `TransactionResource`
+- `401`: 
+- `404`: 
 
 ### User
 
@@ -544,7 +801,7 @@ Show a user
 - `user` (path) (required)
 - `include` (query) - Include related data. Options: card, family, roles,permissions, files.
 - `filter[tenant_id]` (query) - For parent tenants, optionally show users from a child tenant or all visible child tenants.
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
 
@@ -562,7 +819,7 @@ Performs an user update request.
 **Parameters:**
 
 - `user` (path) (required)
-- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-03-25.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Request Body:**
 
@@ -573,10 +830,66 @@ Content-Type: `application/json`
 - `last_name` (string) - The last name of the user.
 - `middle_name` (string,null) - The middle name of the user.
 - `preferred_name` (string,null) - The preferred name of the user.
+- `date_of_birth` (string,null) - The date of birth of the user.
+- `email` (string) - A unique email address for the user.
+- `profile_city` (string,null) - The city of the user.
+- `profile_zip` (string,null) - The postal code or zip code of the user.
+- `profile_state` (string,null) - The province or state of the user.
+- `profile_address` (string,null) - The street address of the user.
+- `profile_address_line_2` (string,null) - The second line of the address of the user.
+- `profile_country` (string,null) - The ISO 3166-1 alpha-2 country code of the user.
+- `telephone` (string,null) - A phone number for the user.
+- `custom_form` (object)
 
 **Responses:**
 
 - `200`: `User`
 - `401`: 
 - `403`: 
+- `422`: 
+
+### User Membership
+
+#### GET /user_memberships
+
+List user memberships
+Returns a paginated list of the memberships members hold, including the
+membership type and pricing plan each one is on. Filter by member,
+active/expired state, or expiry date range.
+
+**Parameters:**
+
+- `filter[user_id]` (query)
+- `filter[active]` (query)
+- `filter[expired]` (query)
+- `filter[expires_starting_at]` (query)
+- `filter[expires_ending_at]` (query)
+- `page[number]` (query)
+- `page[size]` (query)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: Paginated set of `UserMembershipResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
+#### GET /user_memberships/{user_membership}
+
+Get a user membership
+Returns a single held membership with its membership type and pricing
+plan.
+
+**Parameters:**
+
+- `user_membership` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: `UserMembershipResource`
+- `401`: 
+- `403`: 
+- `404`: 
 - `422`: 

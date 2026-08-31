@@ -31,10 +31,19 @@
             "name": "Program Signup"
         },
         {
+            "name": "Booking"
+        },
+        {
+            "name": "Booking Request"
+        },
+        {
             "name": "Membership Type"
         },
         {
             "name": "User Membership"
+        },
+        {
+            "name": "Facility"
         },
         {
             "name": "Membership Card"
@@ -657,6 +666,699 @@
                 }
             }
         },
+        "/bookings": {
+            "get": {
+                "operationId": "bookings.index",
+                "description": "Paginated facility bookings for the current organization. Members see\ntheir own bookings; managers see all bookings. Nested write, export, and\nsearch routes on this controller stay undocumented.",
+                "summary": "List bookings",
+                "tags": [
+                    "Booking"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "description": "Filter by owning user id. Members are limited to their own bookings regardless of this value.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 42
+                    },
+                    {
+                        "name": "filter[bookable_entity]",
+                        "in": "query",
+                        "description": "Filter by facility (bookable entity) id(s), including child facilities of a parent. Comma-separated for multiple.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12,13"
+                    },
+                    {
+                        "name": "filter[id]",
+                        "in": "query",
+                        "description": "Filter by exact booking id(s), comma-separated.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1042"
+                    },
+                    {
+                        "name": "filter[recurring_id]",
+                        "in": "query",
+                        "description": "Filter by the recurring series id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 8
+                    },
+                    {
+                        "name": "filter[uuid]",
+                        "in": "query",
+                        "description": "Filter by exact booking uuid.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "9c1b3f2a-4d5e-6f70-8123-456789abcdef"
+                    },
+                    {
+                        "name": "filter[starting_at]",
+                        "in": "query",
+                        "description": "Filter to bookings that start on or after this date/time.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-01-01"
+                    },
+                    {
+                        "name": "filter[ending_at]",
+                        "in": "query",
+                        "description": "Filter to bookings that end on or before this date/time.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-01-31"
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search bookings by owner name or email, facility name, or booking id.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "jane"
+                    },
+                    {
+                        "name": "filter[associated_booking_id]",
+                        "in": "query",
+                        "description": "Filter by the parent booking id for linked/child bookings. Pass an empty value to match bookings with no parent.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1042
+                    },
+                    {
+                        "name": "filter[only_recurring]",
+                        "in": "query",
+                        "description": "When true, only bookings that belong to a recurring series.",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "filter[tags]",
+                        "in": "query",
+                        "description": "Filter by tag name(s), comma-separated.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Staff,VIP"
+                    },
+                    {
+                        "name": "filter[with_product]",
+                        "in": "query",
+                        "description": "Filter to bookings associated with the given product id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 17
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: user, guest, bookableEntity, bookableEntity.parent, associatedBooking, organization, bookingItems, tags, formSubmissions, recurringBooking, facilities, bookingContactDetails, products.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bookableEntity,facilities,user"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options include readable_start_time, readable_end_time, owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, participants.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "owner_name,invoices_paid"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort field. Options: id, starting_at, ending_at. Prefix with - for descending.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "-starting_at"
+                    },
+                    {
+                        "name": "page[number]",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "page[size]",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "immediate": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message",
+                                                "immediate"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "immediate": {
+                                                    "type": "boolean"
+                                                },
+                                                "download_url": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "record_count": {
+                                                    "anyOf": [
+                                                        {
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "type": "integer",
+                                                            "enum": [
+                                                                0
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                "export_id": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message",
+                                                "immediate",
+                                                "download_url",
+                                                "record_count",
+                                                "export_id"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Unauthorized"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "No results to export for the selected filters."
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {}
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "status": {
+                                                    "type": "boolean"
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Export email is required."
+                                                }
+                                            },
+                                            "required": [
+                                                "status",
+                                                "message"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Export failed. Please try again later."
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/bookings/{booking}": {
+            "get": {
+                "operationId": "bookings.show",
+                "description": "Returns a single facility booking, scoped to the current tenant.",
+                "summary": "Get a booking",
+                "tags": [
+                    "Booking"
+                ],
+                "parameters": [
+                    {
+                        "name": "booking",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.parent.form, bookableEntity.form, notes, organization, tags, user, guest, formSubmissions, facilities, bookingItems, bookingContactDetails, recurringBooking, products, invoices.transactions.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bookableEntity,facilities,user"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options include combined_notes, owner_name, owner_email, owner_telephone, participants, facilities_with_cost, created_by.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "owner_name,facilities_with_cost"
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                }
+            }
+        },
+        "/booking_requests": {
+            "get": {
+                "operationId": "booking_requests.index",
+                "description": "Paginated booking requests for the current tenant. Members see their own\nrequests; facility managers and super admins see the full list. The\ndefault row is a curated payload (schedule, cost, owner, facility, state).\nPass `include` / `append` for the richer relations the product UI uses.",
+                "summary": "List booking requests",
+                "tags": [
+                    "Booking Request"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "description": "Search by owner name, facility name, or organization name.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "jane"
+                    },
+                    {
+                        "name": "filter[bookable_entity_id]",
+                        "in": "query",
+                        "description": "Filter by bookable entity id(s). Also matches child facilities of a parent entity. Comma-separated.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "8,9"
+                    },
+                    {
+                        "name": "filter[booking_state_id]",
+                        "in": "query",
+                        "description": "Filter by booking state id(s). Comma-separated. Include the declined sentinel to also return declined requests.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1,2"
+                    },
+                    {
+                        "name": "filter[user_id]",
+                        "in": "query",
+                        "description": "Filter by owning member id. Non-managers may only use their own id.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 42
+                    },
+                    {
+                        "name": "filter[starting_at]",
+                        "in": "query",
+                        "description": "Filter to requests that start on or after this datetime.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-09-01"
+                    },
+                    {
+                        "name": "filter[ending_at]",
+                        "in": "query",
+                        "description": "Filter to requests that end on or before this datetime.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-09-30"
+                    },
+                    {
+                        "name": "filter[uuid]",
+                        "in": "query",
+                        "description": "Look up a single request by its public uuid.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "9c1b3f2a-4d5e-6789-abcd-ef1234567890"
+                    },
+                    {
+                        "name": "filter[recurring_id]",
+                        "in": "query",
+                        "description": "Filter to requests in a recurring series.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 19
+                    },
+                    {
+                        "name": "filter[tags]",
+                        "in": "query",
+                        "description": "Filter by tag name(s). Comma-separated.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "weekend"
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, organization, bookingItems, tags, bookingContactDetails, recurringBooking, formSubmissions, files, notes, facilities.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bookableEntity,bookingState,user"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, participant_name (facility managers and super admins only).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "owner_name,invoices_paid"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Sort by id, starting_at, or ending_at. Prefix with - for descending.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "-starting_at"
+                    },
+                    {
+                        "name": "page[number]",
+                        "in": "query",
+                        "description": "Page number for pagination.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "page[size]",
+                        "in": "query",
+                        "description": "Number of results per page.",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 25
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `BookingRequestResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/BookingRequestResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/booking_requests/{booking_request}": {
+            "get": {
+                "operationId": "booking_requests.show",
+                "description": "Returns a single booking request. Members may only view their own;\nfacility managers and super admins may view any request in the tenant.",
+                "summary": "Get a booking request",
+                "tags": [
+                    "Booking Request"
+                ],
+                "parameters": [
+                    {
+                        "name": "booking_request",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, files, notes, organization, recurringBooking, tags, formSubmissions, formSubmissions.form, bookingContactDetails, bookingItems, facilities.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "bookableEntity,bookingState,user"
+                    },
+                    {
+                        "name": "append",
+                        "in": "query",
+                        "description": "Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, participant_name (facility managers and super admins only).",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "owner_name,combined_notes"
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`BookingRequestResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BookingRequestResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    }
+                }
+            }
+        },
         "/custom_profile_fields": {
             "get": {
                 "operationId": "customProfileField.index",
@@ -1230,6 +1932,205 @@
                                 }
                             }
                         }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/facilities": {
+            "get": {
+                "operationId": "facilities.index",
+                "description": "Returns a paginated list of the spaces and resources members can book,\nwith their booking rules and membership requirements. Filter by booking\ntype, parent facility, archived state, or a free-text name search.",
+                "summary": "List facilities",
+                "tags": [
+                    "Facility"
+                ],
+                "parameters": [
+                    {
+                        "name": "filter[type]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "instant",
+                                "request"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "filter[parent_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "filter[status]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "archived"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "filter[query]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page[number]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page[size]",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 500
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `FacilityResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/FacilityResource"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "from": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "to": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ],
+                                            "minimum": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "minimum": 0
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "current_page",
+                                        "from",
+                                        "last_page",
+                                        "per_page",
+                                        "to",
+                                        "total"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/facilities/{facility}": {
+            "get": {
+                "operationId": "facilities.show",
+                "description": "Returns a single space or resource with its booking rules and membership\nrequirements. Archived facilities are returned as well as active ones.",
+                "summary": "Get a facility",
+                "tags": [
+                    "Facility"
+                ],
+                "parameters": [
+                    {
+                        "name": "facility",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`FacilityResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FacilityResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
@@ -3472,6 +4373,13 @@
                             true
                         ]
                     },
+                    "can_add_person": {
+                        "type": "boolean",
+                        "description": "Whether the current viewer may register a person from this sheet.",
+                        "examples": [
+                            true
+                        ]
+                    },
                     "recordsCount": {
                         "type": [
                             "integer",
@@ -3512,10 +4420,641 @@
                     "registration_opportunity_ids",
                     "date",
                     "can_update",
+                    "can_add_person",
                     "created_at",
                     "updated_at"
                 ],
                 "title": "AttendanceSheetResource"
+            },
+            "BookingRequestResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "examples": [
+                            412
+                        ]
+                    },
+                    "uuid": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Public identifier used by guest form links.",
+                        "examples": [
+                            "9c1b3f2a-4d5e-6789-abcd-ef1234567890"
+                        ]
+                    },
+                    "starting_at": {
+                        "type": "string",
+                        "examples": [
+                            "2026-09-15T18:00:00.000000Z"
+                        ]
+                    },
+                    "ending_at": {
+                        "type": "string",
+                        "examples": [
+                            "2026-09-15T20:00:00.000000Z"
+                        ]
+                    },
+                    "cost": {
+                        "type": "integer",
+                        "description": "Quoted cost in integer cents.",
+                        "examples": [
+                            5000
+                        ]
+                    },
+                    "reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Community meeting"
+                        ]
+                    },
+                    "display_text": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Optional calendar label.",
+                        "examples": [
+                            "Smith party"
+                        ]
+                    },
+                    "declined_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "2026-09-01T14:22:00.000000Z"
+                        ]
+                    },
+                    "decline_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "Facility closed that evening"
+                        ]
+                    },
+                    "user_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            42
+                        ]
+                    },
+                    "guest_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "organization_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "bookable_entity_id": {
+                        "type": "integer",
+                        "examples": [
+                            8
+                        ]
+                    },
+                    "booking_state_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            3
+                        ]
+                    },
+                    "recurring_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            19
+                        ]
+                    },
+                    "transaction_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            1042
+                        ]
+                    },
+                    "form_responses_locked": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "2026-08-01T12:00:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "2026-08-02T09:15:00.000000Z"
+                        ]
+                    },
+                    "deletion_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "No longer needed"
+                        ]
+                    },
+                    "deleted_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            null
+                        ]
+                    },
+                    "readable_start_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "6:00 PM"
+                        ]
+                    },
+                    "readable_end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "8:00 PM"
+                        ]
+                    },
+                    "can_cancel": {
+                        "type": "boolean",
+                        "description": "Whether the owner may still cancel this request.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "starting_at_utc_ts": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Unix timestamp of starting_at in UTC.",
+                        "examples": [
+                            1789495200
+                        ]
+                    },
+                    "owner": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Resolved booking contact. Prefer this over the raw user/guest/organization relations.",
+                        "examples": [
+                            {
+                                "type": "user",
+                                "id": 42,
+                                "name": "Jane Doe",
+                                "email": "jane@example.com",
+                                "telephone": "416-555-1234"
+                            }
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "email": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "telephone": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "id",
+                            "name",
+                            "email",
+                            "telephone"
+                        ]
+                    },
+                    "bookable_entity": {
+                        "description": "Facility this request is for. Slim `{id, name}` by default; the full\nbookable entity is returned when `include=bookableEntity` is sent.",
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": {}
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "created_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "updated_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "booking_interval": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "deleted_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "membership_required": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "tenant_id": {
+                                        "type": "integer"
+                                    },
+                                    "parent_entity": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "minimum_length": {
+                                        "type": "number"
+                                    },
+                                    "maximum_length": {
+                                        "type": "number"
+                                    },
+                                    "publicly_exposed": {
+                                        "type": "integer"
+                                    },
+                                    "prompt_for_booking_owner": {
+                                        "type": "integer"
+                                    },
+                                    "prompt_for_adding_more_users": {
+                                        "type": "integer"
+                                    },
+                                    "prompt_for_number_of_guests": {
+                                        "type": "integer"
+                                    },
+                                    "possible_states": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {}
+                                    },
+                                    "publicly_exposed_allow_bookings": {
+                                        "type": "integer"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "booking_instructions": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "publicly_exposed_hide_user_names": {
+                                        "type": "integer"
+                                    },
+                                    "booking_request_deadline": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "archived_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "memberships_required": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "items": {}
+                                    },
+                                    "membership_requirement_mode": {
+                                        "type": "string"
+                                    },
+                                    "future_days": {
+                                        "type": "integer"
+                                    },
+                                    "manager_only": {
+                                        "type": "integer"
+                                    },
+                                    "basis_time": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "capacity": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "view_type": {
+                                        "type": "string"
+                                    },
+                                    "user_recurring_bookings": {
+                                        "type": "boolean"
+                                    },
+                                    "user_specified_reason": {
+                                        "type": "boolean"
+                                    },
+                                    "sort_order": {
+                                        "type": "integer"
+                                    },
+                                    "manual_order_enabled": {
+                                        "type": "boolean"
+                                    },
+                                    "apply_tax": {
+                                        "type": "string"
+                                    },
+                                    "products": {
+                                        "type": "array",
+                                        "items": {}
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "description",
+                                    "created_at",
+                                    "updated_at",
+                                    "booking_interval",
+                                    "deleted_at",
+                                    "membership_required",
+                                    "tenant_id",
+                                    "parent_entity",
+                                    "minimum_length",
+                                    "maximum_length",
+                                    "publicly_exposed",
+                                    "prompt_for_booking_owner",
+                                    "prompt_for_adding_more_users",
+                                    "prompt_for_number_of_guests",
+                                    "possible_states",
+                                    "publicly_exposed_allow_bookings",
+                                    "type",
+                                    "booking_instructions",
+                                    "publicly_exposed_hide_user_names",
+                                    "booking_request_deadline",
+                                    "archived_at",
+                                    "memberships_required",
+                                    "membership_requirement_mode",
+                                    "future_days",
+                                    "manager_only",
+                                    "basis_time",
+                                    "capacity",
+                                    "view_type",
+                                    "user_recurring_bookings",
+                                    "user_specified_reason",
+                                    "sort_order",
+                                    "manual_order_enabled",
+                                    "apply_tax",
+                                    "products"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "booking_state": {
+                        "description": "Workflow state. Slim `{id, state_name, color}` by default; the full\nstate model is returned when `include=bookingState` is sent.",
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": {}
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "created_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "updated_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "deleted_at": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "state_name": {
+                                        "type": "string"
+                                    },
+                                    "color": {
+                                        "type": "string"
+                                    },
+                                    "order": {
+                                        "type": "integer"
+                                    },
+                                    "blocks_time": {
+                                        "type": "boolean"
+                                    },
+                                    "tenant_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "created_at",
+                                    "updated_at",
+                                    "deleted_at",
+                                    "state_name",
+                                    "color",
+                                    "order",
+                                    "blocks_time",
+                                    "tenant_id"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "type": "string"
+                    },
+                    "guest": {
+                        "type": "string"
+                    },
+                    "organization": {
+                        "type": "string"
+                    },
+                    "booking_items": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "string"
+                    },
+                    "files": {
+                        "type": "string"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "form_submissions": {
+                        "type": "string"
+                    },
+                    "recurring_booking": {
+                        "type": "string"
+                    },
+                    "booking_contact_details": {
+                        "type": "string"
+                    },
+                    "transaction": {
+                        "type": "string"
+                    },
+                    "facilities": {
+                        "type": "string"
+                    },
+                    "starting_at_ts": {},
+                    "combined_notes": {},
+                    "total_amount_of_invoices": {},
+                    "invoices_paid": {},
+                    "associated_recurring_ids": {},
+                    "readable_booking_item_one_name": {},
+                    "readable_booking_item_two_name": {},
+                    "readable_booking_item_one_description": {},
+                    "readable_booking_item_two_description": {},
+                    "most_expensive_hourly_rate": {},
+                    "cost_for_user_and_availability": {},
+                    "flat_total_for_user_and_availability": {},
+                    "owner_name": {},
+                    "owner_email": {},
+                    "owner_telephone": {},
+                    "participants": {},
+                    "participant_name": {},
+                    "remaining_recurring_bookings": {},
+                    "booking_item_one": {},
+                    "booking_item_two": {},
+                    "facilities_with_cost": {},
+                    "created_by": {}
+                },
+                "required": [
+                    "id",
+                    "uuid",
+                    "starting_at",
+                    "ending_at",
+                    "cost",
+                    "reason",
+                    "display_text",
+                    "declined_at",
+                    "decline_reason",
+                    "user_id",
+                    "guest_id",
+                    "organization_id",
+                    "bookable_entity_id",
+                    "booking_state_id",
+                    "recurring_id",
+                    "transaction_id",
+                    "form_responses_locked",
+                    "created_at",
+                    "updated_at",
+                    "deletion_reason",
+                    "deleted_at",
+                    "readable_start_time",
+                    "readable_end_time",
+                    "can_cancel",
+                    "starting_at_utc_ts",
+                    "owner",
+                    "bookable_entity",
+                    "booking_state"
+                ],
+                "title": "BookingRequestResource"
             },
             "CardDeliveryActivityResource": {
                 "type": "object",
@@ -3812,6 +5351,320 @@
                     "deleted_at"
                 ],
                 "title": "CustomProfileFieldValueResource"
+            },
+            "FacilityResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "description": "The unique identifier of the facility.",
+                        "examples": [
+                            12
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "examples": [
+                            "Main Gymnasium"
+                        ]
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "A full-size gymnasium with hardwood flooring and bleacher seating."
+                        ]
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "How bookings are made: `instant` confirms immediately, `request`\nneeds a manager to approve.",
+                        "examples": [
+                            "instant"
+                        ]
+                    },
+                    "parent_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "The id of the facility this one sits inside, or null when it is\na top-level facility.",
+                        "examples": [
+                            3
+                        ]
+                    },
+                    "capacity": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "The maximum number of people the facility holds.",
+                        "examples": [
+                            50
+                        ]
+                    },
+                    "booking_interval": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "The length in minutes of each bookable slot.",
+                        "examples": [
+                            60
+                        ]
+                    },
+                    "minimum_length": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "The shortest bookable duration, in hours.",
+                        "examples": [
+                            0.5
+                        ]
+                    },
+                    "maximum_length": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "The longest bookable duration, in hours.",
+                        "examples": [
+                            4
+                        ]
+                    },
+                    "future_days": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "How many days ahead members may book.",
+                        "examples": [
+                            30
+                        ]
+                    },
+                    "basis_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "The time of day booking slots are aligned from.",
+                        "examples": [
+                            "08:00:00"
+                        ]
+                    },
+                    "booking_request_deadline": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "How many hours before the start time a booking request must be\nsubmitted.",
+                        "examples": [
+                            48
+                        ]
+                    },
+                    "booking_instructions": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Instructions shown to members when they book.",
+                        "examples": [
+                            "Please arrive 10 minutes before your booking."
+                        ]
+                    },
+                    "user_recurring_bookings": {
+                        "type": "boolean",
+                        "description": "Whether members may create repeating bookings themselves.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "user_specified_reason": {
+                        "type": "boolean",
+                        "description": "Whether members must give a reason when booking.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "publicly_exposed": {
+                        "type": "boolean",
+                        "description": "Whether the facility's schedule is visible to the public.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "publicly_exposed_allow_bookings": {
+                        "type": "boolean",
+                        "description": "Whether the public schedule also accepts bookings.",
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "publicly_exposed_hide_user_names": {
+                        "type": "boolean",
+                        "description": "Whether the public schedule hides who made each booking.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "manager_only": {
+                        "type": "boolean",
+                        "description": "Whether only managers may book the facility.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_booking_owner": {
+                        "type": "boolean",
+                        "description": "Whether the booking form asks who the booking is for.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_adding_more_users": {
+                        "type": "boolean",
+                        "description": "Whether the booking form asks for additional members to add.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "prompt_for_number_of_guests": {
+                        "type": "boolean",
+                        "description": "Whether the booking form asks how many guests are attending.",
+                        "examples": [
+                            false
+                        ]
+                    },
+                    "memberships_required": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "Stripe product ids of the memberships a member must hold to\nbook, or null when the facility is open to everyone.",
+                        "examples": [
+                            [
+                                "prod_abc123"
+                            ]
+                        ],
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "membership_requirement_mode": {
+                        "type": "string",
+                        "description": "Whether a member needs any one (`or`) or all (`and`) of\n`memberships_required`.",
+                        "examples": [
+                            "or"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Whether the facility is currently bookable or has been archived.",
+                        "examples": [
+                            "active"
+                        ]
+                    },
+                    "profile_image": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "examples": [
+                            "https://example.com/images/gymnasium.jpg"
+                        ]
+                    },
+                    "sort_order": {
+                        "type": "integer",
+                        "description": "Position of the facility in the manually ordered list.",
+                        "examples": [
+                            0
+                        ]
+                    },
+                    "archived_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of when the facility was archived, or null\nwhile it is active.",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of when the facility was created.",
+                        "examples": [
+                            "2025-01-15T10:30:00.000000Z"
+                        ]
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "ISO 8601 timestamp of when the facility was last changed.",
+                        "examples": [
+                            "2025-01-20T14:45:00.000000Z"
+                        ]
+                    },
+                    "parent": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "The facility this one sits inside. Included when the `parent`\nrelation is requested.",
+                        "additionalProperties": {}
+                    },
+                    "children": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "description": "The sub-facilities inside this one. Included when the `children`\nrelation is requested.",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "type",
+                    "parent_id",
+                    "capacity",
+                    "booking_interval",
+                    "minimum_length",
+                    "maximum_length",
+                    "future_days",
+                    "basis_time",
+                    "booking_request_deadline",
+                    "booking_instructions",
+                    "user_recurring_bookings",
+                    "user_specified_reason",
+                    "publicly_exposed",
+                    "publicly_exposed_allow_bookings",
+                    "publicly_exposed_hide_user_names",
+                    "manager_only",
+                    "prompt_for_booking_owner",
+                    "prompt_for_adding_more_users",
+                    "prompt_for_number_of_guests",
+                    "memberships_required",
+                    "membership_requirement_mode",
+                    "status",
+                    "profile_image",
+                    "sort_order",
+                    "archived_at",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "FacilityResource"
             },
             "FamilyMember": {
                 "type": "object",
@@ -4628,6 +6481,63 @@
                                 "parent_program_id"
                             ]
                         }
+                    },
+                    "translation_fields": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Raw per-locale values and their provenance for the manager translation editor,\nplus each field's translation mode (`auto` translates into every supported\nlocale, `source` shows the English value everywhere). Omitted for non-manager\nreaders.",
+                        "examples": [
+                            {
+                                "title": {
+                                    "mode": "auto",
+                                    "values": {
+                                        "en-CA": {
+                                            "origin": "human",
+                                            "value": "Gold Membership"
+                                        },
+                                        "fr-CA": {
+                                            "origin": "machine",
+                                            "value": "Adhésion Or"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "mode": {
+                                    "type": "string"
+                                },
+                                "values": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "origin": {
+                                                "type": "string"
+                                            },
+                                            "value": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "origin",
+                                            "value"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "mode",
+                                "values"
+                            ]
+                        }
                     }
                 },
                 "required": [
@@ -4711,6 +6621,15 @@
                 "properties": {
                     "id": {
                         "type": "integer",
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "tenant_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
                         "examples": [
                             1
                         ]
@@ -4841,6 +6760,21 @@
                             "month"
                         ]
                     },
+                    "sort_order": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "manual_order_enabled": {
+                        "type": "boolean",
+                        "examples": [
+                            false
+                        ]
+                    },
                     "created_at": {
                         "type": "string",
                         "examples": [
@@ -4881,10 +6815,7 @@
                                 "type": "string"
                             },
                             "description": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ]
+                                "type": "string"
                             },
                             "created_at": {
                                 "type": [
@@ -4923,6 +6854,13 @@
                             },
                             "metadata": {
                                 "type": "array",
+                                "items": {}
+                            },
+                            "translation_settings": {
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
                                 "items": {}
                             },
                             "status": {
@@ -5011,6 +6949,7 @@
                             "type",
                             "base_membership_id",
                             "metadata",
+                            "translation_settings",
                             "status",
                             "renewal_notifications_pre_expiration",
                             "renewal_notifications",
@@ -5090,10 +7029,68 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "translation_fields": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Raw per-locale values and their provenance for the manager translation editor,\nplus each field's translation mode (`auto` translates into every supported\nlocale, `source` shows the English value everywhere). Omitted for non-manager\nreaders.",
+                        "examples": [
+                            {
+                                "nickname": {
+                                    "mode": "auto",
+                                    "values": {
+                                        "en-CA": {
+                                            "origin": "human",
+                                            "value": "Monthly"
+                                        },
+                                        "fr-CA": {
+                                            "origin": "machine",
+                                            "value": "Mensuel"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "mode": {
+                                    "type": "string"
+                                },
+                                "values": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "properties": {
+                                            "origin": {
+                                                "type": "string"
+                                            },
+                                            "value": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "origin",
+                                            "value"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "mode",
+                                "values"
+                            ]
+                        }
                     }
                 },
                 "required": [
                     "id",
+                    "tenant_id",
                     "membership_type_id",
                     "nickname",
                     "description",
@@ -5108,6 +7105,8 @@
                     "is_business_plan",
                     "max_beneficiaries",
                     "interval",
+                    "sort_order",
+                    "manual_order_enabled",
                     "created_at",
                     "updated_at",
                     "deleted_at"
@@ -6395,6 +8394,13 @@
                             5
                         ]
                     },
+                    "can_manage_registration_opportunity": {
+                        "type": "boolean",
+                        "description": "Whether the current viewer may manage this registration opportunity.",
+                        "examples": [
+                            true
+                        ]
+                    },
                     "class_limit": {
                         "type": [
                             "integer",
@@ -6981,6 +8987,7 @@
                     "name",
                     "description",
                     "parent_program_id",
+                    "can_manage_registration_opportunity",
                     "class_limit",
                     "event_start_date",
                     "event_end_date",
@@ -7328,6 +9335,8 @@
                             {
                                 "id": 12,
                                 "stripe_invoice_number": "INV-0012",
+                                "exposed_invoice_number": "INV-0012",
+                                "provenance": "stripe",
                                 "uuid": "9c1b3f2a-...",
                                 "bookings": [
                                     {
@@ -7350,6 +9359,15 @@
                                     "string",
                                     "null"
                                 ]
+                            },
+                            "exposed_invoice_number": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "provenance": {
+                                "type": "string"
                             },
                             "uuid": {
                                 "type": "string"
@@ -7395,6 +9413,8 @@
                         "required": [
                             "id",
                             "stripe_invoice_number",
+                            "exposed_invoice_number",
+                            "provenance",
                             "uuid",
                             "bookings"
                         ]
@@ -7411,6 +9431,8 @@
                                 "invoice": {
                                     "id": 12,
                                     "stripe_invoice_number": "INV-0012",
+                                    "exposed_invoice_number": "INV-0012",
+                                    "provenance": "stripe",
                                     "uuid": "9c1b3f2a-...",
                                     "bookings": [
                                         {
@@ -7441,6 +9463,15 @@
                                             "null"
                                         ]
                                     },
+                                    "exposed_invoice_number": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "provenance": {
+                                        "type": "string"
+                                    },
                                     "uuid": {
                                         "type": "string"
                                     },
@@ -7470,6 +9501,8 @@
                                 "required": [
                                     "id",
                                     "stripe_invoice_number",
+                                    "exposed_invoice_number",
+                                    "provenance",
                                     "uuid",
                                     "bookings"
                                 ]
@@ -8284,6 +10317,14 @@
             "name": "Program signups",
             "tags": [
                 "Program Signup"
+            ]
+        },
+        {
+            "name": "Facilities",
+            "tags": [
+                "Facility",
+                "Booking",
+                "Booking Request"
             ]
         },
         {
