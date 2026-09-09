@@ -223,23 +223,64 @@ array down to production only.
 
 ## Risks
 
-**Zudoku is pre-1.0 (`0.83.x`).** Config APIs may churn between releases. The
+**Zudoku is pre-1.0 (`0.86.0` as installed).** Config APIs may churn between releases. The
 dependency is pinned to an exact version and upgraded deliberately. The
 license is MIT, so the exposure is maintenance churn, not lock-in.
 
-**Pagefind coverage of the reference is verified from documentation, not from
-a build.** Unified search is a must-keep, and it depends on Zudoku
-prerendering reference pages into static HTML that Pagefind can crawl.
-
-This risk is retired first. **Implementation step 1 is a throwaway spike:**
-scaffold Zudoku with one OpenAPI version and three guide pages, build it, and
-search for a term that appears *only* in the reference (for example an
-operation-specific parameter name). If it returns no hit, stop and reassess
-against the Starlight fallback before any further work.
+**Pagefind coverage of the reference is now build-verified.** See Spike
+results below. This risk is retired.
 
 **Single-vendor OSS.** Zudoku is developed primarily by Zuplo. The Starlight
 fallback remains viable because the expensive assets — `versions.mjs`, the
 spec pipeline, and the Markdown content — are framework-independent.
+
+## Spike results (2026-09-09, zudoku 0.86.0)
+
+A throwaway scaffold with two OpenAPI versions and three guide pages was built
+and its Pagefind index decompressed and inspected. **The gate passed.**
+
+- 61 HTML pages prerendered. 59 Pagefind fragments: **54 reference, 3 guides**,
+  plus the error pages.
+- `request_hash`, a term appearing only in the OpenAPI document and in none of
+  the guide pages, is indexed in 9 reference fragments. Unified search across
+  guides and reference is real.
+
+Facts the spike established, which the implementation depends on:
+
+**`package.json` must set `"type": "module"`.** Without it the Vite build
+succeeds and the prerender step then fails with `Could not find zudoku.config
+entry in server build output`. The error does not name the cause.
+
+**The reference has no per-operation pages.** Output is one page per tag:
+`/reference/<tag>` for the default version and `/reference/<version>/<tag>`
+for the others. Operations are sections within a tag page. The splat redirect
+is therefore the only available mapping for old operation deep links, not
+merely the cheaper one.
+
+**Output is flat `.html` files**, not `<dir>/index.html`. Netlify serves these
+at extensionless paths.
+
+**`category.link` accepts a doc**, which resolves the `/basics` open question:
+a category renders its own page when given `link: { type: "doc", ... }`.
+
+**The default version renders twice**, at `/reference/<tag>` and at
+`/reference/2026-08-25/<tag>`. This is the same duplicate-content shape just
+removed from the guides. Worth a canonical tag or a decision later; it does
+not block.
+
+**Zudoku has native `docs.publishMarkdown` and `docs.llms`.** The build
+already emits a `.md` alongside each page. Whether these subsume part of
+`build.mjs` is a follow-up, not part of this migration.
+
+**`llms-endpoints.json` and `llms-summary-map.json` have exactly one consumer
+in the repo: `public/index.html`**, which this migration deletes. They are
+retained for now because third-party consumers of those public URLs cannot be
+observed from inside the repo. Removing them is a proposed follow-up.
+
+**`npm audit` reports 4 advisories** (`toml` high, `hono` moderate) from
+Zudoku's transitive dependencies. Both are build-time only and are not served
+in the static output.
+
 
 ## Verification checklist
 
@@ -252,7 +293,7 @@ spec pipeline, and the Markdown content — are framework-independent.
 - The reference nests by `x-tagGroups` for each version.
 - Search returns hits from guides **and** from the reference.
 - A sample of version-prefixed guide URLs 301s to canonical.
-- `/basics` resolves (it is a live URL today, not only `/`).
+- `/basics` resolves via `category.link` (it is a live URL today, not only `/`).
 - A sample of old reference deep links lands on the right tag page.
 - `llms.txt`, `llms-endpoints.json`, and `llms-summary-map.json` are present
   at the site root in `dist`.
@@ -263,3 +304,6 @@ spec pipeline, and the Markdown content — are framework-independent.
 - Exact Lucide equivalents for several Phosphor icons
   (`brackets-curly`, `identification-card`, `list-magnifying-glass`) are
   resolved during implementation against the Lucide icon set.
+- Whether to drop `llms-endpoints.json` and `llms-summary-map.json` once
+  `public/index.html`, their only in-repo consumer, is deleted.
+- Whether to canonicalise the duplicate default-version reference URLs.
