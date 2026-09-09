@@ -7,6 +7,14 @@
     },
     "servers": [
         {
+            "url": "http://api.community-management.test/api",
+            "description": "Local"
+        },
+        {
+            "url": "https://api.communitymanagement.xyz/api",
+            "description": "Staging"
+        },
+        {
             "url": "https://api.getcommunal.com/api",
             "description": "Prod"
         }
@@ -55,10 +63,10 @@
             "name": "Transaction"
         },
         {
-            "name": "Attendance Sheet"
+            "name": "Attendance Record"
         },
         {
-            "name": "Attendance Record"
+            "name": "Attendance Sheet"
         }
     ],
     "security": [
@@ -162,6 +170,322 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/AuthorizationException"
+                    }
+                }
+            }
+        },
+        "/attendance_records/{attendance_record}/mark": {
+            "put": {
+                "operationId": "markAttendance.update",
+                "tags": [
+                    "Attendance Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "attendance_record",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "absent",
+                                            "excused",
+                                            "excluded",
+                                            "late",
+                                            "present",
+                                            "unmarked"
+                                        ]
+                                    },
+                                    "notes": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "marked_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "marked_by": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`AttendanceRecordResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AttendanceRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/attendance_sheets/{attendance_sheet}/mark": {
+            "post": {
+                "operationId": "markAttendance.store",
+                "tags": [
+                    "Attendance Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "attendance_sheet",
+                        "in": "path",
+                        "required": true,
+                        "description": "The attendance sheet ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "program_id": {
+                                        "type": "integer"
+                                    },
+                                    "participant_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "existing_user",
+                                            "walk_in"
+                                        ]
+                                    },
+                                    "user_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "additional_member_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "email",
+                                        "maxLength": 255
+                                    },
+                                    "telephone": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "date_of_birth": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "amount_paid": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "minimum": 0
+                                    },
+                                    "payment_method": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "trigger_assign_email": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "attach_invoice": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "absent",
+                                            "excused",
+                                            "excluded",
+                                            "late",
+                                            "present",
+                                            "unmarked"
+                                        ]
+                                    },
+                                    "additional_member": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 255
+                                            },
+                                            "email": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "format": "email",
+                                                "maxLength": 255
+                                            },
+                                            "date_of_birth": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "format": "date-time"
+                                            },
+                                            "emergency_contact_name": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 255
+                                            },
+                                            "emergency_contact_phone": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 255
+                                            },
+                                            "gender": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ],
+                                                "maxLength": 255
+                                            },
+                                            "medical": {
+                                                "type": [
+                                                    "string",
+                                                    "null"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "notes": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "marked_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "marked_by": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "program_id",
+                                    "participant_type",
+                                    "status"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`AttendanceRecordResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AttendanceRecordResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1079,8 +1403,8 @@
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
                     },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
                     }
                 }
             }
@@ -1187,7 +1511,7 @@
                     {
                         "name": "append",
                         "in": "query",
-                        "description": "Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, participant_name (facility managers and super admins only).",
+                        "description": "Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, next_state, previous_state, participant_name (facility managers and super admins only).",
                         "schema": {
                             "type": "string"
                         },
@@ -1323,7 +1647,7 @@
                     {
                         "name": "append",
                         "in": "query",
-                        "description": "Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, participant_name (facility managers and super admins only).",
+                        "description": "Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, next_state, previous_state, participant_name (facility managers and super admins only).",
                         "schema": {
                             "type": "string"
                         },
@@ -2086,6 +2410,138 @@
                         "$ref": "#/components/responses/ValidationException"
                     }
                 }
+            },
+            "post": {
+                "operationId": "facility.store",
+                "description": "Creates a facility from name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options. Other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking. API keys require facilities:write; session users require a facility manager or organization administrator role.",
+                "summary": "Create a facility",
+                "tags": [
+                    "Facility"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "publicly_exposed": {
+                                        "type": "boolean"
+                                    },
+                                    "publicly_exposed_allow_bookings": {
+                                        "type": "boolean"
+                                    },
+                                    "manager_only": {
+                                        "type": "boolean"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "instant",
+                                            "request"
+                                        ]
+                                    },
+                                    "capacity": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 2147483647
+                                    },
+                                    "booking_interval": {
+                                        "type": "integer",
+                                        "enum": [
+                                            "5",
+                                            "10",
+                                            "15",
+                                            "30",
+                                            "60"
+                                        ]
+                                    },
+                                    "future_days": {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 2147483647
+                                    },
+                                    "basis_time": {
+                                        "type": "string"
+                                    },
+                                    "booking_request_deadline": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 0,
+                                        "maximum": 4294967295
+                                    },
+                                    "publicly_exposed_hide_user_names": {
+                                        "type": "boolean"
+                                    },
+                                    "prompt_for_booking_owner": {
+                                        "type": "boolean"
+                                    },
+                                    "prompt_for_adding_more_users": {
+                                        "type": "boolean"
+                                    },
+                                    "prompt_for_number_of_guests": {
+                                        "type": "boolean"
+                                    },
+                                    "user_recurring_bookings": {
+                                        "type": "boolean"
+                                    },
+                                    "user_specified_reason": {
+                                        "type": "boolean"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 191
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "maxLength": 16000
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "description"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "`FacilityResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FacilityResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
             }
         },
         "/facilities/{facility}": {
@@ -2744,6 +3200,666 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "parent_programs.store",
+                "description": "Create a top-level program. Requires the parent-programs:create API key scope and a Program Manager or Super Admin role. Programs default to draft; an omitted, null, or blank title defaults to New Program. Registration opportunities, schedules, and prices are not created.",
+                "summary": "Create program",
+                "tags": [
+                    "Program"
+                ],
+                "parameters": [
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "title": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "description": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "ongoing": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "event_start_date": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "event_end_date": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
+                                    "profile_image": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "location_name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "location_address": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "location_latitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "location_longitude": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "pay_by_cash": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "collection_additional_information": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "require_emergency_contact_information": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "waitlist_enabled": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "prompt_for_registrant": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "unsplash_author_name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "unsplash_author_link": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "demographic": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "instructor": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 191
+                                    },
+                                    "force_participant_selection": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "display_only": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "draft": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "registration_fee": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ]
+                                    },
+                                    "cap_registration_fee": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "is_event": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "multiple_signups": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "is_hidden": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "show_participant_list": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "hide_participant_details": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "total_spots": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "allow_file_uploads": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "file_uploads_required": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "file_uploads_max": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 1,
+                                        "maximum": 20
+                                    },
+                                    "auto_archive": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "auto_archive_days": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "minimum": 0
+                                    },
+                                    "participant_must_hold_membership": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ]
+                                    },
+                                    "gl_code": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`ParentProgram`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "tenant_id": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "title": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "description": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "limit": {
+                                            "type": "integer"
+                                        },
+                                        "demographic": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "instructor": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "location_name": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "location_address": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "location_latitude": {
+                                            "type": [
+                                                "number",
+                                                "null"
+                                            ]
+                                        },
+                                        "location_longitude": {
+                                            "type": [
+                                                "number",
+                                                "null"
+                                            ]
+                                        },
+                                        "is_online": {
+                                            "type": "integer"
+                                        },
+                                        "registration_start_date": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "registration_end_date": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "event_start_date": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "event_end_date": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "profile_image": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "unsplash_author_name": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "unsplash_author_link": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "multiple_signups": {
+                                            "type": "boolean"
+                                        },
+                                        "pay_by_cash": {
+                                            "type": "boolean"
+                                        },
+                                        "collection_additional_information": {
+                                            "type": "boolean"
+                                        },
+                                        "prompt_for_number_of_guests": {
+                                            "type": "boolean"
+                                        },
+                                        "prompt_for_registrant": {
+                                            "type": "boolean"
+                                        },
+                                        "waitlist_enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "created_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "format": "date-time"
+                                        },
+                                        "deleted_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "format": "date-time"
+                                        },
+                                        "archived_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "block_facility_calendars": {
+                                            "type": "boolean"
+                                        },
+                                        "auto_archive": {
+                                            "type": "boolean"
+                                        },
+                                        "auto_archive_days": {
+                                            "type": "integer"
+                                        },
+                                        "participant_must_hold_membership": {
+                                            "type": "boolean"
+                                        },
+                                        "ongoing": {
+                                            "type": "boolean"
+                                        },
+                                        "draft": {
+                                            "type": "boolean"
+                                        },
+                                        "require_emergency_contact_information": {
+                                            "type": "boolean"
+                                        },
+                                        "registration_fee": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "force_participant_selection": {
+                                            "type": "boolean"
+                                        },
+                                        "is_event": {
+                                            "type": "boolean"
+                                        },
+                                        "form_id": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "display_only": {
+                                            "type": "boolean"
+                                        },
+                                        "is_hidden": {
+                                            "type": "boolean"
+                                        },
+                                        "show_participant_list": {
+                                            "type": "boolean"
+                                        },
+                                        "hide_participant_details": {
+                                            "type": "boolean"
+                                        },
+                                        "total_spots": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "cap_registration_fee": {
+                                            "type": "boolean"
+                                        },
+                                        "allow_file_uploads": {
+                                            "type": "integer"
+                                        },
+                                        "file_uploads_required": {
+                                            "type": "integer"
+                                        },
+                                        "file_uploads_max": {
+                                            "type": [
+                                                "integer",
+                                                "null"
+                                            ]
+                                        },
+                                        "sort_order": {
+                                            "type": "integer"
+                                        },
+                                        "manual_order_enabled": {
+                                            "type": "boolean"
+                                        },
+                                        "gl_code": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        },
+                                        "available_spots": {
+                                            "type": "string"
+                                        },
+                                        "dates": {
+                                            "type": "string"
+                                        },
+                                        "days_until_event": {
+                                            "type": "string"
+                                        },
+                                        "event_end_time": {
+                                            "type": "string"
+                                        },
+                                        "event_start_time": {
+                                            "type": "string"
+                                        },
+                                        "facility_ids": {
+                                            "type": "string"
+                                        },
+                                        "ignores_tax_rates": {
+                                            "type": "string"
+                                        },
+                                        "readable_event_end_date": {
+                                            "type": "string"
+                                        },
+                                        "readable_event_start_date": {
+                                            "type": "string"
+                                        },
+                                        "registration_dates": {
+                                            "type": "string"
+                                        },
+                                        "registration_end_time": {
+                                            "type": "string"
+                                        },
+                                        "registration_start_time": {
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "type": "string"
+                                        },
+                                        "volunteer_opportunities_ids": {
+                                            "type": "string"
+                                        },
+                                        "reserved_spots": {
+                                            "type": "string"
+                                        },
+                                        "reserved_spots_remaining": {
+                                            "type": "string"
+                                        },
+                                        "reserved_spots_signups": {
+                                            "type": "string"
+                                        },
+                                        "total_signups": {
+                                            "type": "string"
+                                        },
+                                        "uncapped_spots": {
+                                            "type": "string"
+                                        },
+                                        "uncapped_spots_remaining": {
+                                            "type": "string"
+                                        },
+                                        "uncapped_spots_signups": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "id",
+                                        "tenant_id",
+                                        "title",
+                                        "description",
+                                        "limit",
+                                        "demographic",
+                                        "instructor",
+                                        "location_name",
+                                        "location_address",
+                                        "location_latitude",
+                                        "location_longitude",
+                                        "is_online",
+                                        "registration_start_date",
+                                        "registration_end_date",
+                                        "event_start_date",
+                                        "event_end_date",
+                                        "profile_image",
+                                        "unsplash_author_name",
+                                        "unsplash_author_link",
+                                        "multiple_signups",
+                                        "pay_by_cash",
+                                        "collection_additional_information",
+                                        "prompt_for_number_of_guests",
+                                        "prompt_for_registrant",
+                                        "waitlist_enabled",
+                                        "created_at",
+                                        "updated_at",
+                                        "deleted_at",
+                                        "archived_at",
+                                        "block_facility_calendars",
+                                        "auto_archive",
+                                        "auto_archive_days",
+                                        "participant_must_hold_membership",
+                                        "ongoing",
+                                        "draft",
+                                        "require_emergency_contact_information",
+                                        "registration_fee",
+                                        "force_participant_selection",
+                                        "is_event",
+                                        "form_id",
+                                        "display_only",
+                                        "is_hidden",
+                                        "show_participant_list",
+                                        "hide_participant_details",
+                                        "total_spots",
+                                        "cap_registration_fee",
+                                        "allow_file_uploads",
+                                        "file_uploads_required",
+                                        "file_uploads_max",
+                                        "sort_order",
+                                        "manual_order_enabled",
+                                        "gl_code",
+                                        "available_spots",
+                                        "dates",
+                                        "days_until_event",
+                                        "event_end_time",
+                                        "event_start_time",
+                                        "facility_ids",
+                                        "ignores_tax_rates",
+                                        "readable_event_end_date",
+                                        "readable_event_start_date",
+                                        "registration_dates",
+                                        "registration_end_time",
+                                        "registration_start_time",
+                                        "status",
+                                        "volunteer_opportunities_ids",
+                                        "reserved_spots",
+                                        "reserved_spots_remaining",
+                                        "reserved_spots_signups",
+                                        "total_signups",
+                                        "uncapped_spots",
+                                        "uncapped_spots_remaining",
+                                        "uncapped_spots_signups"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -4249,6 +5365,58 @@
                     }
                 }
             }
+        },
+        "/parent_programs/{parentProgram}/opportunity-order": {
+            "get": {
+                "operationId": "programOrder.index",
+                "tags": [
+                    "ProgramOrder"
+                ],
+                "parameters": [
+                    {
+                        "name": "parentProgram",
+                        "in": "path",
+                        "required": true,
+                        "description": "The parent program ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Api-Version",
+                        "in": "header",
+                        "description": "Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2026-08-25"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -4296,6 +5464,18 @@
                             "Left early due to illness"
                         ]
                     },
+                    "marked_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "marked_by": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "can_update": {
                         "type": "boolean",
                         "description": "Whether the current viewer may update this record.",
@@ -4332,6 +5512,8 @@
                     "program_signup_id",
                     "status",
                     "notes",
+                    "marked_at",
+                    "marked_by",
                     "can_update",
                     "created_at",
                     "updated_at"
@@ -5022,7 +6204,73 @@
                     "booking_item_one": {},
                     "booking_item_two": {},
                     "facilities_with_cost": {},
-                    "created_by": {}
+                    "created_by": {},
+                    "next_state": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "The state this request advances to next in the facility's workflow.\nPresent when `append=next_state` is requested; null when the request is already in the final state.",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "state_name": {
+                                "type": "string"
+                            },
+                            "color": {
+                                "type": "string"
+                            },
+                            "order": {
+                                "type": "integer"
+                            },
+                            "blocks_time": {
+                                "type": "boolean"
+                            },
+                            "is_final": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "state_name",
+                            "color",
+                            "order",
+                            "blocks_time",
+                            "is_final"
+                        ]
+                    },
+                    "previous_state": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "The state this request can be moved back to.\nPresent when `append=previous_state` is requested; null when the request is in the first state.",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "state_name": {
+                                "type": "string"
+                            },
+                            "color": {
+                                "type": "string"
+                            },
+                            "order": {
+                                "type": "integer"
+                            },
+                            "blocks_time": {
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "state_name",
+                            "color",
+                            "order",
+                            "blocks_time"
+                        ]
+                    }
                 },
                 "required": [
                     "id",
@@ -8370,6 +9618,15 @@
                             42
                         ]
                     },
+                    "display_order": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "is_pinned": {
+                        "type": "boolean"
+                    },
                     "name": {
                         "type": "string",
                         "examples": [
@@ -8984,6 +10241,8 @@
                 },
                 "required": [
                     "id",
+                    "display_order",
+                    "is_pinned",
                     "name",
                     "description",
                     "parent_program_id",
@@ -10209,25 +11468,6 @@
             }
         },
         "responses": {
-            "ModelNotFoundException": {
-                "description": "Not found",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "message": {
-                                    "type": "string",
-                                    "description": "Error overview."
-                                }
-                            },
-                            "required": [
-                                "message"
-                            ]
-                        }
-                    }
-                }
-            },
             "AuthenticationException": {
                 "description": "Unauthenticated",
                 "content": {
@@ -10295,6 +11535,25 @@
                         }
                     }
                 }
+            },
+            "ModelNotFoundException": {
+                "description": "Not found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
             }
         }
     },
@@ -10310,7 +11569,8 @@
         {
             "name": "Registration opportunities",
             "tags": [
-                "Registration Opportunity"
+                "Registration Opportunity",
+                "ProgramOrder"
             ]
         },
         {

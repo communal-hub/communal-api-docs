@@ -43,6 +43,69 @@ List all digital member card delivery activities
 
 ### Attendance Record
 
+#### PUT /attendance_records/{attendance_record}/mark
+
+
+**Parameters:**
+
+- `attendance_record` (path) (required)
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `status` (string)
+- `notes` (string,null)
+- `marked_at` (string)
+- `marked_by` (integer)
+
+**Responses:**
+
+- `200`: `AttendanceRecordResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
+#### POST /attendance_sheets/{attendance_sheet}/mark
+
+
+**Parameters:**
+
+- `attendance_sheet` (path) (required) - The attendance sheet ID
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `program_id` (integer)
+- `participant_type` (string)
+- `user_id` (integer,null)
+- `additional_member_id` (integer,null)
+- `name` (string,null)
+- `email` (string,null)
+- `telephone` (string,null)
+- `date_of_birth` (string,null)
+- `amount_paid` (number,null)
+- `payment_method` (string,null)
+- `trigger_assign_email` (boolean,null)
+- `attach_invoice` (boolean,null)
+- `status` (string)
+- `additional_member` (object)
+- `notes` (string,null)
+- `marked_at` (string)
+- `marked_by` (integer)
+
+**Responses:**
+
+- `200`: `AttendanceRecordResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
 #### GET /attendance_records/export-config
 
 Get export configuration for the current model
@@ -197,7 +260,7 @@ Returns a single facility booking, scoped to the current tenant.
 
 - `200`: 
 - `401`: 
-- `404`: 
+- `403`: 
 
 ### Booking Request
 
@@ -221,7 +284,7 @@ Pass `include` / `append` for the richer relations the product UI uses.
 - `filter[recurring_id]` (query) - Filter to requests in a recurring series.
 - `filter[tags]` (query) - Filter by tag name(s). Comma-separated.
 - `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, organization, bookingItems, tags, bookingContactDetails, recurringBooking, formSubmissions, files, notes, facilities.
-- `append` (query) - Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, participant_name (facility managers and super admins only).
+- `append` (query) - Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, next_state, previous_state, participant_name (facility managers and super admins only).
 - `sort` (query) - Sort by id, starting_at, or ending_at. Prefix with - for descending.
 - `page[number]` (query) - Page number for pagination.
 - `page[size]` (query) - Number of results per page.
@@ -242,7 +305,7 @@ facility managers and super admins may view any request in the tenant.
 
 - `booking_request` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, files, notes, organization, recurringBooking, tags, formSubmissions, formSubmissions.form, bookingContactDetails, bookingItems, facilities.
-- `append` (query) - Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, participant_name (facility managers and super admins only).
+- `append` (query) - Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, next_state, previous_state, participant_name (facility managers and super admins only).
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
@@ -427,6 +490,44 @@ type, parent facility, archived state, or a free-text name search.
 - `403`: 
 - `422`: 
 
+#### POST /facilities
+
+Create a facility
+Creates a facility from name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options. Other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking. API keys require facilities:write; session users require a facility manager or organization administrator role.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `publicly_exposed` (boolean)
+- `publicly_exposed_allow_bookings` (boolean)
+- `manager_only` (boolean)
+- `type` (string)
+- `capacity` (integer,null)
+- `booking_interval` (integer)
+- `future_days` (integer)
+- `basis_time` (string)
+- `booking_request_deadline` (integer,null)
+- `publicly_exposed_hide_user_names` (boolean)
+- `prompt_for_booking_owner` (boolean)
+- `prompt_for_adding_more_users` (boolean)
+- `prompt_for_number_of_guests` (boolean)
+- `user_recurring_bookings` (boolean)
+- `user_specified_reason` (boolean)
+- `name` (string)
+- `description` (string)
+
+**Responses:**
+
+- `201`: `FacilityResource`
+- `401`: 
+- `403`: 
+- `422`: 
+
 #### GET /facilities/{facility}
 
 Get a facility
@@ -602,6 +703,64 @@ excluded by default for performance - use `?include=programs` to include them.
 
 - `200`: Paginated set of `Program`
 - `401`: 
+
+#### POST /parent_programs
+
+Create program
+Create a top-level program. Requires the parent-programs:create API key scope and a Program Manager or Super Admin role. Programs default to draft; an omitted, null, or blank title defaults to New Program. Registration opportunities, schedules, and prices are not created.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+- `title` (string,null)
+- `description` (string,null)
+- `ongoing` (boolean,null)
+- `event_start_date` (string,null)
+- `event_end_date` (string,null)
+- `profile_image` (string,null)
+- `location_name` (string,null)
+- `location_address` (string,null)
+- `location_latitude` (number,null)
+- `location_longitude` (number,null)
+- `pay_by_cash` (boolean,null)
+- `collection_additional_information` (boolean,null)
+- `require_emergency_contact_information` (boolean,null)
+- `waitlist_enabled` (boolean,null)
+- `prompt_for_registrant` (boolean,null)
+- `unsplash_author_name` (string,null)
+- `unsplash_author_link` (string,null)
+- `demographic` (string,null)
+- `instructor` (string,null)
+- `force_participant_selection` (boolean,null)
+- `display_only` (boolean,null)
+- `draft` (boolean,null)
+- `registration_fee` (number,null)
+- `cap_registration_fee` (boolean,null)
+- `is_event` (boolean,null)
+- `multiple_signups` (boolean,null)
+- `is_hidden` (boolean,null)
+- `show_participant_list` (boolean,null)
+- `hide_participant_details` (boolean,null)
+- `total_spots` (integer,null)
+- `allow_file_uploads` (boolean,null)
+- `file_uploads_required` (boolean,null)
+- `file_uploads_max` (integer,null)
+- `auto_archive` (boolean,null)
+- `auto_archive_days` (integer,null)
+- `participant_must_hold_membership` (boolean,null)
+- `gl_code` (string,null)
+
+**Responses:**
+
+- `200`: `ParentProgram`
+- `401`: 
+- `403`: 
+- `422`: 
 
 #### GET /parent_programs/{parent_program}
 
@@ -889,6 +1048,24 @@ plan.
 **Responses:**
 
 - `200`: `UserMembershipResource`
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
+### ProgramOrder
+
+#### GET /parent_programs/{parentProgram}/opportunity-order
+
+
+**Parameters:**
+
+- `parentProgram` (path) (required) - The parent program ID
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: 
 - `401`: 
 - `403`: 
 - `404`: 

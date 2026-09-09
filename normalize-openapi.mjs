@@ -9,7 +9,7 @@ export const TAG_GROUPS = [
   },
   {
     name: 'Registration opportunities',
-    tags: ['Registration Opportunity'],
+    tags: ['Registration Opportunity', 'ProgramOrder'],
   },
   {
     name: 'Program signups',
@@ -56,6 +56,24 @@ export const HIDDEN_TAGS = new Set(['ParentProgramCalendarEvents'])
 export const HIDDEN_METHODS = new Set(['patch'])
 
 /**
+ * Individual operations that should never appear in the published docs, keyed
+ * `<method> <path>`. Use this when a tag carries legitimate public endpoints and
+ * only one operation on it is internal, which `HIDDEN_TAGS` cannot express.
+ *
+ * `post /users` is Communal's own signup endpoint. Its description documents the
+ * `web` session guard, the `auto_login` response flag and the social-signup
+ * path, and it accepts `password` and `roles`. That is first-party auth design,
+ * not something a third-party integrator should read or call.
+ */
+export const HIDDEN_OPERATIONS = new Set(['post /users'])
+
+/** True when this operation is hidden by tag, method, or explicit path. */
+export const isHiddenOperation = (method, path, op) =>
+  HIDDEN_METHODS.has(method) ||
+  HIDDEN_OPERATIONS.has(`${method} ${path}`) ||
+  (Array.isArray(op?.tags) && op.tags.some((tag) => HIDDEN_TAGS.has(tag)))
+
+/**
  * Normalize an OpenAPI document in place: drop operations using a
  * `HIDDEN_METHODS` method or carrying a `HIDDEN_TAGS` tag, strip
  * per-path/operation `servers` overrides, and apply the Scalar `x-tagGroups`
@@ -77,11 +95,7 @@ export function normalizeSpec(filePath, { productionOnly = false } = {}) {
 
     for (const [key, op] of Object.entries(pathItem)) {
       if (!METHODS.has(key) || !op || typeof op !== 'object') continue
-      if (HIDDEN_METHODS.has(key)) {
-        delete pathItem[key]
-        continue
-      }
-      if (Array.isArray(op.tags) && op.tags.some((tag) => HIDDEN_TAGS.has(tag))) {
+      if (isHiddenOperation(key, path, op)) {
         delete pathItem[key]
         continue
       }

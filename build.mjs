@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 import { specUrl, DEFAULT_VERSION } from './versions.mjs'
-import { HIDDEN_TAGS, HIDDEN_METHODS } from './normalize-openapi.mjs'
+import { HIDDEN_TAGS, HIDDEN_METHODS, isHiddenOperation } from './normalize-openapi.mjs'
 
 // llms.txt tracks the current (default) API version.
 const SPEC_URL = specUrl(DEFAULT_VERSION)
@@ -111,7 +111,7 @@ const tagGroups = {}
 for (const [path, methods] of Object.entries(spec.paths || {})) {
   for (const [method, op] of Object.entries(methods)) {
     if (['get', 'post', 'put', 'patch', 'delete'].includes(method) && !HIDDEN_METHODS.has(method)) {
-      if (isHidden(op)) continue
+      if (isHiddenOperation(method, path, op)) continue
       const tag = op.tags?.[0] || 'Other'
       if (!tagGroups[tag]) tagGroups[tag] = []
       tagGroups[tag].push({ path, method, op })
@@ -184,7 +184,7 @@ for (const [tag, eps] of Object.entries(tagGroups)) {
 const summaryMap = {}
 for (const [path, methods] of Object.entries(spec.paths || {})) {
   for (const [method, op] of Object.entries(methods)) {
-    if (HIDDEN_METHODS.has(method) || isHidden(op)) continue
+    if (isHiddenOperation(method, path, op)) continue
     const key = `${method.toUpperCase()} ${path}`
     if (op.summary) summaryMap[op.summary.trim()] = key
     if (op.operationId) summaryMap[op.operationId] = key
