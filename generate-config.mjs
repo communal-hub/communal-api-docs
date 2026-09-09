@@ -41,6 +41,7 @@ const PHOSPHOR_TO_LUCIDE = {
   'phosphor/regular/book-open-text': 'book-open-text',
   'phosphor/regular/user-gear': 'user-cog',
   'phosphor/regular/identification-card': 'id-card',
+  'phosphor/regular/list-bullets': 'list',
   'phosphor/regular/list-magnifying-glass': 'text-search',
   'phosphor/regular/plus-circle': 'circle-plus',
   'phosphor/regular/envelope': 'mail',
@@ -89,6 +90,7 @@ export const NAVIGATION = [
         children: [
           { kind: 'doc', slug: 'platform/users/users-overview', file: 'docs/guides/users-overview.md', label: 'Users', icon: 'phosphor/regular/book-open-text' },
           { kind: 'doc', slug: 'platform/users/update-user-profiles', file: 'docs/guides/update-user-profiles.md', label: 'Update user profiles', icon: 'phosphor/regular/user-gear' },
+          { kind: 'doc', slug: 'platform/users/custom-profile-fields', file: 'docs/guides/custom-profile-fields.md', label: 'Read custom profile fields', icon: 'phosphor/regular/list-bullets' },
         ],
       },
       {

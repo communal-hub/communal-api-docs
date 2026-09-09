@@ -4,6 +4,8 @@ Source for the Communal Platform API docs, a self-hosted [Zudoku](https://zudoku
 
 Navigation is one declarative tree, the `NAVIGATION` constant in [`generate-config.mjs`](generate-config.mjs). Three artifacts derive from it by pure function: the Zudoku `navigation` array, the legacy version-prefixed guide redirects in `public/_redirects`, and the URL inventory [`verify-docs.mjs`](verify-docs.mjs) asserts against. Editing the tree updates all three, so they cannot drift. Page titles and icons live in that tree, not in Markdown frontmatter; none of the guide files carry any.
 
+A doc node's `slug` is its canonical URL path, and the empty slug is the site root, so `/` serves the Overview page itself rather than bouncing to another URL. A node's optional `previousSlug` is the path it used to be served at; it 301s to `slug`, and the version-prefixed redirects are built from it too, so a page that moves never leaves a redirect chain behind.
+
 The API reference is built from [`versions.mjs`](versions.mjs). Every version reuses the same guides; only the `/reference` OpenAPI document differs, and Zudoku renders a version selector across them. Guides publish once at their canonical paths, and the version prefixes Scalar used (`/2026-03-25/...`, `/2026-02-01/...`) 301 to those paths.
 
 ## Prerequisites
@@ -36,7 +38,7 @@ The API reference is built from [`versions.mjs`](versions.mjs). Every version re
 
 ## Contributing
 
-1. Add or edit Markdown under `docs/`, then add the page to `NAVIGATION` in `generate-config.mjs` with its full canonical `slug`, `label`, and a [Lucide](https://lucide.dev/icons/) `icon`. A page not in the tree gets no navigation entry and no redirect.
+1. Add or edit Markdown under `docs/`, then add the page to `NAVIGATION` in `generate-config.mjs` with its full canonical `slug`, `label`, and an `icon`. Icons are written as the Phosphor names the Scalar config used and translated by the `PHOSPHOR_TO_LUCIDE` table, which throws on a name it does not know. Moving a page means changing its `slug` and setting `previousSlug` to the old one. A page left out of the tree gets no navigation entry, no redirect, and fails `verify-docs`.
 2. Run `npm run generate-config` and commit the regenerated `zudoku.config.ts` and `public/_redirects` alongside your change.
 3. Run `npm run build && npm run build:docs && npm run verify-docs` before opening a pull request.
 4. `fetch-spec` overwrites each `docs/<date>/openapi.json` and then runs [`normalize-openapi.mjs`](normalize-openapi.mjs), which drops path-level `servers` entries pointing at tenant subdomains and re-applies `x-tagGroups`. For a permanent fix, remove those entries in the API generator that publishes `api.json`.

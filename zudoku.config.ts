@@ -113,6 +113,13 @@ const config: ZudokuConfig = {
               "path": "platform/users/update-user-profiles",
               "label": "Update user profiles",
               "icon": "user-cog"
+            },
+            {
+              "type": "doc",
+              "file": "docs/guides/custom-profile-fields.md",
+              "path": "platform/users/custom-profile-fields",
+              "label": "Read custom profile fields",
+              "icon": "list"
             }
           ]
         },
