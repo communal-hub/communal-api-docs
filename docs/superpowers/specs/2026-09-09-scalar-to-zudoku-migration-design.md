@@ -293,7 +293,10 @@ in the static output.
 - The reference nests by `x-tagGroups` for each version.
 - Search returns hits from guides **and** from the reference.
 - A sample of version-prefixed guide URLs 301s to canonical.
-- `/basics` resolves via `category.link` (it is a live URL today, not only `/`).
+- `/basics` 301s to `/`, and `/` serves the Overview as a real page.
+- No redirect points at another redirect.
+- No page title repeats the site name.
+- No prerendered guide page sits outside the navigation tree.
 - A sample of old reference deep links lands on the right tag page.
 - `llms.txt`, `llms-endpoints.json`, and `llms-summary-map.json` are present
   at the site root in `dist`.
@@ -301,9 +304,29 @@ in the static output.
 
 ## Open questions
 
-- Exact Lucide equivalents for several Phosphor icons
-  (`brackets-curly`, `identification-card`, `list-magnifying-glass`) are
-  resolved during implementation against the Lucide icon set.
+**Resolved during implementation.**
+
+- Lucide equivalents are a 24-entry `PHOSPHOR_TO_LUCIDE` table in
+  `generate-config.mjs`. `lucideIcon()` throws on an unmapped name, so a new
+  Phosphor icon fails the build rather than rendering a blank.
+- `docs/guides/custom-profile-fields.md` joins the navigation under `Users` at
+  `/platform/users/custom-profile-fields`. It is a 21st Markdown file the
+  Scalar navigation never listed, and the four links to it from
+  `update-user-profiles.md` and `users-overview.md` 404 on the live site
+  today. This migration fixes them.
+- The site root serves the Overview as a real prerendered page. `/basics`
+  becomes a 301 to `/`, so the currently indexed URL survives without leaving
+  duplicate content. A doc node carries an optional `previousSlug`, and every
+  redirect derived from it targets the canonical slug in one hop.
+- The `metadata.title` template drops the brand suffix. A page's own title
+  already carries the brand on the homepage and on all 68 reference pages, so
+  appending it rendered the name twice on 69 of 90 pages.
+
+**Still open.**
+
 - Whether to drop `llms-endpoints.json` and `llms-summary-map.json` once
   `public/index.html`, their only in-repo consumer, is deleted.
 - Whether to canonicalise the duplicate default-version reference URLs.
+- The 68 reference tag pages title as `<Tag> - Communal Platform API`, which
+  comes from the OpenAPI `info.title`. Changing it belongs in the API
+  generator that publishes `api.json`, not here.
