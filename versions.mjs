@@ -1,7 +1,7 @@
 // Single source of truth for API documentation versions.
 //
 // The docs use Stripe-style date-based versioning (X-Api-Version: YYYY-MM-DD).
-// Each entry becomes one item in the Scalar version selector and one OpenAPI
+// Each entry becomes one item in the reference's version selector and one OpenAPI
 // document under docs/<date>/openapi.json.
 //
 // Adding a version is automatic: `fetch-spec` calls `syncVersions()` (see
@@ -13,7 +13,7 @@
 // leaves the list alone. Removing a sunset version is still a manual edit.
 //
 // Rules:
-//   - Exactly one entry MUST have `id: 'default'` (Scalar requires it; shown first).
+//   - Exactly one entry MUST have `id: 'default'`; it is the current version, shown first.
 //   - `date` is the display title and the local directory name.
 //   - `spec` is the S3 object filename. The current/live version tracks the
 //     always-latest `api.json`; frozen versions use `api-<date>.json`.
@@ -21,12 +21,11 @@
 
 const S3_BASE = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs'
 
-// Scalar Registry coordinates. Every version publishes to this ONE registry API
-// (@<namespace>/<slug>) as a distinct registry *version*, so the Scalar dashboard
-// shows a single "API Document" with a version selector instead of one entry per
-// version (which is what produced communal-platform-api + communal-platform-api-1).
-// `publish-registry.mjs` uploads the specs; the production docs reference routes
-// point at `registryUrl(version)` (see generate-config.mjs).
+// Scalar Registry coordinates, used only by `publish-registry.mjs`. Every version
+// publishes to this ONE registry API (@<namespace>/<slug>) as a distinct registry
+// *version*, so the Scalar dashboard shows a single "API Document" with a version
+// selector instead of one entry per version. Retained until the DNS cutover off
+// Scalar is confirmed.
 export const REGISTRY_NAMESPACE = 'getcommunal'
 export const REGISTRY_SLUG = 'communal-platform-api'
 
@@ -35,8 +34,8 @@ export const REGISTRY_SLUG = 'communal-platform-api'
 // array down to this one so the published "Server" selector offers Prod alone.
 export const PRODUCTION_SERVER_URL = 'https://api.getcommunal.com/api'
 
-// True when this process is a production docs build (set by `npm run publish`).
-// Preview and plain `fetch-spec` leave it unset, keeping all servers selectable.
+// True when this process is a production docs build. Preview and plain `fetch-spec`
+// leave it unset, keeping all servers selectable.
 export const IS_PRODUCTION = process.env.SCALAR_ENV === 'production'
 
 export const VERSIONS = [
@@ -60,14 +59,4 @@ export function specUrl(version) {
 /** Local path the spec is written to (one directory per version). */
 export function specPath(version) {
   return `docs/${version.date}/openapi.json`
-}
-
-/**
- * Scalar Registry document URL for a version. All versions share one slug; the
- * trailing path segment selects the registry version. Used by the production
- * docs reference route so the published reference reads from the single
- * versioned registry API rather than a separate uploaded document.
- */
-export function registryUrl(version) {
-  return `https://registry.scalar.com/@${REGISTRY_NAMESPACE}/apis/${REGISTRY_SLUG}/${version.date}?format=json`
 }

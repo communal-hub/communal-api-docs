@@ -1,35 +1,50 @@
 # Communal API documentation
 
-Source for the Communal Platform API docs published with [Scalar](https://scalar.com/). Guides live in [`docs/`](docs/); the OpenAPI description is [`docs/openapi.json`](docs/openapi.json). Navigation uses **Scalar 2.0** in [`scalar.config.json`](scalar.config.json) (Scalar expects this exact filename for preview and hosted Docs): top tabs (**Get Started** first, then **API Reference**), grouped guide sections (**Basics** / **Platform guides** with nested modules—**Programs** contains programs, registration opportunities, program signups, and attendance; **Membership** is its own section; **Activities** and **Users** are each their own section), and the reference in **nested** mode with **`x-tagGroups`** (applied by [`normalize-openapi.mjs`](normalize-openapi.mjs) after each `fetch-spec`).
+Source for the Communal Platform API docs, a self-hosted [Zudoku](https://zudoku.dev/) static site deployed to Netlify at `docs.getcommunal.com`. Guides live in [`docs/`](docs/); each version's OpenAPI description is `docs/<date>/openapi.json`.
+
+Navigation is one declarative tree, the `NAVIGATION` constant in [`generate-config.mjs`](generate-config.mjs). Three artifacts derive from it by pure function: the Zudoku `navigation` array, the legacy version-prefixed guide redirects in `public/_redirects`, and the URL inventory [`verify-docs.mjs`](verify-docs.mjs) asserts against. Editing the tree updates all three, so they cannot drift. Page titles and icons live in that tree, not in Markdown frontmatter; none of the guide files carry any.
+
+A doc node's `slug` is its canonical URL path, and the empty slug is the site root, so `/` serves the Overview page itself rather than bouncing to another URL. A node's optional `previousSlug` is the path it used to be served at; it 301s to `slug`, and the version-prefixed redirects are built from it too, so a page that moves never leaves a redirect chain behind.
+
+The API reference is built from [`versions.mjs`](versions.mjs). Every version reuses the same guides; only the `/reference` OpenAPI document differs, and Zudoku renders a version selector across them. Guides publish once at their canonical paths, and the version prefixes Scalar used (`/2026-03-25/...`, `/2026-02-01/...`) 301 to those paths.
 
 ## Prerequisites
 
-- **Node.js 24+** — required by `@scalar/cli` for `npm run preview`, `npm run publish`, and `npx scalar upgrade`. **Netlify supports Node 24** in builds; this repo sets `NODE_VERSION = "24"` in [netlify.toml](netlify.toml) so production installs match the CLI. With [nvm](https://github.com/nvm-sh/nvm), run `nvm use` (see [`.nvmrc`](.nvmrc)).
-- `npm run build` only needs Node 18+ in practice, but the repo standardizes on 24 for one toolchain.
+- **Node.js 24+.** With [nvm](https://github.com/nvm-sh/nvm), run `nvm use` (see [`.nvmrc`](.nvmrc)). [netlify.toml](netlify.toml) pins `NODE_VERSION = "24"` so production builds match.
+- `npm install` once, then any script below.
 
 ## Scripts
 
 | Command | Purpose |
 |---------|---------|
 | `npm run fetch-spec` | Download each version's spec from S3 into `docs/<date>/openapi.json` (per [`versions.mjs`](versions.mjs)), then normalize each. |
-| `npm run normalize-spec` | Remove per-path `servers` overrides from a version's spec so Try It uses global servers (production central host). |
-| `npm run build` | Generate `public/llms.txt`, `public/llms-endpoints.json`, and `public/llms-summary-map.json` from the OpenAPI spec. |
-| `npm run preview` | Fetch specs, then open a local Scalar preview. Reference reads the on-disk specs (preview unpublished spec changes); keeps all servers (Local/Staging/Prod) selectable. |
-| `npm run publish-registry` | Publish every version's spec to the single registry API `@getcommunal/communal-platform-api`, each as its own registry **version** (requires Scalar CLI auth). |
-| `npm run publish` | Fetch specs, publish them to the registry, then publish the docs project (requires Scalar CLI auth). Runs in `SCALAR_ENV=production`, which (a) reduces the OpenAPI `servers` array to **Prod only** (`https://api.getcommunal.com/api`) and (b) points each docs version's reference at the shared versioned registry API, so the registry shows **one** entry with a version selector rather than `communal-platform-api`, `communal-platform-api-1`, … |
+| `npm run normalize-spec` | Remove per-path `servers` overrides from a version's spec so the reference uses the global production host. |
+| `npm run generate-config` | Regenerate `zudoku.config.ts` and `public/_redirects` from the `NAVIGATION` tree, and stage each version's spec under a unique filename in `.zudoku-specs/`. |
+| `npm run build` | Generate `public/llms.txt`, `public/llms-endpoints.json`, and `public/llms-summary-map.json` from the current OpenAPI spec. |
+| `npm run dev` | Regenerate the config, then serve the site locally with hot reload. |
+| `npm run build:docs` | Regenerate the config, then build the static site into `dist/`. |
+| `npm run verify-docs` | Assert a built `dist/` against the navigation tree and `versions.mjs`. Exits non-zero on the first broken guarantee. |
+| `npm run publish-registry` | Publish every version's spec to the Scalar registry API `@getcommunal/communal-platform-api`. Retained as the pre-cutover rollback path; not part of the Netlify build. |
+
+`build` must run before `build:docs`: `build.mjs` writes the `llms.*` artifacts into `public/`, and the Zudoku build copies `public/` into `dist/`.
 
 ## Layout
 
-- **`docs/*.md`** — Guide pages (overview, auth, concepts, API usage, per-area guides under `docs/guides/`).
-- **`docs/openapi.json`** — OpenAPI 3.1 document (committed snapshot; refresh with `fetch-spec` when the API changes).
-- **`public/`** — Static assets for Netlify (`index.html`, logos) plus generated LLM helper files from `build`.
+- **`docs/*.md`, `docs/guides/*.md`** — Guide pages. No frontmatter; titles and icons come from `NAVIGATION`.
+- **`docs/<date>/openapi.json`** — One normalized OpenAPI 3.1 document per version (committed snapshots; refresh with `fetch-spec`).
+- **`public/`** — Served from the site root: logos, favicon, `_redirects`, and the generated `llms.*` artifacts.
+- **`zudoku.config.ts`, `public/_redirects`** — Generated. Commit them, never hand-edit them.
+- **`scalar.config.json`, `publish-registry.mjs`** — The Scalar setup, kept until the DNS cutover is confirmed. A follow-up removes them.
 
 ## Contributing
 
-1. Edit Markdown or config locally; keep content aligned with the published OpenAPI (avoid undocumented headers or paths).
-2. Run `npm run build` before committing if `docs/openapi.json` changed (regenerates `public/llms.*`).
-3. `fetch-spec` overwrites `docs/openapi.json`. This repo runs [`normalize-openapi.mjs`](normalize-openapi.mjs) afterward to drop path-level `servers` entries that pointed at tenant subdomains, so Scalar matches the central API host. For a permanent fix, remove those entries in the API generator that publishes `api.json`.
+1. Add or edit Markdown under `docs/`, then add the page to `NAVIGATION` in `generate-config.mjs` with its full canonical `slug`, `label`, and an `icon`. Icons are written as the Phosphor names the Scalar config used and translated by the `PHOSPHOR_TO_LUCIDE` table, which throws on a name it does not know. Moving a page means changing its `slug` and setting `previousSlug` to the old one. A page left out of the tree gets no navigation entry, no redirect, and fails `verify-docs`.
+2. Run `npm run generate-config` and commit the regenerated `zudoku.config.ts` and `public/_redirects` alongside your change.
+3. Run `npm run build && npm run build:docs && npm run verify-docs` before opening a pull request.
+4. `fetch-spec` overwrites each `docs/<date>/openapi.json` and then runs [`normalize-openapi.mjs`](normalize-openapi.mjs), which drops path-level `servers` entries pointing at tenant subdomains and re-applies `x-tagGroups`. For a permanent fix, remove those entries in the API generator that publishes `api.json`.
 
 ## Deployment
 
-Netlify runs `npm install && npm run build` and publishes the `public/` directory. Scalar-hosted API reference and guides are synced via Scalar’s GitHub integration or `npm run publish` depending on your workflow.
+Netlify runs `npm ci && npm run build && npm run build:docs` and publishes `dist/`. `build.mjs` fetches the live spec from S3 at build time, so builds depend on that bucket being reachable.
+
+Adding an API version needs only a `versions.mjs` edit; `sync-versions.mjs` performs that edit automatically when the upstream `info.version` changes. The version selector, the reference routes, and the guide redirect prefixes all follow from `VERSIONS`.
