@@ -49,7 +49,7 @@ const config: ZudokuConfig = {
       "link": {
         "type": "doc",
         "file": "docs/overview.md",
-        "path": "basics",
+        "path": "",
         "label": "Overview"
       },
       "items": [
@@ -248,13 +248,7 @@ const config: ZudokuConfig = {
       "showVersionSelect": "always",
       "disablePlayground": true
     }
-  },
-  "redirects": [
-    {
-      "from": "/",
-      "to": "/basics"
-    }
-  ]
+  }
 };
 
 export default config;

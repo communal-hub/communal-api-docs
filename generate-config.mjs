@@ -54,8 +54,11 @@ const PHOSPHOR_TO_LUCIDE = {
 
 /**
  * The navigation. `slug` is the full canonical URL path, so no artifact has to
- * reassemble one. A category's `indexDoc` becomes Zudoku's `category.link`,
- * which is what makes /basics a page rather than a bare grouping label.
+ * reassemble one; the empty slug is the site root. A category's `indexDoc`
+ * becomes Zudoku's `category.link`, which is what gives the category itself a
+ * page. `previousSlug` is the path a page used to be served at, which 301s to
+ * `slug` and is also what the version-prefixed legacy redirects are built from,
+ * so a moved page never produces a redirect chain.
  */
 export const NAVIGATION = [
   {
@@ -63,7 +66,7 @@ export const NAVIGATION = [
     slug: 'basics',
     label: 'Basics',
     icon: 'phosphor/regular/info',
-    indexDoc: { kind: 'doc', slug: 'basics', file: 'docs/overview.md', label: 'Overview' },
+    indexDoc: { kind: 'doc', slug: '', previousSlug: 'basics', file: 'docs/overview.md', label: 'Overview' },
     children: [
       { kind: 'doc', slug: 'basics/getting-started', file: 'docs/getting-started.md', label: 'Getting started', icon: 'phosphor/regular/flag' },
       { kind: 'doc', slug: 'basics/authentication', file: 'docs/authentication.md', label: 'Authentication', icon: 'phosphor/regular/key' },
@@ -175,20 +178,26 @@ export function toDocs(tree) {
 }
 
 /**
- * Scalar published every guide under each non-default version prefix as well as
- * canonically. Those 301 back to the single canonical page.
+ * Every guide URL that is not canonical, 301ing to the one that is. Scalar
+ * published each guide under every non-default version prefix as well as at its
+ * own path, and a page that has since moved leaves its old path behind. Both
+ * kinds target the canonical slug directly, never another redirect.
  */
-export function toLegacyGuideRedirects(tree) {
+export function toGuideRedirects(tree) {
   const prefixes = VERSIONS.filter((v) => v.id !== 'default').map((v) => v.date)
-  return prefixes.flatMap((prefix) =>
-    toDocs(tree).map(({ slug }) => [`/${prefix}/${slug}`, `/${slug}`]),
-  )
+  return toDocs(tree).flatMap((doc) => {
+    const published = doc.previousSlug ?? doc.slug
+    return [
+      ...(doc.previousSlug ? [[`/${doc.previousSlug}`, `/${doc.slug}`]] : []),
+      ...prefixes.map((prefix) => [`/${prefix}/${published}`, `/${doc.slug}`]),
+    ]
+  })
 }
 
 export function toRedirectsFile(tree) {
   const rules = [
     ...REFERENCE_REDIRECTS.map(([from, to]) => [from, to]),
-    ...toLegacyGuideRedirects(tree),
+    ...toGuideRedirects(tree),
   ]
   const fromWidth = Math.max(...rules.map(([from]) => from.length))
   const toWidth = Math.max(...rules.map(([, to]) => to.length))
@@ -231,7 +240,6 @@ export function toZudokuConfig(tree) {
       path: '/reference',
       options: { showVersionSelect: 'always', disablePlayground: true },
     },
-    redirects: [{ from: '/', to: '/basics' }],
   }
 }
 
@@ -254,7 +262,7 @@ if (import.meta.main) {
   writeFileSync('zudoku.config.ts', toConfigFile(NAVIGATION), 'utf8')
   writeFileSync('public/_redirects', toRedirectsFile(NAVIGATION), 'utf8')
   const docs = toDocs(NAVIGATION).length
-  const redirects = toLegacyGuideRedirects(NAVIGATION).length + REFERENCE_REDIRECTS.length
+  const redirects = toGuideRedirects(NAVIGATION).length + REFERENCE_REDIRECTS.length
   console.log(
     `generate-config: wrote zudoku.config.ts (${docs} guides, ${VERSIONS.length} API versions) and public/_redirects (${redirects} rules)`,
   )

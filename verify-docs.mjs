@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
-import { NAVIGATION, toDocs, toLegacyGuideRedirects } from './generate-config.mjs'
+import { NAVIGATION, toDocs, toGuideRedirects } from './generate-config.mjs'
 import { DEFAULT_VERSION, VERSIONS, specPath } from './versions.mjs'
 
 // Proves a built dist/ against the navigation tree and versions.mjs. Rerun it
@@ -13,6 +13,9 @@ const FRAGMENT_PREFIX = 'pagefind_dcd'
 // reference fragment proves search really reaches the reference. The check below
 // re-proves that property against the guide sources on every run.
 const REFERENCE_ONLY_TERM = 'prompt_for_number_of_guests'
+// Body text from docs/overview.md, so a redirect stub at the root cannot pass.
+const ROOT_BODY_TEXT = 'lets your organization integrate with Communal programmatically'
+const ROOT_MIN_BYTES = 2000
 
 const slugify = (str) =>
   str
@@ -22,6 +25,9 @@ const slugify = (str) =>
     .replace(/['‘’“”]/g, '')
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
+
+const pagePath = (slug) => (slug === '' ? 'index' : slug)
+const pageUrl = (slug) => (slug === '' ? '/' : `/${slug}`)
 
 const listMissing = (missing, total) =>
   `${missing.length} of ${total} missing: ${missing.slice(0, 5).join(', ')}${missing.length > 5 ? ', ...' : ''}`
@@ -67,20 +73,28 @@ const referencePages = VERSIONS.flatMap((version) => {
 const fragments = loadFragments()
 const guideFragments = fragments.filter((f) => !f.url.startsWith('/reference'))
 const referenceFragments = fragments.filter((f) => f.url.startsWith('/reference'))
-const redirects = existsSync(`${DIST}/_redirects`)
+const rules = existsSync(`${DIST}/_redirects`)
   ? readFileSync(`${DIST}/_redirects`, 'utf8')
-  : ''
+      .split('\n')
+      .map((line) => line.trim().split(/\s+/))
+      .filter((rule) => rule.length === 3)
+  : []
+const hasRule = (from, to) =>
+  rules.some((rule) => rule[0] === from && rule[1] === to && rule[2] === '301')
 
-check('every canonical guide URL is prerendered', () => {
-  const missing = guideSlugs.filter((slug) => !existsSync(`${DIST}/${slug}.html`))
-  return missing.length ? listMissing(missing, guideSlugs.length) : null
+check('every navigation doc is prerendered', () => {
+  const missing = guideSlugs.filter((slug) => !existsSync(`${DIST}/${pagePath(slug)}.html`))
+  return missing.length ? listMissing(missing.map(pageUrl), guideSlugs.length) : null
 })
 
-check('the site root is prerendered', () =>
-  existsSync(`${DIST}/index.html`) ? null : `${DIST}/index.html is missing`)
-
-check('/basics is a page, not a bare category label', () =>
-  existsSync(`${DIST}/basics.html`) ? null : `${DIST}/basics.html is missing`)
+check('the site root serves the overview, not a redirect stub', () => {
+  if (!existsSync(`${DIST}/index.html`)) return `${DIST}/index.html is missing`
+  const html = readFileSync(`${DIST}/index.html`, 'utf8')
+  if (html.length < ROOT_MIN_BYTES) {
+    return `${DIST}/index.html is ${html.length} bytes, too small to be a real page`
+  }
+  return html.includes(ROOT_BODY_TEXT) ? null : `does not contain '${ROOT_BODY_TEXT}'`
+})
 
 check('the reference is prerendered for every version and tag', () => {
   const missing = referencePages.filter((page) => !existsSync(`${DIST}/${page}.html`))
@@ -89,7 +103,7 @@ check('the reference is prerendered for every version and tag', () => {
 
 check('Pagefind indexed the guides', () => {
   const indexed = new Set(guideFragments.map((f) => f.url))
-  const missing = guideSlugs.filter((slug) => !indexed.has(`/${slug}`))
+  const missing = guideSlugs.map(pageUrl).filter((url) => !indexed.has(url))
   return missing.length ? listMissing(missing, guideSlugs.length) : null
 })
 
@@ -125,26 +139,31 @@ check('the llms artifacts ship at the site root', () => {
 })
 
 check('_redirects ships the reference splat rules', () => {
-  if (!redirects) return `${DIST}/_redirects is missing or empty`
+  if (rules.length === 0) return `${DIST}/_redirects is missing or empty`
   const required = [
     ['/reference/description/introduction', '/reference'],
     ['/reference/tag/:tag', '/reference/:tag'],
     ['/reference/tag/:tag/*', '/reference/:tag'],
   ]
-  const rules = redirects.split('\n').map((line) => line.trim().split(/\s+/))
-  const missing = required.filter(
-    ([from, to]) => !rules.some((rule) => rule[0] === from && rule[1] === to && rule[2] === '301'),
-  )
+  const missing = required.filter(([from, to]) => !hasRule(from, to))
   return missing.length ? `missing ${missing.map(([from]) => from).join(', ')}` : null
 })
 
-check('_redirects ships a 301 for every legacy version-prefixed guide URL', () => {
-  const expected = toLegacyGuideRedirects(NAVIGATION)
-  const rules = redirects.split('\n').map((line) => line.trim().split(/\s+/))
-  const missing = expected.filter(
-    ([from, to]) => !rules.some((rule) => rule[0] === from && rule[1] === to && rule[2] === '301'),
-  )
+check('_redirects ships a 301 for every non-canonical guide URL', () => {
+  const expected = toGuideRedirects(NAVIGATION)
+  const missing = expected.filter(([from, to]) => !hasRule(from, to))
   return missing.length ? listMissing(missing.map(([from]) => from), expected.length) : null
+})
+
+check('_redirects sends the old /basics to the site root', () =>
+  hasRule('/basics', '/') ? null : "no '/basics  /  301' rule")
+
+check('no redirect points at another redirect', () => {
+  const sources = new Set(rules.map((rule) => rule[0]))
+  const chains = rules.filter((rule) => sources.has(rule[1]))
+  return chains.length
+    ? chains.map((rule) => `${rule[0]} -> ${rule[1]} -> ...`).join(', ')
+    : null
 })
 
 const failed = results.filter((r) => r.problem)
