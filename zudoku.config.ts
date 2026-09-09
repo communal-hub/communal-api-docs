@@ -10,6 +10,7 @@ const config: ZudokuConfig = {
         "dark": "/logo-dark.svg"
       },
       "alt": "Communal Platform API",
+      "width": 160,
       "href": "/"
     }
   },
@@ -27,208 +28,207 @@ const config: ZudokuConfig = {
   "search": {
     "type": "pagefind"
   },
-  "header": {
-    "navigation": [
-      {
-        "label": "Get Started",
-        "to": "/basics",
-        "icon": "rocket"
-      },
-      {
-        "label": "API Reference",
-        "to": "/reference",
-        "icon": "plug"
-      }
-    ]
-  },
   "navigation": [
     {
       "type": "category",
-      "label": "Basics",
-      "icon": "info",
-      "link": {
-        "type": "doc",
-        "file": "docs/overview.md",
-        "path": "",
-        "label": "Overview"
-      },
+      "label": "Get Started",
+      "icon": "rocket",
       "items": [
         {
-          "type": "doc",
-          "file": "docs/getting-started.md",
-          "path": "basics/getting-started",
-          "label": "Getting started",
-          "icon": "flag"
+          "type": "category",
+          "label": "Basics",
+          "icon": "info",
+          "link": {
+            "type": "doc",
+            "file": "docs/overview.md",
+            "path": "",
+            "label": "Overview"
+          },
+          "items": [
+            {
+              "type": "doc",
+              "file": "docs/getting-started.md",
+              "path": "basics/getting-started",
+              "label": "Getting started",
+              "icon": "flag"
+            },
+            {
+              "type": "doc",
+              "file": "docs/authentication.md",
+              "path": "basics/authentication",
+              "label": "Authentication",
+              "icon": "key"
+            },
+            {
+              "type": "doc",
+              "file": "docs/using-the-api.md",
+              "path": "basics/using-the-api",
+              "label": "Using the API",
+              "icon": "code"
+            },
+            {
+              "type": "doc",
+              "file": "docs/versioning.md",
+              "path": "basics/versioning",
+              "label": "Versioning",
+              "icon": "git-branch"
+            },
+            {
+              "type": "doc",
+              "file": "docs/mcp-server.md",
+              "path": "basics/mcp-server",
+              "label": "MCP server",
+              "icon": "bot"
+            }
+          ]
         },
         {
-          "type": "doc",
-          "file": "docs/authentication.md",
-          "path": "basics/authentication",
-          "label": "Authentication",
-          "icon": "key"
-        },
-        {
-          "type": "doc",
-          "file": "docs/using-the-api.md",
-          "path": "basics/using-the-api",
-          "label": "Using the API",
-          "icon": "code"
-        },
-        {
-          "type": "doc",
-          "file": "docs/versioning.md",
-          "path": "basics/versioning",
-          "label": "Versioning",
-          "icon": "git-branch"
-        },
-        {
-          "type": "doc",
-          "file": "docs/mcp-server.md",
-          "path": "basics/mcp-server",
-          "label": "MCP server",
-          "icon": "bot"
+          "type": "category",
+          "label": "Platform guides",
+          "icon": "layout-grid",
+          "items": [
+            {
+              "type": "category",
+              "label": "Users",
+              "icon": "user",
+              "items": [
+                {
+                  "type": "doc",
+                  "file": "docs/guides/users-overview.md",
+                  "path": "platform/users/users-overview",
+                  "label": "Users",
+                  "icon": "book-open-text"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/update-user-profiles.md",
+                  "path": "platform/users/update-user-profiles",
+                  "label": "Update user profiles",
+                  "icon": "user-cog"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/custom-profile-fields.md",
+                  "path": "platform/users/custom-profile-fields",
+                  "label": "Read custom profile fields",
+                  "icon": "list"
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Membership",
+              "icon": "id-card",
+              "items": [
+                {
+                  "type": "doc",
+                  "file": "docs/guides/membership-overview.md",
+                  "path": "platform/membership/membership-overview",
+                  "label": "Membership",
+                  "icon": "book-open-text"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/browse-membership-types.md",
+                  "path": "platform/membership/browse-membership-types",
+                  "label": "Browse membership types",
+                  "icon": "text-search"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/create-and-archive-membership-types.md",
+                  "path": "platform/membership/create-and-archive-membership-types",
+                  "label": "Create and archive membership types",
+                  "icon": "circle-plus"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/send-membership-cards.md",
+                  "path": "platform/membership/send-membership-cards",
+                  "label": "Send membership cards",
+                  "icon": "mail"
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Programs",
+              "icon": "folders",
+              "items": [
+                {
+                  "type": "doc",
+                  "file": "docs/guides/programs-overview.md",
+                  "path": "platform/programs/programs-overview",
+                  "label": "Programs & registration",
+                  "icon": "book-open-text"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/fetch-program-information.md",
+                  "path": "platform/programs/fetch-program-information",
+                  "label": "Fetch program information",
+                  "icon": "search"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/browse-registration-opportunities.md",
+                  "path": "platform/programs/browse-registration-opportunities",
+                  "label": "Browse registration opportunities",
+                  "icon": "text-search"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/retrieve-program-signups.md",
+                  "path": "platform/programs/retrieve-program-signups",
+                  "label": "Retrieve program signups",
+                  "icon": "users"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/view-attendance.md",
+                  "path": "platform/programs/view-attendance",
+                  "label": "View attendance",
+                  "icon": "clipboard-list"
+                }
+              ]
+            },
+            {
+              "type": "category",
+              "label": "Activities",
+              "icon": "activity",
+              "items": [
+                {
+                  "type": "doc",
+                  "file": "docs/guides/activities-overview.md",
+                  "path": "platform/activities/activities-overview",
+                  "label": "Activities",
+                  "icon": "book-open-text"
+                },
+                {
+                  "type": "doc",
+                  "file": "docs/guides/track-card-deliveries.md",
+                  "path": "platform/activities/track-card-deliveries",
+                  "label": "Track card deliveries",
+                  "icon": "clipboard-list"
+                }
+              ]
+            },
+            {
+              "type": "doc",
+              "file": "docs/changelog.md",
+              "path": "platform/changelog",
+              "label": "Changelog",
+              "icon": "history"
+            }
+          ]
         }
       ]
     },
     {
-      "type": "category",
-      "label": "Platform guides",
-      "icon": "layout-grid",
-      "items": [
-        {
-          "type": "category",
-          "label": "Users",
-          "icon": "user",
-          "items": [
-            {
-              "type": "doc",
-              "file": "docs/guides/users-overview.md",
-              "path": "platform/users/users-overview",
-              "label": "Users",
-              "icon": "book-open-text"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/update-user-profiles.md",
-              "path": "platform/users/update-user-profiles",
-              "label": "Update user profiles",
-              "icon": "user-cog"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/custom-profile-fields.md",
-              "path": "platform/users/custom-profile-fields",
-              "label": "Read custom profile fields",
-              "icon": "list"
-            }
-          ]
-        },
-        {
-          "type": "category",
-          "label": "Membership",
-          "icon": "id-card",
-          "items": [
-            {
-              "type": "doc",
-              "file": "docs/guides/membership-overview.md",
-              "path": "platform/membership/membership-overview",
-              "label": "Membership",
-              "icon": "book-open-text"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/browse-membership-types.md",
-              "path": "platform/membership/browse-membership-types",
-              "label": "Browse membership types",
-              "icon": "text-search"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/create-and-archive-membership-types.md",
-              "path": "platform/membership/create-and-archive-membership-types",
-              "label": "Create and archive membership types",
-              "icon": "circle-plus"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/send-membership-cards.md",
-              "path": "platform/membership/send-membership-cards",
-              "label": "Send membership cards",
-              "icon": "mail"
-            }
-          ]
-        },
-        {
-          "type": "category",
-          "label": "Programs",
-          "icon": "folders",
-          "items": [
-            {
-              "type": "doc",
-              "file": "docs/guides/programs-overview.md",
-              "path": "platform/programs/programs-overview",
-              "label": "Programs & registration",
-              "icon": "book-open-text"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/fetch-program-information.md",
-              "path": "platform/programs/fetch-program-information",
-              "label": "Fetch program information",
-              "icon": "search"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/browse-registration-opportunities.md",
-              "path": "platform/programs/browse-registration-opportunities",
-              "label": "Browse registration opportunities",
-              "icon": "text-search"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/retrieve-program-signups.md",
-              "path": "platform/programs/retrieve-program-signups",
-              "label": "Retrieve program signups",
-              "icon": "users"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/view-attendance.md",
-              "path": "platform/programs/view-attendance",
-              "label": "View attendance",
-              "icon": "clipboard-list"
-            }
-          ]
-        },
-        {
-          "type": "category",
-          "label": "Activities",
-          "icon": "activity",
-          "items": [
-            {
-              "type": "doc",
-              "file": "docs/guides/activities-overview.md",
-              "path": "platform/activities/activities-overview",
-              "label": "Activities",
-              "icon": "book-open-text"
-            },
-            {
-              "type": "doc",
-              "file": "docs/guides/track-card-deliveries.md",
-              "path": "platform/activities/track-card-deliveries",
-              "label": "Track card deliveries",
-              "icon": "clipboard-list"
-            }
-          ]
-        },
-        {
-          "type": "doc",
-          "file": "docs/changelog.md",
-          "path": "platform/changelog",
-          "label": "Changelog",
-          "icon": "history"
-        }
-      ]
+      "type": "link",
+      "to": "/reference",
+      "label": "API Reference",
+      "icon": "plug"
     }
   ],
   "apis": {

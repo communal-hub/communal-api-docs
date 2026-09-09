@@ -61,7 +61,7 @@ const PHOSPHOR_TO_LUCIDE = {
  * `slug` and is also what the version-prefixed legacy redirects are built from,
  * so a moved page never produces a redirect chain.
  */
-export const NAVIGATION = [
+const DOCS_SECTIONS = [
   {
     kind: 'category',
     slug: 'basics',
@@ -133,6 +133,24 @@ export const NAVIGATION = [
   },
 ]
 
+/**
+ * Scalar published exactly two tabs, Get Started and API Reference, with Basics
+ * and Platform guides as groups inside the first. Zudoku renders each top-level
+ * item as a tab, so the sections nest under one category to reproduce that. A
+ * category with no `indexDoc` resolves its tab to the first child page, which is
+ * the Overview at the site root.
+ */
+export const NAVIGATION = [
+  {
+    kind: 'category',
+    slug: 'get-started',
+    label: 'Get Started',
+    icon: 'phosphor/regular/rocket-launch',
+    children: DOCS_SECTIONS,
+  },
+  { kind: 'link', to: '/reference', label: 'API Reference', icon: 'phosphor/regular/plug' },
+]
+
 /** Reference deep links Zudoku cannot reproduce one-to-one, degraded to their tag page. */
 const REFERENCE_REDIRECTS = [
   ['/reference/description/introduction', '/reference'],
@@ -147,6 +165,9 @@ const lucideIcon = (phosphor) => {
 }
 
 const navigationItem = (node) => {
+  if (node.kind === 'link') {
+    return { type: 'link', to: node.to, label: node.label, icon: lucideIcon(node.icon) }
+  }
   if (node.kind === 'doc') {
     return { type: 'doc', file: node.file, path: node.slug, label: node.label, icon: lucideIcon(node.icon) }
   }
@@ -168,6 +189,7 @@ export const toNavigation = (tree) => tree.map(navigationItem)
 export function toDocs(tree) {
   const docs = []
   const visit = (node) => {
+    if (node.kind === 'link') return
     if (node.kind === 'doc') {
       docs.push(node)
       return
@@ -214,6 +236,9 @@ export function toZudokuConfig(tree) {
       logo: {
         src: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
         alt: SITE_TITLE,
+        // The SVG carries width="620", so it renders at full size unless capped.
+        // 160 is ~27px tall, matching the 28px cap the old Scalar header used.
+        width: 160,
         href: '/',
       },
     },
@@ -229,12 +254,6 @@ export function toZudokuConfig(tree) {
     },
     docs: { files: ['/{docs,docs/guides}/*.md'] },
     search: { type: 'pagefind' },
-    header: {
-      navigation: [
-        { label: 'Get Started', to: '/basics', icon: lucideIcon('phosphor/regular/rocket-launch') },
-        { label: 'API Reference', to: '/reference', icon: lucideIcon('phosphor/regular/plug') },
-      ],
-    },
     navigation: toNavigation(tree),
     apis: {
       type: 'file',

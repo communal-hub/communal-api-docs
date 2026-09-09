@@ -195,6 +195,21 @@ check('_redirects ships a 301 for every non-canonical guide URL', () => {
 check('_redirects sends the old /basics to the site root', () =>
   hasRule('/basics', '/') ? null : "no '/basics  /  301' rule")
 
+check('no navigation link points at a redirect', () => {
+  const targets = []
+  const visit = (node) => {
+    if (node.kind === 'link') targets.push(node.to)
+    else if (node.kind === 'category') {
+      if (node.indexDoc) targets.push(pageUrl(node.indexDoc.slug))
+      node.children.forEach(visit)
+    } else targets.push(pageUrl(node.slug))
+  }
+  NAVIGATION.forEach(visit)
+  const sources = new Set(rules.map(([from]) => from))
+  const stale = targets.filter((to) => sources.has(to))
+  return stale.length ? `${stale.join(', ')} 301s elsewhere, so the navigation takes a needless hop` : null
+})
+
 check('no page title repeats the site name', () => {
   const repeats = allHtmlFiles()
     .map((file) => headTitle(file))
