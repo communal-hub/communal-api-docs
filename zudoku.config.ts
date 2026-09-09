@@ -14,7 +14,7 @@ const config: ZudokuConfig = {
     }
   },
   "metadata": {
-    "title": "%s | Communal Platform API",
+    "title": "%s",
     "defaultTitle": "Communal Platform API",
     "description": "Documentation and API reference for organizations building on Communal.",
     "favicon": "/logo-icon.svg"

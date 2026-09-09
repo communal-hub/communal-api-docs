@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
-import { NAVIGATION, toDocs, toGuideRedirects } from './generate-config.mjs'
+import { NAVIGATION, SITE_TITLE, toDocs, toGuideRedirects } from './generate-config.mjs'
 import { DEFAULT_VERSION, VERSIONS, specPath } from './versions.mjs'
 
 // Proves a built dist/ against the navigation tree and versions.mjs. Rerun it
@@ -88,6 +88,16 @@ const referencePages = VERSIONS.flatMap((version) => {
     ...(spec.tags ?? []).map((tag) => `reference/${slugify(tag.name)}`),
   ]
 })
+
+function allHtmlFiles(dir = DIST) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = `${dir}/${entry.name}`
+    if (entry.isDirectory()) return entry.name === 'pagefind' ? [] : allHtmlFiles(full)
+    return entry.name.endsWith('.html') ? [full] : []
+  })
+}
+
+const headTitle = (file) => readFileSync(file, 'utf8').match(/<title>([^<]*)<\/title>/)?.[1] ?? ''
 
 const fragments = loadFragments()
 const guideFragments = fragments.filter((f) => !f.url.startsWith('/reference'))
@@ -184,6 +194,15 @@ check('_redirects ships a 301 for every non-canonical guide URL', () => {
 
 check('_redirects sends the old /basics to the site root', () =>
   hasRule('/basics', '/') ? null : "no '/basics  /  301' rule")
+
+check('no page title repeats the site name', () => {
+  const repeats = allHtmlFiles()
+    .map((file) => headTitle(file))
+    .filter((title) => title && title.split(SITE_TITLE).length - 1 > 1)
+  return repeats.length
+    ? `${repeats.length} page(s) render the brand twice, e.g. "${repeats[0]}"`
+    : null
+})
 
 check('no redirect points at another redirect', () => {
   const sources = new Set(rules.map((rule) => rule[0]))

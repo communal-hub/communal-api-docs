@@ -16,7 +16,7 @@ import { VERSIONS, specPath } from './versions.mjs'
 const SPEC_STAGE_DIR = '.zudoku-specs'
 const stagedSpecPath = (version) => `${SPEC_STAGE_DIR}/api-${version.date}.json`
 
-const SITE_TITLE = 'Communal Platform API'
+export const SITE_TITLE = 'Communal Platform API'
 const SITE_DESCRIPTION =
   'Documentation and API reference for organizations building on Communal.'
 
@@ -218,7 +218,11 @@ export function toZudokuConfig(tree) {
       },
     },
     metadata: {
-      title: `%s | ${SITE_TITLE}`,
+      // No brand suffix. A page's own title already carries it: the Overview's
+      // H1 is the site title, and Zudoku titles every reference tag page
+      // `<Tag> - <OpenAPI info.title>`. Appending it again rendered the brand
+      // twice on 69 of 90 pages.
+      title: '%s',
       defaultTitle: SITE_TITLE,
       description: SITE_DESCRIPTION,
       favicon: '/logo-icon.svg',
