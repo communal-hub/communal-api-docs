@@ -49,3 +49,6 @@ Thumbs.db
 
 # Codanna
 .codanna/
+
+# zudoku spec staging (see generate-config.mjs)
+/.zudoku-specs/
