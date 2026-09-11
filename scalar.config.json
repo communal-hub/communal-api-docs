@@ -6,7 +6,6 @@
     "description": "Documentation and API reference for organizations building on Communal."
   },
   "siteConfig": {
-    "customDomain": "docs.getcommunal.com",
     "favicon": "./public/logo-icon.svg",
     "logo": {
       "darkMode": "./public/logo-dark.svg",
