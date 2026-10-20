@@ -55,17 +55,11 @@ List all digital member card delivery activities
 
 Content-Type: `application/json`
 
-- `status` (string)
-- `notes` (string,null)
-- `marked_at` (string)
-- `marked_by` (integer)
-
 **Responses:**
 
 - `200`: `AttendanceRecordResource`
 - `401`: 
 - `403`: 
-- `404`: 
 - `422`: 
 
 #### POST /attendance_sheets/{attendance_sheet}/mark
@@ -79,24 +73,6 @@ Content-Type: `application/json`
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `program_id` (integer)
-- `participant_type` (string)
-- `user_id` (integer,null)
-- `additional_member_id` (integer,null)
-- `name` (string,null)
-- `email` (string,null)
-- `telephone` (string,null)
-- `date_of_birth` (string,null)
-- `amount_paid` (number,null)
-- `payment_method` (string,null)
-- `trigger_assign_email` (boolean,null)
-- `attach_invoice` (boolean,null)
-- `status` (string)
-- `additional_member` (object)
-- `notes` (string,null)
-- `marked_at` (string)
-- `marked_by` (integer)
 
 **Responses:**
 
@@ -127,9 +103,11 @@ List attendance records
 **Parameters:**
 
 - `filter[attendance_sheet_id]` (query) - Filter by attendance sheet ID.
+- `filter[query]` (query) - Filter by attendee name.
 - `filter[export]` (query) - When true, request a CSV export.
 - `filter[export_email]` (query) - Email to receive export notification/download link.
 - `include` (query) - Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.
+- `sort` (query) - Sort by attendee name. Prefix with - for descending. Option: participant_name.
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
@@ -305,7 +283,7 @@ facility managers and super admins may view any request in the tenant.
 
 - `booking_request` (path) (required)
 - `include` (query) - Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, files, notes, organization, recurringBooking, tags, formSubmissions, formSubmissions.form, bookingContactDetails, bookingItems, facilities.
-- `append` (query) - Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, next_state, previous_state, participant_name (facility managers and super admins only).
+- `append` (query) - Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, next_state, previous_state, buffer_minutes, participant_name (facility managers and super admins only).
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
@@ -326,6 +304,8 @@ Returns a paginated list of the tenant's custom profile fields. Use
 
 - `cross_tenant_user_id` (query)
 - `cross_tenant_values` (query)
+- `filter[applies_to_users]` (query)
+- `filter[applies_to_family_members]` (query)
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
 **Responses:**
@@ -349,11 +329,6 @@ to also propagate the field to child tenants.
 
 Content-Type: `application/json`
 
-- `name` (string)
-- `display_on_membership_card` (boolean,null)
-- `for_child_tenants` (boolean,null)
-- `user_editable` (boolean,null)
-
 **Responses:**
 
 - `200`: `CustomProfileFieldResource`
@@ -376,11 +351,6 @@ to also propagate the change to child tenants.
 
 Content-Type: `application/json`
 
-- `name` (string)
-- `display_on_membership_card` (boolean,null)
-- `for_child_tenants` (boolean,null)
-- `user_editable` (boolean,null)
-
 **Responses:**
 
 - `200`: `CustomProfileFieldResource`
@@ -395,12 +365,13 @@ Content-Type: `application/json`
 
 List custom profile field values
 Returns a paginated list of stored custom profile field values. Filter by
-`user_id` or `custom_profile_field_id`, and use `?include=customProfileField`
-to embed the parent field.
+`user_id`, `family_id`, or `custom_profile_field_id`, and use
+`?include=customProfileField` to embed the parent field.
 
 **Parameters:**
 
 - `filter[user_id]` (query)
+- `filter[family_id]` (query)
 - `filter[custom_profile_field_id]` (query)
 - `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
 
@@ -414,8 +385,9 @@ to embed the parent field.
 #### POST /custom_profile_field_values
 
 Create custom profile field value
-Stores a value for a custom profile field. Empty values are ignored, and
-values cannot be modified from a parent tenant.
+Stores a value for a custom profile field. POST requires exactly one of
+`user_id` or `family_id`. Empty values are ignored, and values cannot be
+modified from a parent tenant.
 
 **Parameters:**
 
@@ -424,10 +396,6 @@ values cannot be modified from a parent tenant.
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `value` (string,null)
-- `user_id` (integer)
-- `custom_profile_field_id` (integer)
 
 **Responses:**
 
@@ -450,10 +418,6 @@ value clears (deletes) the record.
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `value` (string,null)
-- `user_id` (integer)
-- `custom_profile_field_id` (integer)
 
 **Responses:**
 
@@ -503,24 +467,6 @@ Creates a facility from name, description, and optional booking type, capacity, 
 
 Content-Type: `application/json`
 
-- `publicly_exposed` (boolean)
-- `publicly_exposed_allow_bookings` (boolean)
-- `manager_only` (boolean)
-- `type` (string)
-- `capacity` (integer,null)
-- `booking_interval` (integer)
-- `future_days` (integer)
-- `basis_time` (string)
-- `booking_request_deadline` (integer,null)
-- `publicly_exposed_hide_user_names` (boolean)
-- `prompt_for_booking_owner` (boolean)
-- `prompt_for_adding_more_users` (boolean)
-- `prompt_for_number_of_guests` (boolean)
-- `user_recurring_bookings` (boolean)
-- `user_specified_reason` (boolean)
-- `name` (string)
-- `description` (string)
-
 **Responses:**
 
 - `201`: `FacilityResource`
@@ -565,10 +511,6 @@ is not found, a new user will be created with the additional data supplied.
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `card_types` (array)
-- `user` (object) - User specific data that will stored on the user profile and used to generate the card. If not supplied during
-this request, the data stored on the user profile will be used.
 
 **Responses:**
 
@@ -617,9 +559,6 @@ Reorder items by an ordered array of IDs
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `ids` (array)
-- `prioritized_ids` (array)
 
 **Responses:**
 
@@ -717,44 +656,6 @@ Create a top-level program. Requires the parent-programs:create API key scope an
 
 Content-Type: `application/json`
 
-- `title` (string,null)
-- `description` (string,null)
-- `ongoing` (boolean,null)
-- `event_start_date` (string,null)
-- `event_end_date` (string,null)
-- `profile_image` (string,null)
-- `location_name` (string,null)
-- `location_address` (string,null)
-- `location_latitude` (number,null)
-- `location_longitude` (number,null)
-- `pay_by_cash` (boolean,null)
-- `collection_additional_information` (boolean,null)
-- `require_emergency_contact_information` (boolean,null)
-- `waitlist_enabled` (boolean,null)
-- `prompt_for_registrant` (boolean,null)
-- `unsplash_author_name` (string,null)
-- `unsplash_author_link` (string,null)
-- `demographic` (string,null)
-- `instructor` (string,null)
-- `force_participant_selection` (boolean,null)
-- `display_only` (boolean,null)
-- `draft` (boolean,null)
-- `registration_fee` (number,null)
-- `cap_registration_fee` (boolean,null)
-- `is_event` (boolean,null)
-- `multiple_signups` (boolean,null)
-- `is_hidden` (boolean,null)
-- `show_participant_list` (boolean,null)
-- `hide_participant_details` (boolean,null)
-- `total_spots` (integer,null)
-- `allow_file_uploads` (boolean,null)
-- `file_uploads_required` (boolean,null)
-- `file_uploads_max` (integer,null)
-- `auto_archive` (boolean,null)
-- `auto_archive_days` (integer,null)
-- `participant_must_hold_membership` (boolean,null)
-- `gl_code` (string,null)
-
 **Responses:**
 
 - `200`: `ParentProgram`
@@ -778,9 +679,42 @@ opportunities (sessions) with pricing information.
 
 - `200`: `Program`
 - `401`: 
-- `403`: An error
 
 ### Program Signup
+
+#### GET /program_signups/export-config
+
+Get export configuration for the current model
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: An error
+
+#### GET /program_signups/export
+
+
+**Parameters:**
+
+- `email` (query)
+- `filter[]` (query)
+- `filter[program_id]` (query) - Filter by registration opportunity ID. Supports comma-separated values.
+- `filter[program[parent_program_id]]` (query) - Filter by program ID. Exports signups for all registration opportunities under this program.
+- `filter[signup_status]` (query) - Signup lifecycle filter. Options: active, cancelled, cancelled:member, cancelled:admin. Defaults to active.
+- `filter[timeScope]` (query) - Simple time scope filter. Options: upcoming (includes ongoing and active), past, all.
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `422`: 
 
 #### GET /program_signups
 
@@ -812,7 +746,6 @@ List program signups
 
 #### GET /program_signups/{program_signup}
 
-Get a program signup
 
 **Parameters:**
 
@@ -875,6 +808,26 @@ Returns a paginated list of registration opportunities with optional filtering.
 - `200`: Paginated set of `RegistrationOpportunityResource`
 - `401`: 
 
+#### POST /programs
+
+Create registration opportunity
+Create a registration opportunity under an existing program. Requires the programs:write API key scope and a manager role or an Instructor assigned to that program. Dates and times use the organization timezone.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+**Responses:**
+
+- `200`: `Program`
+- `401`: 
+- `403`: 
+- `422`: 
+
 #### GET /programs/{program}
 
 Get a registration opportunity
@@ -906,18 +859,19 @@ managed-API-key consumers. Every row is scoped to the current tenant.
 - `filter[starting_at]` (query) - Filter to transactions with an effective date on or after this date.
 - `filter[ending_at]` (query) - Filter to transactions with an effective date on or before this date (end of day).
 - `filter[type]` (query) - Filter by transaction type. Supports comma-separated values. Options: membership, program, charge, invoice, donation, booking, refund, transfer. Each option (other than refund) matches both the charge and its refund type.
-- `filter[query]` (query) - Search transactions by related user/guest/account name or email, or by program signup id (subscription schedule lookup).
+- `filter[query]` (query) - Search transactions by related user/guest/account name or email, Stripe or native invoice number, or by program signup id (subscription schedule lookup).
 - `filter[membership_type_id]` (query) - Filter to transactions for the given membership type (plan product) id.
 - `filter[amount]` (query) - Filter by amount in dollars. Pass a bare value for an exact match, or prefix with lte: / gte: for a range bound.
 - `filter[id]` (query) - Filter by exact transaction id. Supports comma-separated values.
 - `filter[payout_id]` (query) - Filter by exact payout id.
+- `filter[invoice_id]` (query) - Filter to transactions linked to the given local invoice id (invoices.id). Matches native_invoice_id and Stripe invoice_id rows for that invoice.
 - `filter[subscription_schedule_id]` (query) - Filter by the local subscription schedule id (transactions.subscription_schedule_id). This is not the Stripe `sub_sched_...` id, which lives on subscription_schedules.stripe_schedule_id.
 - `filter[user_id]` (query) - Filter by exact owning user id.
 - `filter[promotion_code_id]` (query) - Filter by exact promotion code id.
 - `filter[tags]` (query) - Filter by tag name(s). Supports comma-separated values.
 - `filter[with_product]` (query) - Filter to transactions associated with the given product (membership/plan) id. Takes a product id, not a boolean — it matches both transaction line items and invoice items for that product.
 - `filter[with_parent_program]` (query) - Filter to transactions associated with the given parent program id(s), including the refunds of those charges. Takes parent program id(s), not a boolean. Supports comma-separated values.
-- `include` (query) - Include related resources (comma-separated). Only these two options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).
+- `include` (query) - Include related resources (comma-separated). Only these options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity or nativeInvoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).
 - `sort` (query) - Sort by effective date (falls back to created_at). Options: -created_at (descending) or created_at (ascending).
 - `page[number]` (query) - Page number for pagination.
 - `page[size]` (query) - Number of results per page.
@@ -983,22 +937,6 @@ Performs an user update request.
 **Request Body:**
 
 Content-Type: `application/json`
-
-- `name` (string,null) - The full name of the user (generated from first/last name).
-- `first_name` (string) - The first name of the user.
-- `last_name` (string) - The last name of the user.
-- `middle_name` (string,null) - The middle name of the user.
-- `preferred_name` (string,null) - The preferred name of the user.
-- `date_of_birth` (string,null) - The date of birth of the user.
-- `email` (string) - A unique email address for the user.
-- `profile_city` (string,null) - The city of the user.
-- `profile_zip` (string,null) - The postal code or zip code of the user.
-- `profile_state` (string,null) - The province or state of the user.
-- `profile_address` (string,null) - The street address of the user.
-- `profile_address_line_2` (string,null) - The second line of the address of the user.
-- `profile_country` (string,null) - The ISO 3166-1 alpha-2 country code of the user.
-- `telephone` (string,null) - A phone number for the user.
-- `custom_form` (object)
 
 **Responses:**
 
