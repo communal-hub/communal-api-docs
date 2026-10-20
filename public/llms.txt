@@ -1046,7 +1046,7 @@ MCP server tools (55). Each acts as the connected user inside their organization
 
 ### list_programs
 
-List programs. List the organization's programs (the top-level offerings members register for; each program has one or more registration opportunities / sessions beneath it).
+List programs. See the programs your organization runs. List the organization's programs (the top-level offerings members register for; each program has one or more registration opportunities / sessions beneath it).
 Returns a paginated list. Registration opportunities are excluded by default — pass include="programs" to embed them.
 
 REST: GET /parent_programs
@@ -1058,7 +1058,7 @@ REST: GET /parent_programs
 
 ### get_program
 
-Get program. Get one program by id, including all of its configuration fields. Pass include="programs" to embed its registration opportunities (sessions) with pricing.
+Get program. Look at one program's full details and settings. Get one program by id, including all of its configuration fields. Pass include="programs" to embed its registration opportunities (sessions) with pricing.
 
 REST: GET /parent_programs/{parent_program}
 
@@ -1067,7 +1067,7 @@ REST: GET /parent_programs/{parent_program}
 
 ### create_program
 
-Create program. Create a top-level program with optional details and registration settings. Defaults to draft. Requires a Program Manager or Super Admin role. Returns the created program. Does not create registration opportunities, schedules, or prices.
+Create program. Create a new program. It starts as a draft, so you can finish setting it up before anyone sees it. Create a top-level program with optional details and registration settings. Defaults to draft. Requires a Program Manager or Super Admin role. Returns the created program. Does not create registration opportunities, schedules, or prices.
 
 REST: POST /parent_programs
 
@@ -1111,7 +1111,7 @@ REST: POST /parent_programs
 
 ### list_registration_opportunities
 
-List registration opportunities. List registration opportunities (the individual sessions/occurrences of a program that members sign up for). Paginated; supports filtering, sorting and includes.
+List registration opportunities. See the sessions people can sign up for, such as “Spring, Tuesdays 6pm”. List registration opportunities (the individual sessions/occurrences of a program that members sign up for). Paginated; supports filtering, sorting and includes.
 
 REST: GET /programs
 
@@ -1134,7 +1134,7 @@ REST: GET /programs
 
 ### get_registration_opportunity
 
-Get registration opportunity. Get one registration opportunity (program session) by id.
+Get registration opportunity. Look at one session's dates, spots and prices. Get one registration opportunity (program session) by id.
 
 REST: GET /programs/{program}
 
@@ -1144,7 +1144,7 @@ REST: GET /programs/{program}
 
 ### create_registration_opportunity
 
-Create registration opportunity. Create a registration opportunity under an existing program. Requires a manager role or an instructor assigned to that program. Dates and times use the organization timezone. Returns the created registration opportunity.
+Create registration opportunity. Add a session to a program with exact settings. Assistants usually use `add_session` instead. Create a registration opportunity under an existing program. Requires a manager role or an instructor assigned to that program. Dates and times use the organization timezone. Returns the created registration opportunity.
 
 REST: POST /programs
 
@@ -1183,7 +1183,7 @@ REST: POST /programs
 
 ### list_program_signups
 
-List program signups. List program signups (registrations of members/guests to registration opportunities). Paginated. Non-managers only see their own signups.
+List program signups. See who has signed up for your programs and sessions. List program signups (registrations of members/guests to registration opportunities). Paginated. Non-managers only see their own signups.
 
 REST: GET /program_signups
 
@@ -1205,7 +1205,7 @@ REST: GET /program_signups
 
 ### get_program_signup
 
-Get program signup. Get one program signup by id.
+Get program signup. Look at one person's signup. Get one program signup by id.
 
 REST: GET /program_signups/{program_signup}
 
@@ -1214,7 +1214,7 @@ REST: GET /program_signups/{program_signup}
 
 ### export_program_signups
 
-Export program signups as CSV. Export program signups to a CSV file. Accepts the same filters as list_program_signups. Small exports return a temporary download_url (valid ~10 minutes) plus record_count; larger exports are prepared in the background and emailed to the caller, in which case immediate is false and there is no download_url. Requires a manager role; instructors always receive their program-scoped export by email. Share the download_url with the user — do not try to fetch the CSV yourself.
+Export program signups as CSV. Download signups as a spreadsheet (CSV). Large exports are emailed to you instead. Export program signups to a CSV file. Accepts the same filters as list_program_signups. Small exports return a temporary download_url (valid ~10 minutes) plus record_count; larger exports are prepared in the background and emailed to the caller, in which case immediate is false and there is no download_url. Requires a manager role; instructors always receive their program-scoped export by email. Share the download_url with the user — do not try to fetch the CSV yourself.
 
 REST: GET /program_signups/export
 
@@ -1227,7 +1227,7 @@ REST: GET /program_signups/export
 
 ### update_program
 
-Update a program. Change a program's details — title, description, dates, location, price, spots, tags, or whether it's published, hidden or has a waitlist. Only send what you want to change; everything else stays exactly as it is. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to save.
+Update a program. Change a program's details, such as its dates, price, spots or whether it's published. Change a program's details — title, description, dates, location, price, spots, tags, or whether it's published, hidden or has a waitlist. Only send what you want to change; everything else stays exactly as it is. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to save.
 
 - `program` (string) (required) - The program to change: its name (e.g. "Youth Basketball") or ID.
 - `title` (string) - New title.
@@ -1247,7 +1247,7 @@ Update a program. Change a program's details — title, description, dates, loca
 
 ### clone_program
 
-Copy a program. Make a copy of a program — for example to run last season's program again. The copy starts as a draft called "<title> (Copy)", keeps the waivers, facilities and tax settings, and by default copies every session and its prices too. Optionally move all dates forward one year. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to create the copy, then use update_program to rename or publish it.
+Copy a program. Copy a program, for example to run last season again. The copy starts as a draft. Make a copy of a program — for example to run last season's program again. The copy starts as a draft called "<title> (Copy)", keeps the waivers, facilities and tax settings, and by default copies every session and its prices too. Optionally move all dates forward one year. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to create the copy, then use update_program to rename or publish it.
 
 - `program` (string) (required) - The program to copy: its name or ID.
 - `include_sessions` (boolean) - Copy the program’s sessions and their prices too (default true).
@@ -1256,7 +1256,7 @@ Copy a program. Make a copy of a program — for example to run last season's pr
 
 ### add_session
 
-Add a session. Add a session (registration opportunity) to an existing program — for example "Spring 2027, Tuesdays 6–7pm, 12 spots, $40". Give a single date (starts_at/ends_at), a weekly schedule, or ongoing; spots; when sign-up opens and closes (or keep it open until the session starts, the default); and what non-members and specific membership types pay. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to create it.
+Add a session. Add a new session to a program, with its schedule, spots and prices. Add a session (registration opportunity) to an existing program — for example "Spring 2027, Tuesdays 6–7pm, 12 spots, $40". Give a single date (starts_at/ends_at), a weekly schedule, or ongoing; spots; when sign-up opens and closes (or keep it open until the session starts, the default); and what non-members and specific membership types pay. Refer to the program by name or ID. Runs as a preview first; call again with mode "apply" to create it.
 
 REST: POST /programs
 
@@ -1288,7 +1288,7 @@ REST: POST /programs
 
 ### update_session
 
-Update a session. Change one session (registration opportunity) of a program — its name, spots, dates or weekly schedule, sign-up window, waitlist, or prices for non-members and specific membership types. Only send what you want to change; prices, dates and everything else stay exactly as they are. Refer to the session by name or ID, and pass the program too when the session name is used by more than one program. Runs as a preview first; call again with mode "apply" to save.
+Update a session. Change a session's name, spots, dates, schedule, sign-up window or prices. Change one session (registration opportunity) of a program — its name, spots, dates or weekly schedule, sign-up window, waitlist, or prices for non-members and specific membership types. Only send what you want to change; prices, dates and everything else stay exactly as they are. Refer to the session by name or ID, and pass the program too when the session name is used by more than one program. Runs as a preview first; call again with mode "apply" to save.
 
 - `session` (string) (required) - The session to change: its name (e.g. "Spring 2027 — Tuesdays") or ID.
 - `program` (string) - The program the session belongs to (name or ID), to tell apart sessions with the same name.
@@ -1319,7 +1319,7 @@ Update a session. Change one session (registration opportunity) of a program —
 
 ### list_attendance_sheets
 
-List attendance sheets. List attendance sheets (one per registration opportunity occurrence/date). Requires a manager role. Paginated.
+List attendance sheets. See attendance sheets, one for each date a session runs. List attendance sheets (one per registration opportunity occurrence/date). Requires a manager role. Paginated.
 
 REST: GET /attendance_sheets
 
@@ -1334,7 +1334,7 @@ REST: GET /attendance_sheets
 
 ### get_attendance_sheet
 
-Get attendance sheet. Get one attendance sheet by id. Requires a manager role.
+Get attendance sheet. Look at one attendance sheet. Get one attendance sheet by id. Requires a manager role.
 
 REST: GET /attendance_sheets/{attendance_sheet}
 
@@ -1343,7 +1343,7 @@ REST: GET /attendance_sheets/{attendance_sheet}
 
 ### list_attendance_records
 
-List attendance records. List attendance records (a person's attendance status on an attendance sheet). Requires a manager role. Paginated.
+List attendance records. See who was marked present, absent, late or excused. List attendance records (a person's attendance status on an attendance sheet). Requires a manager role. Paginated.
 
 REST: GET /attendance_records
 
@@ -1356,7 +1356,7 @@ REST: GET /attendance_records
 
 ### get_attendance_record
 
-Get attendance record. Get one attendance record by id. Requires a manager role.
+Get attendance record. Look at one person's attendance on one date. Get one attendance record by id. Requires a manager role.
 
 REST: GET /attendance_records/{attendance_record}
 
@@ -1365,7 +1365,7 @@ REST: GET /attendance_records/{attendance_record}
 
 ### mark_attendance_record
 
-Mark attendance. Update an existing attendance record for a program signup on a specific sheet. Accepts status, notes, marked_at (timestamp with timezone), and marked_by (user ID). Timestamp and marker default to now and the credential owner. Requires the owning staff user to be a manager or an instructor assigned to the signup program.
+Mark attendance. Change one person's attendance mark on a sheet. Update an existing attendance record for a program signup on a specific sheet. Accepts status, notes, marked_at (timestamp with timezone), and marked_by (user ID). Timestamp and marker default to now and the credential owner. Requires the owning staff user to be a manager or an instructor assigned to the signup program.
 
 REST: PUT /attendance_records/{attendance_record}/mark
 
@@ -1377,7 +1377,7 @@ REST: PUT /attendance_records/{attendance_record}/mark
 
 ### register_attendance
 
-Register and mark attendance. Create a program signup and mark attendance for a person not previously registered. Use existing_user with user_id for a member, or walk_in with name for a guest. program_id must be a registration opportunity on the attendance sheet. Creates a new signup on each call. Requires the owning staff user to have the existing attendance registration permission: program manager, super admin, or assigned instructor. Returns the attendance record. Timestamp and marker default to now and the credential owner.
+Register and mark attendance. Sign up someone who wasn't registered, such as a walk-in, and mark their attendance in one step. Create a program signup and mark attendance for a person not previously registered. Use existing_user with user_id for a member, or walk_in with name for a guest. program_id must be a registration opportunity on the attendance sheet. Creates a new signup on each call. Requires the owning staff user to have the existing attendance registration permission: program manager, super admin, or assigned instructor. Returns the attendance record. Timestamp and marker default to now and the credential owner.
 
 REST: POST /attendance_sheets/{attendance_sheet}/mark
 
@@ -1409,7 +1409,7 @@ REST: POST /attendance_sheets/{attendance_sheet}/mark
 
 ### mark_attendance
 
-Mark attendance. Mark one or more people present, absent, late, excused or excluded for one date of a session — for example "mark Sam Broadbent and Lena Kowalczyk present at the Competitive Team session on 2026-09-24". Refer to the session and the people by name or ID; no lookups needed. The people must already be on that date's attendance sheet. Runs as a preview first and shows each person's current and new mark; call again with mode "apply" to save.
+Mark attendance. Mark one or more people present, absent, late or excused for one session date. Mark one or more people present, absent, late, excused or excluded for one date of a session — for example "mark Sam Broadbent and Lena Kowalczyk present at the Competitive Team session on 2026-09-24". Refer to the session and the people by name or ID; no lookups needed. The people must already be on that date's attendance sheet. Runs as a preview first and shows each person's current and new mark; call again with mode "apply" to save.
 
 REST: PUT /attendance_records/{attendance_record}/mark
 
@@ -1423,7 +1423,7 @@ REST: PUT /attendance_records/{attendance_record}/mark
 
 ### get_user
 
-Get user. Get one user (member) by id: name, email, telephone, date of birth, subscriptions and family. Non-managers can only read themselves and their family.
+Get user. Look up a person's profile, memberships and family members. Get one user (member) by id: name, email, telephone, date of birth, subscriptions and family. Non-managers can only read themselves and their family.
 
 REST: GET /users/{user}
 
@@ -1432,7 +1432,7 @@ REST: GET /users/{user}
 
 ### update_user
 
-Update user. Update a user's (member's) profile. This is a full update like the REST API's PUT: first_name, last_name and email are always required — read the user first (get_user) and resend the current values for anything you are not changing. Returns the updated user. Non-managers can only update themselves and their family.
+Update user. Update a person's profile with exact values. Assistants usually use `update_member` instead. Update a user's (member's) profile. This is a full update like the REST API's PUT: first_name, last_name and email are always required — read the user first (get_user) and resend the current values for anything you are not changing. Returns the updated user. Non-managers can only update themselves and their family.
 
 REST: PUT /users/{user}
 
@@ -1454,7 +1454,7 @@ REST: PUT /users/{user}
 
 ### create_user
 
-Create user. Create a member in this organization. Requires a manager role. Returns the created user and auto_login flag. A password is generated when omitted, and the existing welcome or profile-completion notification is sent.
+Create user. Add a person with exact settings. Assistants usually use `add_member` instead. Create a member in this organization. Requires a manager role. Returns the created user and auto_login flag. A password is generated when omitted, and the existing welcome or profile-completion notification is sent.
 
 - `first_name` (string) (required) - First name.
 - `last_name` (string) (required) - Last name.
@@ -1471,7 +1471,7 @@ Create user. Create a member in this organization. Requires a manager role. Retu
 
 ### list_custom_profile_fields
 
-List custom profile fields. List the organization's custom profile fields (extra per-member attributes). Paginated. Pass include="values" to embed each field's stored values.
+List custom profile fields. See the extra profile questions your organization asks, such as “Jersey size”. List the organization's custom profile fields (extra per-member attributes). Paginated. Pass include="values" to embed each field's stored values.
 
 REST: GET /custom_profile_fields
 
@@ -1485,7 +1485,7 @@ REST: GET /custom_profile_fields
 
 ### create_custom_profile_field
 
-Create custom profile field. Create a custom profile field. Requires a manager role.
+Create custom profile field. Add a new profile question. Create a custom profile field. Requires a manager role.
 
 REST: POST /custom_profile_fields
 
@@ -1498,7 +1498,7 @@ REST: POST /custom_profile_fields
 
 ### update_custom_profile_field
 
-Update custom profile field. Update a custom profile field's label or flags. Requires a manager role.
+Update custom profile field. Rename a profile question or change its settings. Update a custom profile field's label or flags. Requires a manager role.
 
 REST: PUT /custom_profile_fields/{id}
 
@@ -1512,7 +1512,7 @@ REST: PUT /custom_profile_fields/{id}
 
 ### list_custom_profile_field_values
 
-List custom profile field values. List stored custom profile field values. Filter by user, family member, or field. Paginated. Pass include="customProfileField" to embed the field.
+List custom profile field values. See people's answers to your profile questions. List stored custom profile field values. Filter by user, family member, or field. Paginated. Pass include="customProfileField" to embed the field.
 
 REST: GET /custom_profile_field_values
 
@@ -1527,7 +1527,7 @@ REST: GET /custom_profile_field_values
 
 ### create_custom_profile_field_value
 
-Create custom profile field value. Store a custom profile field value for a user or family member. Provide exactly one of user_id or family_id. Values cannot be modified from a parent organization.
+Create custom profile field value. Save someone's answer to a profile question. Store a custom profile field value for a user or family member. Provide exactly one of user_id or family_id. Values cannot be modified from a parent organization.
 
 REST: POST /custom_profile_field_values
 
@@ -1538,7 +1538,7 @@ REST: POST /custom_profile_field_values
 
 ### update_custom_profile_field_value
 
-Update custom profile field value. Change a stored custom profile field value. Only `value` is used; sending an empty value deletes the stored value.
+Update custom profile field value. Change or clear someone's answer to a profile question. Change a stored custom profile field value. Only `value` is used; sending an empty value deletes the stored value.
 
 REST: PUT /custom_profile_field_values/{id}
 
@@ -1547,7 +1547,7 @@ REST: PUT /custom_profile_field_values/{id}
 
 ### update_member
 
-Update a person. Change a person's details — name, email, phone, date of birth, address, or custom profile fields such as "Jersey Size". Only send what you want to change; everything else stays exactly as it is. Refer to the person by name, email or ID, and to profile fields by their name. Runs as a preview first; call again with mode "apply" to save.
+Update a person. Change a person's name, email, phone, date of birth, address or profile answers. Change a person's details — name, email, phone, date of birth, address, or custom profile fields such as "Jersey Size". Only send what you want to change; everything else stays exactly as it is. Refer to the person by name, email or ID, and to profile fields by their name. Runs as a preview first; call again with mode "apply" to save.
 
 REST: PUT /users/{user}, POST /custom_profile_field_values, PUT /custom_profile_field_values/{id}
 
@@ -1569,7 +1569,7 @@ REST: PUT /users/{user}, POST /custom_profile_field_values, PUT /custom_profile_
 
 ### add_member
 
-Add a person. Add a new person to the organization with their name and email, plus optional phone, address and custom profile fields such as "Jersey Size" (by field name). They get a welcome email as soon as they are added. Warns when someone with the same email or name already exists. Runs as a preview first; call again with mode "apply" to add them. To set a date of birth, use update_member afterwards.
+Add a person. Add a new person to your organization. They get a welcome email right away. Add a new person to the organization with their name and email, plus optional phone, address and custom profile fields such as "Jersey Size" (by field name). They get a welcome email as soon as they are added. Warns when someone with the same email or name already exists. Runs as a preview first; call again with mode "apply" to add them. To set a date of birth, use update_member afterwards.
 
 REST: POST /custom_profile_field_values
 
@@ -1589,7 +1589,7 @@ REST: POST /custom_profile_field_values
 
 ### list_membership_types
 
-List membership types. List all membership types the organization offers, with their plans (prices/billing intervals), status and configuration.
+List membership types. See the memberships you offer and their prices. List all membership types the organization offers, with their plans (prices/billing intervals), status and configuration.
 
 REST: GET /membership_types
 
@@ -1599,7 +1599,7 @@ REST: GET /membership_types
 
 ### get_membership_type
 
-Get membership type. Get one membership type by id, including its plans.
+Get membership type. Look at one membership type and its prices. Get one membership type by id, including its plans.
 
 REST: GET /membership_types/{membership_type}
 
@@ -1607,7 +1607,7 @@ REST: GET /membership_types/{membership_type}
 
 ### archive_membership_type
 
-Archive membership type. Archive a membership type so it can no longer be purchased. Existing memberships are unaffected. Requires a membership manager role.
+Archive membership type. Stop selling a membership type. People who already have it keep it. Archive a membership type so it can no longer be purchased. Existing memberships are unaffected. Requires a membership manager role.
 
 REST: POST /membership_types/{id}/archive
 
@@ -1615,7 +1615,7 @@ REST: POST /membership_types/{id}/archive
 
 ### unarchive_membership_type
 
-Unarchive membership type. Restore a previously archived membership type. Requires a membership manager role.
+Unarchive membership type. Start selling an archived membership type again. Restore a previously archived membership type. Requires a membership manager role.
 
 REST: POST /membership_types/{id}/unarchive
 
@@ -1623,7 +1623,7 @@ REST: POST /membership_types/{id}/unarchive
 
 ### list_user_memberships
 
-List user memberships. List the memberships members hold — which membership type and plan each member is on, its status (active/expired/retrying), expiry date and auto-renewal state. Paginated.
+List user memberships. See who holds which membership, when it expires and whether it renews. List the memberships members hold — which membership type and plan each member is on, its status (active/expired/retrying), expiry date and auto-renewal state. Paginated.
 
 REST: GET /user_memberships
 
@@ -1639,7 +1639,7 @@ REST: GET /user_memberships
 
 ### create_user_membership
 
-Assign a membership. Give an existing member a membership of the given type at no charge. Requires a membership-manager role. When the type has more than one active plan, plan_id is required. A payment the member already made outside Communal is recorded only when payment_method and amount_paid are supplied. Nothing is emailed unless send_email is true; then the member gets a "Membership Assigned" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card).
+Assign a membership. Give someone a membership with exact settings. Assistants usually use `assign_membership` instead. Give an existing member a membership of the given type at no charge. Requires a membership-manager role. When the type has more than one active plan, plan_id is required. A payment the member already made outside Communal is recorded only when payment_method and amount_paid are supplied. Nothing is emailed unless send_email is true; then the member gets a "Membership Assigned" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card).
 
 REST: POST /user_memberships
 
@@ -1653,7 +1653,7 @@ REST: POST /user_memberships
 
 ### get_user_membership
 
-Get user membership. Get one held membership by id, including its membership type and plan.
+Get user membership. Look at one person's membership. Get one held membership by id, including its membership type and plan.
 
 REST: GET /user_memberships/{user_membership}
 
@@ -1661,7 +1661,7 @@ REST: GET /user_memberships/{user_membership}
 
 ### send_membership_card
 
-Send membership card. Send a digital membership card (Apple Wallet, Google Wallet and/or PDF) to a member by email. This does more than send a card: it looks the member up by their member ID (the value of `data[unique_identifier_key]`), creates a new member if none matches, CANCELS every active membership they hold, and gives them the membership type named in `data.MemberType` (which must match a membership type title exactly). It also sends real email. Confirm all of this with the user before calling.
+Send membership card. Send a card using a member ID. It can also add the person and replace their current memberships, so to only send a card, `send_member_card` is safer. Send a digital membership card (Apple Wallet, Google Wallet and/or PDF) to a member by email. This does more than send a card: it looks the member up by their member ID (the value of `data[unique_identifier_key]`), creates a new member if none matches, CANCELS every active membership they hold, and gives them the membership type named in `data.MemberType` (which must match a membership type title exactly). It also sends real email. Confirm all of this with the user before calling.
 
 REST: POST /membership_cards/send
 
@@ -1672,7 +1672,7 @@ REST: POST /membership_cards/send
 
 ### list_membership_card_deliveries
 
-List membership card deliveries. List digital membership card delivery activities (when cards were sent, to whom, and whether delivery succeeded). Paginated.
+List membership card deliveries. See when membership cards were sent and whether they arrived. List digital membership card delivery activities (when cards were sent, to whom, and whether delivery succeeded). Paginated.
 
 REST: GET /activities/card-deliveries
 
@@ -1688,7 +1688,7 @@ REST: GET /activities/card-deliveries
 
 ### update_membership_type
 
-Update a membership type. Change a membership type's details — its name, description, whether members can see it, and its expiry reminder emails. Only send what you want to change; everything else stays exactly as it is. Prices, renewal dates, auto-renewal, tax, waivers and forms can't be changed here — do that in Manage → Memberships. Refer to the membership type by name or ID. Runs as a preview first; call again with mode "apply" to save.
+Update a membership type. Change a membership type's name, description, visibility or reminder emails. Change a membership type's details — its name, description, whether members can see it, and its expiry reminder emails. Only send what you want to change; everything else stays exactly as it is. Prices, renewal dates, auto-renewal, tax, waivers and forms can't be changed here — do that in Manage → Memberships. Refer to the membership type by name or ID. Runs as a preview first; call again with mode "apply" to save.
 
 - `membership_type` (string) (required) - The membership type to change: its name (e.g. "Adult Annual") or ID.
 - `title` (string) - New name.
@@ -1705,7 +1705,7 @@ Update a membership type. Change a membership type's details — its name, descr
 
 ### create_membership_type
 
-Create a membership type. Create a new membership type (for example "Adult Annual" or a "Locker Add-on") with its name, description, how it expires, and its reminder emails. This does not set up any prices: members can't buy the new type until a price is added in Manage → Memberships. Runs as a preview first; call again with mode "apply" to create it.
+Create a membership type. Create a new membership type. Add a price in Communal before people can buy it. Create a new membership type (for example "Adult Annual" or a "Locker Add-on") with its name, description, how it expires, and its reminder emails. This does not set up any prices: members can't buy the new type until a price is added in Manage → Memberships. Runs as a preview first; call again with mode "apply" to create it.
 
 - `title` (string) (required) - Name of the membership type, e.g. "Adult Annual".
 - `description` (string) (required) - What the membership includes (plain text or simple HTML).
@@ -1724,7 +1724,7 @@ Create a membership type. Create a new membership type (for example "Adult Annua
 
 ### send_member_card
 
-Send a member their membership card. Email an existing member their digital membership card for the membership they already have. The email includes the PDF card plus Apple Wallet and Google Wallet versions. It only sends the card: it never creates a person and never changes, cancels or assigns any membership. Refer to the person by name, email or ID. By default the card goes to the email on their profile; pass send_to to use other addresses. Runs as a preview first; call again with mode "apply" to send. Prefer this over send_membership_card.
+Send a member their membership card. Email someone their digital membership card: a PDF plus Apple Wallet and Google Wallet versions. Email an existing member their digital membership card for the membership they already have. The email includes the PDF card plus Apple Wallet and Google Wallet versions. It only sends the card: it never creates a person and never changes, cancels or assigns any membership. Refer to the person by name, email or ID. By default the card goes to the email on their profile; pass send_to to use other addresses. Runs as a preview first; call again with mode "apply" to send. Prefer this over send_membership_card.
 
 - `person` (string) (required) - The member: their name, email or ID. They must already exist.
 - `send_to` (array of strings) - Up to 5 email addresses to send the card to. Defaults to the email on their profile.
@@ -1733,7 +1733,7 @@ Send a member their membership card. Email an existing member their digital memb
 
 ### assign_membership
 
-Assign a membership. Give an existing person a membership: pick the membership type and, when it has more than one, which of its prices (plans). It never cancels their other memberships. Nothing is ever charged: Communal sets the membership up in Stripe with no charge, and can record money the person already paid outside Communal (payment_method plus amount_paid, e.g. "cash" and "120.00"). Nothing is emailed unless send_email is true, so only turn it on when asked; then they get a "Membership Assigned" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card). To send only a card, use send_member_card instead. Refer to the person and the membership type by name or ID. Runs as a preview first; call again with mode "apply" to assign it. To add someone who isn't in Communal yet with a membership, use add_member_with_membership.
+Assign a membership. Give someone a membership. Nothing is charged, and their other memberships stay as they are. Give an existing person a membership: pick the membership type and, when it has more than one, which of its prices (plans). It never cancels their other memberships. Nothing is ever charged: Communal sets the membership up in Stripe with no charge, and can record money the person already paid outside Communal (payment_method plus amount_paid, e.g. "cash" and "120.00"). Nothing is emailed unless send_email is true, so only turn it on when asked; then they get a "Membership Assigned" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card). To send only a card, use send_member_card instead. Refer to the person and the membership type by name or ID. Runs as a preview first; call again with mode "apply" to assign it. To add someone who isn't in Communal yet with a membership, use add_member_with_membership.
 
 REST: POST /user_memberships
 
@@ -1748,7 +1748,7 @@ REST: POST /user_memberships
 
 ### list_transactions
 
-List transactions. List financial transactions (charges, refunds, disputes, transfers, adjustments) for reporting. Paginated. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.
+List transactions. See payments, refunds and other money movements for reporting. List financial transactions (charges, refunds, disputes, transfers, adjustments) for reporting. Paginated. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.
 
 REST: GET /transactions
 
@@ -1775,7 +1775,7 @@ REST: GET /transactions
 
 ### get_transaction
 
-Get transaction. Get one financial transaction by id. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.
+Get transaction. Look at one payment or refund. Get one financial transaction by id. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.
 
 REST: GET /transactions/{transaction}
 
@@ -1783,7 +1783,7 @@ REST: GET /transactions/{transaction}
 
 ### list_bookings
 
-List bookings. List facility bookings for this organization. Paginated. Members see their own bookings; managers see all bookings. Times are UTC ISO 8601; use include/append for owner, facility, and computed fields.
+List bookings. See facility bookings. List facility bookings for this organization. Paginated. Members see their own bookings; managers see all bookings. Times are UTC ISO 8601; use include/append for owner, facility, and computed fields.
 
 REST: GET /bookings
 
@@ -1809,7 +1809,7 @@ REST: GET /bookings
 
 ### get_booking
 
-Get booking. Get one facility booking by id. Members may only fetch their own bookings; managers may fetch any booking in the organization.
+Get booking. Look at one booking. Get one facility booking by id. Members may only fetch their own bookings; managers may fetch any booking in the organization.
 
 REST: GET /bookings/{booking}
 
@@ -1819,7 +1819,7 @@ REST: GET /bookings/{booking}
 
 ### list_booking_requests
 
-List booking requests. List facility booking requests (reservations that go through an approval workflow). Paginated. Members only see their own requests; facility managers and super admins see the full organization. The default row is a curated payload (schedule, cost, owner, facility, state).
+List booking requests. See booking requests that need approval, and ones already decided. List facility booking requests (reservations that go through an approval workflow). Paginated. Members only see their own requests; facility managers and super admins see the full organization. The default row is a curated payload (schedule, cost, owner, facility, state).
 
 REST: GET /booking_requests
 
@@ -1842,7 +1842,7 @@ REST: GET /booking_requests
 
 ### get_booking_request
 
-Get booking request. Get one facility booking request by id. Members may only view their own; facility managers and super admins may view any request in the organization.
+Get booking request. Look at one booking request. Get one facility booking request by id. Members may only view their own; facility managers and super admins may view any request in the organization.
 
 REST: GET /booking_requests/{booking_request}
 
@@ -1852,7 +1852,7 @@ REST: GET /booking_requests/{booking_request}
 
 ### list_facilities
 
-List facilities. List the bookable spaces and resources the organization offers — rooms, courts, fields, equipment — with their booking rules, capacity and membership requirements. Paginated.
+List facilities. See the spaces and equipment people can book, such as rooms, courts and fields. List the bookable spaces and resources the organization offers — rooms, courts, fields, equipment — with their booking rules, capacity and membership requirements. Paginated.
 
 REST: GET /facilities
 
@@ -1868,7 +1868,7 @@ REST: GET /facilities
 
 ### get_facility
 
-Get facility. Get one bookable space or resource by id, including its booking rules, capacity and membership requirements.
+Get facility. Look at one facility's booking rules and capacity. Get one bookable space or resource by id, including its booking rules, capacity and membership requirements.
 
 REST: GET /facilities/{facility}
 
@@ -1877,7 +1877,7 @@ REST: GET /facilities/{facility}
 
 ### create_facility
 
-Create facility. Create a facility configuration record. Requires the facilities:write OAuth scope, independently of user roles. Accepts name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options; other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking.
+Create facility. Add a new facility. It starts hidden, and only managers can book it until you change its settings. Create a facility configuration record. Requires the facilities:write OAuth scope, independently of user roles. Accepts name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options; other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking.
 
 REST: POST /facilities
 
@@ -1902,7 +1902,7 @@ REST: POST /facilities
 
 ### update_facility
 
-Update a facility. Change a facility's own settings — its name, description, booking type, capacity, booking instructions and prompts, booking lengths and interval, buffer, how far ahead and how late it can be booked, public visibility, manager-only booking, recurring bookings, reminder emails and calendar view. Only send what you want to change; everything else stays exactly as it is. Parent and sub-facilities, associated facilities, products, membership requirements, booking checklists, tax, availability and existing bookings can't be changed here — do that in Manage → Facilities. Refer to the facility by name or ID. Runs as a preview first; call again with mode "apply" to save.
+Update a facility. Change a facility's name, description, capacity or booking rules. Change a facility's own settings — its name, description, booking type, capacity, booking instructions and prompts, booking lengths and interval, buffer, how far ahead and how late it can be booked, public visibility, manager-only booking, recurring bookings, reminder emails and calendar view. Only send what you want to change; everything else stays exactly as it is. Parent and sub-facilities, associated facilities, products, membership requirements, booking checklists, tax, availability and existing bookings can't be changed here — do that in Manage → Facilities. Refer to the facility by name or ID. Runs as a preview first; call again with mode "apply" to save.
 
 - `facility` (string) (required) - The facility to change: its name (e.g. "Court 1") or ID.
 - `name` (string) - New name.
@@ -1935,7 +1935,7 @@ Update a facility. Change a facility's own settings — its name, description, b
 
 ### find_records
 
-Find records by name. Look up programs, sessions, people, membership types or facilities by name and get their IDs. Most task tools also accept a plain name wherever they ask for a record, so you only need this when a name is ambiguous or you want to browse. Leave query empty to list the most relevant records of that kind.
+Find records by name. Find a program, session, person, membership type or facility by name. Look up programs, sessions, people, membership types or facilities by name and get their IDs. Most task tools also accept a plain name wherever they ask for a record, so you only need this when a name is ambiguous or you want to browse. Leave query empty to list the most relevant records of that kind.
 
 - `kind` (`booking`, `booking_request`, `booking_state`, `facility`, `invoice`, `membership_price`, `membership_type`, `notification`, `organization`, `person`, `product`, `program`, `session`, `subscription`, `tag`, `transaction`, `volunteer_hour_submission`, `volunteer_shift`) (required) - What to look for. A "program" is a top-level offering (e.g. "Youth Basketball"); a "session" is one of its sign-up options (e.g. "Spring 2026, Tuesdays").
 - `query` (string) - Part of the name (or email, for people). Leave empty to browse.

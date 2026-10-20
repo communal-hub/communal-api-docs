@@ -8,6 +8,7 @@
         {
             "name": "list_programs",
             "title": "List programs",
+            "summary": "See the programs your organization runs.",
             "description": "List the organization's programs (the top-level offerings members register for; each program has one or more registration opportunities / sessions beneath it).\nReturns a paginated list. Registration opportunities are excluded by default — pass include=\"programs\" to embed them.",
             "domain": "programs",
             "kind": "endpoint",
@@ -50,6 +51,7 @@
         {
             "name": "get_program",
             "title": "Get program",
+            "summary": "Look at one program's full details and settings.",
             "description": "Get one program by id, including all of its configuration fields. Pass include=\"programs\" to embed its registration opportunities (sessions) with pricing.",
             "domain": "programs",
             "kind": "endpoint",
@@ -82,6 +84,7 @@
         {
             "name": "create_program",
             "title": "Create program",
+            "summary": "Create a new program. It starts as a draft, so you can finish setting it up before anyone sees it.",
             "description": "Create a top-level program with optional details and registration settings. Defaults to draft. Requires a Program Manager or Super Admin role. Returns the created program. Does not create registration opportunities, schedules, or prices.",
             "domain": "programs",
             "kind": "endpoint",
@@ -264,6 +267,7 @@
         {
             "name": "list_registration_opportunities",
             "title": "List registration opportunities",
+            "summary": "See the sessions people can sign up for, such as “Spring, Tuesdays 6pm”.",
             "description": "List registration opportunities (the individual sessions/occurrences of a program that members sign up for). Paginated; supports filtering, sorting and includes.",
             "domain": "programs",
             "kind": "endpoint",
@@ -356,6 +360,7 @@
         {
             "name": "get_registration_opportunity",
             "title": "Get registration opportunity",
+            "summary": "Look at one session's dates, spots and prices.",
             "description": "Get one registration opportunity (program session) by id.",
             "domain": "programs",
             "kind": "endpoint",
@@ -392,6 +397,7 @@
         {
             "name": "create_registration_opportunity",
             "title": "Create registration opportunity",
+            "summary": "Add a session to a program with exact settings. Assistants usually use `add_session` instead.",
             "description": "Create a registration opportunity under an existing program. Requires a manager role or an instructor assigned to that program. Dates and times use the organization timezone. Returns the created registration opportunity.",
             "domain": "programs",
             "kind": "endpoint",
@@ -564,6 +570,7 @@
         {
             "name": "list_program_signups",
             "title": "List program signups",
+            "summary": "See who has signed up for your programs and sessions.",
             "description": "List program signups (registrations of members/guests to registration opportunities). Paginated. Non-managers only see their own signups.",
             "domain": "programs",
             "kind": "endpoint",
@@ -657,6 +664,7 @@
         {
             "name": "get_program_signup",
             "title": "Get program signup",
+            "summary": "Look at one person's signup.",
             "description": "Get one program signup by id.",
             "domain": "programs",
             "kind": "endpoint",
@@ -689,6 +697,7 @@
         {
             "name": "export_program_signups",
             "title": "Export program signups as CSV",
+            "summary": "Download signups as a spreadsheet (CSV). Large exports are emailed to you instead.",
             "description": "Export program signups to a CSV file. Accepts the same filters as list_program_signups. Small exports return a temporary download_url (valid ~10 minutes) plus record_count; larger exports are prepared in the background and emailed to the caller, in which case immediate is false and there is no download_url. Requires a manager role; instructors always receive their program-scoped export by email. Share the download_url with the user — do not try to fetch the CSV yourself.",
             "domain": "programs",
             "kind": "endpoint",
@@ -743,6 +752,7 @@
         {
             "name": "update_program",
             "title": "Update a program",
+            "summary": "Change a program's details, such as its dates, price, spots or whether it's published.",
             "description": "Change a program's details — title, description, dates, location, price, spots, tags, or whether it's published, hidden or has a waitlist. Only send what you want to change; everything else stays exactly as it is. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
             "domain": "programs",
             "kind": "task",
@@ -837,6 +847,7 @@
         {
             "name": "clone_program",
             "title": "Copy a program",
+            "summary": "Copy a program, for example to run last season again. The copy starts as a draft.",
             "description": "Make a copy of a program — for example to run last season's program again. The copy starts as a draft called \"<title> (Copy)\", keeps the waivers, facilities and tax settings, and by default copies every session and its prices too. Optionally move all dates forward one year. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to create the copy, then use update_program to rename or publish it.",
             "domain": "programs",
             "kind": "task",
@@ -883,6 +894,7 @@
         {
             "name": "add_session",
             "title": "Add a session",
+            "summary": "Add a new session to a program, with its schedule, spots and prices.",
             "description": "Add a session (registration opportunity) to an existing program — for example \"Spring 2027, Tuesdays 6–7pm, 12 spots, $40\". Give a single date (starts_at/ends_at), a weekly schedule, or ongoing; spots; when sign-up opens and closes (or keep it open until the session starts, the default); and what non-members and specific membership types pay. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to create it.",
             "domain": "programs",
             "kind": "task",
@@ -1039,6 +1051,7 @@
         {
             "name": "update_session",
             "title": "Update a session",
+            "summary": "Change a session's name, spots, dates, schedule, sign-up window or prices.",
             "description": "Change one session (registration opportunity) of a program — its name, spots, dates or weekly schedule, sign-up window, waitlist, or prices for non-members and specific membership types. Only send what you want to change; prices, dates and everything else stay exactly as they are. Refer to the session by name or ID, and pass the program too when the session name is used by more than one program. Runs as a preview first; call again with mode \"apply\" to save.",
             "domain": "programs",
             "kind": "task",
@@ -1198,6 +1211,7 @@
         {
             "name": "list_attendance_sheets",
             "title": "List attendance sheets",
+            "summary": "See attendance sheets, one for each date a session runs.",
             "description": "List attendance sheets (one per registration opportunity occurrence/date). Requires a manager role. Paginated.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1258,6 +1272,7 @@
         {
             "name": "get_attendance_sheet",
             "title": "Get attendance sheet",
+            "summary": "Look at one attendance sheet.",
             "description": "Get one attendance sheet by id. Requires a manager role.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1290,6 +1305,7 @@
         {
             "name": "list_attendance_records",
             "title": "List attendance records",
+            "summary": "See who was marked present, absent, late or excused.",
             "description": "List attendance records (a person's attendance status on an attendance sheet). Requires a manager role. Paginated.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1342,6 +1358,7 @@
         {
             "name": "get_attendance_record",
             "title": "Get attendance record",
+            "summary": "Look at one person's attendance on one date.",
             "description": "Get one attendance record by id. Requires a manager role.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1374,6 +1391,7 @@
         {
             "name": "mark_attendance_record",
             "title": "Mark attendance",
+            "summary": "Change one person's attendance mark on a sheet.",
             "description": "Update an existing attendance record for a program signup on a specific sheet. Accepts status, notes, marked_at (timestamp with timezone), and marked_by (user ID). Timestamp and marker default to now and the credential owner. Requires the owning staff user to be a manager or an instructor assigned to the signup program.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1433,6 +1451,7 @@
         {
             "name": "register_attendance",
             "title": "Register and mark attendance",
+            "summary": "Sign up someone who wasn't registered, such as a walk-in, and mark their attendance in one step.",
             "description": "Create a program signup and mark attendance for a person not previously registered. Use existing_user with user_id for a member, or walk_in with name for a guest. program_id must be a registration opportunity on the attendance sheet. Creates a new signup on each call. Requires the owning staff user to have the existing attendance registration permission: program manager, super admin, or assigned instructor. Returns the attendance record. Timestamp and marker default to now and the credential owner.",
             "domain": "attendance",
             "kind": "endpoint",
@@ -1593,6 +1612,7 @@
         {
             "name": "mark_attendance",
             "title": "Mark attendance",
+            "summary": "Mark one or more people present, absent, late or excused for one session date.",
             "description": "Mark one or more people present, absent, late, excused or excluded for one date of a session — for example \"mark Sam Broadbent and Lena Kowalczyk present at the Competitive Team session on 2026-09-24\". Refer to the session and the people by name or ID; no lookups needed. The people must already be on that date's attendance sheet. Runs as a preview first and shows each person's current and new mark; call again with mode \"apply\" to save.",
             "domain": "attendance",
             "kind": "task",
@@ -1667,6 +1687,7 @@
         {
             "name": "get_user",
             "title": "Get user",
+            "summary": "Look up a person's profile, memberships and family members.",
             "description": "Get one user (member) by id: name, email, telephone, date of birth, subscriptions and family. Non-managers can only read themselves and their family.",
             "domain": "people",
             "kind": "endpoint",
@@ -1699,6 +1720,7 @@
         {
             "name": "update_user",
             "title": "Update user",
+            "summary": "Update a person's profile with exact values. Assistants usually use `update_member` instead.",
             "description": "Update a user's (member's) profile. This is a full update like the REST API's PUT: first_name, last_name and email are always required — read the user first (get_user) and resend the current values for anything you are not changing. Returns the updated user. Non-managers can only update themselves and their family.",
             "domain": "people",
             "kind": "endpoint",
@@ -1788,6 +1810,7 @@
         {
             "name": "create_user",
             "title": "Create user",
+            "summary": "Add a person with exact settings. Assistants usually use `add_member` instead.",
             "description": "Create a member in this organization. Requires a manager role. Returns the created user and auto_login flag. A password is generated when omitted, and the existing welcome or profile-completion notification is sent.",
             "domain": "people",
             "kind": "endpoint",
@@ -1864,6 +1887,7 @@
         {
             "name": "list_custom_profile_fields",
             "title": "List custom profile fields",
+            "summary": "See the extra profile questions your organization asks, such as “Jersey size”.",
             "description": "List the organization's custom profile fields (extra per-member attributes). Paginated. Pass include=\"values\" to embed each field's stored values.",
             "domain": "people",
             "kind": "endpoint",
@@ -1920,6 +1944,7 @@
         {
             "name": "create_custom_profile_field",
             "title": "Create custom profile field",
+            "summary": "Add a new profile question.",
             "description": "Create a custom profile field. Requires a manager role.",
             "domain": "people",
             "kind": "endpoint",
@@ -1970,6 +1995,7 @@
         {
             "name": "update_custom_profile_field",
             "title": "Update custom profile field",
+            "summary": "Rename a profile question or change its settings.",
             "description": "Update a custom profile field's label or flags. Requires a manager role.",
             "domain": "people",
             "kind": "endpoint",
@@ -2025,6 +2051,7 @@
         {
             "name": "list_custom_profile_field_values",
             "title": "List custom profile field values",
+            "summary": "See people's answers to your profile questions.",
             "description": "List stored custom profile field values. Filter by user, family member, or field. Paginated. Pass include=\"customProfileField\" to embed the field.",
             "domain": "people",
             "kind": "endpoint",
@@ -2085,6 +2112,7 @@
         {
             "name": "create_custom_profile_field_value",
             "title": "Create custom profile field value",
+            "summary": "Save someone's answer to a profile question.",
             "description": "Store a custom profile field value for a user or family member. Provide exactly one of user_id or family_id. Values cannot be modified from a parent organization.",
             "domain": "people",
             "kind": "endpoint",
@@ -2127,6 +2155,7 @@
         {
             "name": "update_custom_profile_field_value",
             "title": "Update custom profile field value",
+            "summary": "Change or clear someone's answer to a profile question.",
             "description": "Change a stored custom profile field value. Only `value` is used; sending an empty value deletes the stored value.",
             "domain": "people",
             "kind": "endpoint",
@@ -2161,6 +2190,7 @@
         {
             "name": "update_member",
             "title": "Update a person",
+            "summary": "Change a person's name, email, phone, date of birth, address or profile answers.",
             "description": "Change a person's details — name, email, phone, date of birth, address, or custom profile fields such as \"Jersey Size\". Only send what you want to change; everything else stays exactly as it is. Refer to the person by name, email or ID, and to profile fields by their name. Runs as a preview first; call again with mode \"apply\" to save.",
             "domain": "people",
             "kind": "task",
@@ -2259,6 +2289,7 @@
         {
             "name": "add_member",
             "title": "Add a person",
+            "summary": "Add a new person to your organization. They get a welcome email right away.",
             "description": "Add a new person to the organization with their name and email, plus optional phone, address and custom profile fields such as \"Jersey Size\" (by field name). They get a welcome email as soon as they are added. Warns when someone with the same email or name already exists. Runs as a preview first; call again with mode \"apply\" to add them. To set a date of birth, use update_member afterwards.",
             "domain": "people",
             "kind": "task",
@@ -2347,6 +2378,7 @@
         {
             "name": "list_membership_types",
             "title": "List membership types",
+            "summary": "See the memberships you offer and their prices.",
             "description": "List all membership types the organization offers, with their plans (prices/billing intervals), status and configuration.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2385,6 +2417,7 @@
         {
             "name": "get_membership_type",
             "title": "Get membership type",
+            "summary": "Look at one membership type and its prices.",
             "description": "Get one membership type by id, including its plans.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2413,6 +2446,7 @@
         {
             "name": "archive_membership_type",
             "title": "Archive membership type",
+            "summary": "Stop selling a membership type. People who already have it keep it.",
             "description": "Archive a membership type so it can no longer be purchased. Existing memberships are unaffected. Requires a membership manager role.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2443,6 +2477,7 @@
         {
             "name": "unarchive_membership_type",
             "title": "Unarchive membership type",
+            "summary": "Start selling an archived membership type again.",
             "description": "Restore a previously archived membership type. Requires a membership manager role.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2473,6 +2508,7 @@
         {
             "name": "list_user_memberships",
             "title": "List user memberships",
+            "summary": "See who holds which membership, when it expires and whether it renews.",
             "description": "List the memberships members hold — which membership type and plan each member is on, its status (active/expired/retrying), expiry date and auto-renewal state. Paginated.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2537,6 +2573,7 @@
         {
             "name": "create_user_membership",
             "title": "Assign a membership",
+            "summary": "Give someone a membership with exact settings. Assistants usually use `assign_membership` instead.",
             "description": "Give an existing member a membership of the given type at no charge. Requires a membership-manager role. When the type has more than one active plan, plan_id is required. A payment the member already made outside Communal is recorded only when payment_method and amount_paid are supplied. Nothing is emailed unless send_email is true; then the member gets a \"Membership Assigned\" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card).",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2592,6 +2629,7 @@
         {
             "name": "get_user_membership",
             "title": "Get user membership",
+            "summary": "Look at one person's membership.",
             "description": "Get one held membership by id, including its membership type and plan.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2620,6 +2658,7 @@
         {
             "name": "send_membership_card",
             "title": "Send membership card",
+            "summary": "Send a card using a member ID. It can also add the person and replace their current memberships, so to only send a card, `send_member_card` is safer.",
             "description": "Send a digital membership card (Apple Wallet, Google Wallet and/or PDF) to a member by email. This does more than send a card: it looks the member up by their member ID (the value of `data[unique_identifier_key]`), creates a new member if none matches, CANCELS every active membership they hold, and gives them the membership type named in `data.MemberType` (which must match a membership type title exactly). It also sends real email. Confirm all of this with the user before calling.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2676,6 +2715,7 @@
         {
             "name": "list_membership_card_deliveries",
             "title": "List membership card deliveries",
+            "summary": "See when membership cards were sent and whether they arrived.",
             "description": "List digital membership card delivery activities (when cards were sent, to whom, and whether delivery succeeded). Paginated.",
             "domain": "memberships",
             "kind": "endpoint",
@@ -2744,6 +2784,7 @@
         {
             "name": "update_membership_type",
             "title": "Update a membership type",
+            "summary": "Change a membership type's name, description, visibility or reminder emails.",
             "description": "Change a membership type's details — its name, description, whether members can see it, and its expiry reminder emails. Only send what you want to change; everything else stays exactly as it is. Prices, renewal dates, auto-renewal, tax, waivers and forms can't be changed here — do that in Manage → Memberships. Refer to the membership type by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
             "domain": "memberships",
             "kind": "task",
@@ -2825,6 +2866,7 @@
         {
             "name": "create_membership_type",
             "title": "Create a membership type",
+            "summary": "Create a new membership type. Add a price in Communal before people can buy it.",
             "description": "Create a new membership type (for example \"Adult Annual\" or a \"Locker Add-on\") with its name, description, how it expires, and its reminder emails. This does not set up any prices: members can't buy the new type until a price is added in Manage → Memberships. Runs as a preview first; call again with mode \"apply\" to create it.",
             "domain": "memberships",
             "kind": "task",
@@ -2919,6 +2961,7 @@
         {
             "name": "send_member_card",
             "title": "Send a member their membership card",
+            "summary": "Email someone their digital membership card: a PDF plus Apple Wallet and Google Wallet versions.",
             "description": "Email an existing member their digital membership card for the membership they already have. The email includes the PDF card plus Apple Wallet and Google Wallet versions. It only sends the card: it never creates a person and never changes, cancels or assigns any membership. Refer to the person by name, email or ID. By default the card goes to the email on their profile; pass send_to to use other addresses. Runs as a preview first; call again with mode \"apply\" to send. Prefer this over send_membership_card.",
             "domain": "memberships",
             "kind": "task",
@@ -2977,6 +3020,7 @@
         {
             "name": "assign_membership",
             "title": "Assign a membership",
+            "summary": "Give someone a membership. Nothing is charged, and their other memberships stay as they are.",
             "description": "Give an existing person a membership: pick the membership type and, when it has more than one, which of its prices (plans). It never cancels their other memberships. Nothing is ever charged: Communal sets the membership up in Stripe with no charge, and can record money the person already paid outside Communal (payment_method plus amount_paid, e.g. \"cash\" and \"120.00\"). Nothing is emailed unless send_email is true, so only turn it on when asked; then they get a \"Membership Assigned\" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card). To send only a card, use send_member_card instead. Refer to the person and the membership type by name or ID. Runs as a preview first; call again with mode \"apply\" to assign it. To add someone who isn't in Communal yet with a membership, use add_member_with_membership.",
             "domain": "memberships",
             "kind": "task",
@@ -3051,6 +3095,7 @@
         {
             "name": "list_transactions",
             "title": "List transactions",
+            "summary": "See payments, refunds and other money movements for reporting.",
             "description": "List financial transactions (charges, refunds, disputes, transfers, adjustments) for reporting. Paginated. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.",
             "domain": "payments",
             "kind": "endpoint",
@@ -3172,6 +3217,7 @@
         {
             "name": "get_transaction",
             "title": "Get transaction",
+            "summary": "Look at one payment or refund.",
             "description": "Get one financial transaction by id. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.",
             "domain": "payments",
             "kind": "endpoint",
@@ -3200,6 +3246,7 @@
         {
             "name": "list_bookings",
             "title": "List bookings",
+            "summary": "See facility bookings.",
             "description": "List facility bookings for this organization. Paginated. Members see their own bookings; managers see all bookings. Times are UTC ISO 8601; use include/append for owner, facility, and computed fields.",
             "domain": "bookings",
             "kind": "endpoint",
@@ -3304,6 +3351,7 @@
         {
             "name": "get_booking",
             "title": "Get booking",
+            "summary": "Look at one booking.",
             "description": "Get one facility booking by id. Members may only fetch their own bookings; managers may fetch any booking in the organization.",
             "domain": "bookings",
             "kind": "endpoint",
@@ -3340,6 +3388,7 @@
         {
             "name": "list_booking_requests",
             "title": "List booking requests",
+            "summary": "See booking requests that need approval, and ones already decided.",
             "description": "List facility booking requests (reservations that go through an approval workflow). Paginated. Members only see their own requests; facility managers and super admins see the full organization. The default row is a curated payload (schedule, cost, owner, facility, state).",
             "domain": "bookings",
             "kind": "endpoint",
@@ -3432,6 +3481,7 @@
         {
             "name": "get_booking_request",
             "title": "Get booking request",
+            "summary": "Look at one booking request.",
             "description": "Get one facility booking request by id. Members may only view their own; facility managers and super admins may view any request in the organization.",
             "domain": "bookings",
             "kind": "endpoint",
@@ -3468,6 +3518,7 @@
         {
             "name": "list_facilities",
             "title": "List facilities",
+            "summary": "See the spaces and equipment people can book, such as rooms, courts and fields.",
             "description": "List the bookable spaces and resources the organization offers — rooms, courts, fields, equipment — with their booking rules, capacity and membership requirements. Paginated.",
             "domain": "facilities",
             "kind": "endpoint",
@@ -3532,6 +3583,7 @@
         {
             "name": "get_facility",
             "title": "Get facility",
+            "summary": "Look at one facility's booking rules and capacity.",
             "description": "Get one bookable space or resource by id, including its booking rules, capacity and membership requirements.",
             "domain": "facilities",
             "kind": "endpoint",
@@ -3564,6 +3616,7 @@
         {
             "name": "create_facility",
             "title": "Create facility",
+            "summary": "Add a new facility. It starts hidden, and only managers can book it until you change its settings.",
             "description": "Create a facility configuration record. Requires the facilities:write OAuth scope, independently of user roles. Accepts name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options; other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking.",
             "domain": "facilities",
             "kind": "endpoint",
@@ -3694,6 +3747,7 @@
         {
             "name": "update_facility",
             "title": "Update a facility",
+            "summary": "Change a facility's name, description, capacity or booking rules.",
             "description": "Change a facility's own settings — its name, description, booking type, capacity, booking instructions and prompts, booking lengths and interval, buffer, how far ahead and how late it can be booked, public visibility, manager-only booking, recurring bookings, reminder emails and calendar view. Only send what you want to change; everything else stays exactly as it is. Parent and sub-facilities, associated facilities, products, membership requirements, booking checklists, tax, availability and existing bookings can't be changed here — do that in Manage → Facilities. Refer to the facility by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
             "domain": "facilities",
             "kind": "task",
@@ -3860,6 +3914,7 @@
         {
             "name": "find_records",
             "title": "Find records by name",
+            "summary": "Find a program, session, person, membership type or facility by name.",
             "description": "Look up programs, sessions, people, membership types or facilities by name and get their IDs. Most task tools also accept a plain name wherever they ask for a record, so you only need this when a name is ambiguous or you want to browse. Leave query empty to list the most relevant records of that kind.",
             "domain": "assistant",
             "kind": "lookup",

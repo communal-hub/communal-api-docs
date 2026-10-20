@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import { NAVIGATION, SITE_TITLE, toDocs, toGuideRedirects } from './generate-config.mjs'
 import { DEFAULT_VERSION, VERSIONS, specPath } from './versions.mjs'
-import { MCP_TOOLS_PAGE, loadManifest, referenceLinks, toToolsPage } from './mcp-tools.mjs'
+import { MCP_REFERENCE_PAGE, MCP_TOOLS_PAGE, loadManifest, referenceLinks, toReferencePage, toToolsPage } from './mcp-tools.mjs'
 
 // Proves a built dist/ against the navigation tree and versions.mjs. Rerun it
 // after any build: `npm run build && npm run build:docs && npm run verify-docs`.
@@ -229,32 +229,52 @@ check('no redirect points at another redirect', () => {
 })
 
 const mcpManifest = loadManifest()
-const mcpToolsDoc = guides.find((doc) => doc.file === MCP_TOOLS_PAGE)
+const mcpSpec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
+const builtGuide = (file) => {
+  const doc = guides.find((guide) => guide.file === file)
+  if (!doc) throw new Error(`${file} is not in the navigation tree`)
+  const html = `${DIST}/${pagePath(doc.slug)}.html`
+  if (!existsSync(html)) throw new Error(`${html} is missing`)
+  return readFileSync(html, 'utf8')
+}
 
-check('the MCP tools page is current with the manifest snapshot', () => {
-  const spec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
-  return readFileSync(MCP_TOOLS_PAGE, 'utf8') === toToolsPage(mcpManifest, spec)
-    ? null
-    : `${MCP_TOOLS_PAGE} differs from the manifest; run npm run generate-config`
+check('the MCP tool pages are current with the manifest snapshot', () => {
+  const stale = [
+    [MCP_TOOLS_PAGE, toToolsPage(mcpManifest)],
+    [MCP_REFERENCE_PAGE, toReferencePage(mcpManifest, mcpSpec)],
+  ].filter(([file, expected]) => readFileSync(file, 'utf8') !== expected)
+  return stale.length
+    ? `${stale.map(([file]) => file).join(', ')} differ from the manifest; run npm run generate-config`
+    : null
 })
 
-check('every MCP tool has an anchor on the MCP tools page', () => {
-  if (!mcpToolsDoc) return `${MCP_TOOLS_PAGE} is not in the navigation tree`
-  const file = `${DIST}/${pagePath(mcpToolsDoc.slug)}.html`
-  if (!existsSync(file)) return `${file} is missing`
-  const html = readFileSync(file, 'utf8')
+check('every MCP tool has a plain-language summary', () => {
+  const missing = mcpManifest.tools.filter((tool) => !tool.summary?.trim()).map((tool) => tool.name)
+  return missing.length
+    ? `${listMissing(missing, mcpManifest.tools.length)}; add #[Summary] to the tool in community-management`
+    : null
+})
+
+check('every MCP tool is listed on the What AI assistants can do page', () => {
+  const html = builtGuide(MCP_TOOLS_PAGE)
+  const missing = mcpManifest.tools.map((tool) => tool.name).filter((name) => !html.includes(`>${name}</code>`))
+  return missing.length ? listMissing(missing, mcpManifest.tools.length) : null
+})
+
+check('every MCP tool has an anchor on the MCP tool reference', () => {
+  const html = builtGuide(MCP_REFERENCE_PAGE)
   const names = mcpManifest.tools.map((tool) => tool.name)
   const missing = names.filter((name) => !html.includes(`id="${name}"`))
   return missing.length ? listMissing(missing, names.length) : null
 })
 
 check('every MCP tool reference link resolves to a reference operation', () => {
-  const spec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
-  const broken = [...new Set(referenceLinks(spec).values())]
-    .filter((href) => readFileSync(MCP_TOOLS_PAGE, 'utf8').includes(`](${href})`))
+  const page = readFileSync(MCP_REFERENCE_PAGE, 'utf8')
+  const broken = [...new Set(referenceLinks(mcpSpec).values())]
+    .filter((href) => page.includes(`](${href})`))
     .filter((href) => {
-      const [page, anchor] = href.slice(1).split('#')
-      const file = `${DIST}/${page}.html`
+      const [path, anchor] = href.slice(1).split('#')
+      const file = `${DIST}/${path}.html`
       return !existsSync(file) || !readFileSync(file, 'utf8').includes(`id="${anchor}"`)
     })
   return broken.length ? listMissing(broken, broken.length) : null

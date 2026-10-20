@@ -77,14 +77,21 @@ const config: ZudokuConfig = {
               "type": "doc",
               "file": "docs/mcp-server.md",
               "path": "basics/mcp-server",
-              "label": "MCP server",
+              "label": "Connect an AI assistant",
               "icon": "bot"
             },
             {
               "type": "doc",
               "file": "docs/mcp-tools.md",
               "path": "basics/mcp-tools",
-              "label": "MCP tools",
+              "label": "What AI assistants can do",
+              "icon": "message-square-text"
+            },
+            {
+              "type": "doc",
+              "file": "docs/mcp-tool-reference.md",
+              "path": "basics/mcp-tool-reference",
+              "label": "MCP tool reference",
               "icon": "wrench"
             }
           ]

@@ -2,28 +2,84 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { DEFAULT_VERSION, specPath } from './versions.mjs'
 import { isHiddenOperation } from './normalize-openapi.mjs'
 
-// The MCP tool reference. community-management publishes the public tool
-// manifest (`php artisan docs:export-to-s3` -> docs/mcp-tools.json), fetch-spec
-// snapshots it into MCP_MANIFEST_PATH, and generate-config renders it into
-// MCP_TOOLS_PAGE. The page is generated: edit the tool descriptions in
-// community-management, never the Markdown.
+// The MCP tool pages. community-management publishes the public tool manifest
+// (`php artisan docs:export-to-s3` -> docs/mcp-tools.json), fetch-spec snapshots
+// it into MCP_MANIFEST_PATH, and generate-config renders two pages from it:
+//
+//   MCP_TOOLS_PAGE      for the people who use an assistant day to day, most of
+//                       whom are not developers: each tool's plain-language
+//                       `summary`, grouped by area, with example requests.
+//   MCP_REFERENCE_PAGE  for developers: descriptions, parameters and the REST
+//                       operations behind each tool.
+//
+// Both pages are generated. Tool wording (summary, title, description,
+// parameters) is edited on the tool in community-management; the area intros
+// and example requests below are the only copy that lives here.
 
 export const MCP_MANIFEST_PATH = 'docs/mcp/tools.json'
 export const MCP_TOOLS_PAGE = 'docs/mcp-tools.md'
+export const MCP_REFERENCE_PAGE = 'docs/mcp-tool-reference.md'
 
-/** Section heading per manifest `domain`, in page order. An unknown domain throws. */
-const DOMAIN_LABELS = {
-  programs: 'Programs and registration',
-  attendance: 'Attendance',
-  people: 'People',
-  memberships: 'Membership',
-  payments: 'Payments',
-  bookings: 'Bookings',
-  facilities: 'Facilities',
-  volunteers: 'Volunteers',
-  communications: 'Communications',
-  donations: 'Donations',
-  assistant: 'Lookup',
+/**
+ * One section per manifest `domain`, in page order. `intro` and `examples` are
+ * written for people who are not developers. An unknown domain throws, so a
+ * new area cannot publish without its copy.
+ */
+const DOMAINS = {
+  programs: {
+    label: 'Programs and registration',
+    intro: 'Programs are what your organization offers, such as “Youth Basketball”. Each program has sessions people sign up for, such as “Spring, Tuesdays 6pm”.',
+    examples: [
+      'Which programs have registration open right now?',
+      'How many people signed up for the Tuesday session of Youth Basketball?',
+      'Copy last fall’s Youth Basketball program for the spring.',
+    ],
+  },
+  attendance: {
+    label: 'Attendance',
+    intro: 'Each date a session runs has an attendance sheet, where people are marked present, absent, late or excused.',
+    examples: [
+      'Mark Sam and Lena present at Thursday’s Competitive Team session.',
+      'Who missed last week’s Learn to Swim sessions?',
+    ],
+  },
+  people: {
+    label: 'People',
+    intro: 'The people in your organization, their profiles, and the extra profile questions you ask, such as “Jersey size”.',
+    examples: [
+      'Update Jordan Lee’s phone number to 555-0142.',
+      'Add Priya Shah, priya@example.com, with jersey size M.',
+    ],
+  },
+  memberships: {
+    label: 'Membership',
+    intro: 'The memberships you offer, who holds them, and their digital membership cards.',
+    examples: [
+      'Which memberships expire this month?',
+      'Give Alex Chen the Adult Annual membership.',
+      'Send Maria Lopez her membership card.',
+    ],
+  },
+  payments: {
+    label: 'Payments',
+    intro: 'Payments, refunds and other money movements, for reporting.',
+    examples: ['How much did we refund last month?'],
+  },
+  bookings: {
+    label: 'Bookings',
+    intro: 'Bookings of your facilities, and booking requests that need approval.',
+    examples: ['Which booking requests are waiting for approval?'],
+  },
+  facilities: {
+    label: 'Facilities',
+    intro: 'The spaces and equipment people can book, such as rooms, courts and fields.',
+    examples: ['Which of our facilities can members book online?', 'Change the gym’s capacity to 40.'],
+  },
+  assistant: {
+    label: 'Finding records',
+    intro: 'Your assistant uses this behind the scenes when a name could match more than one record.',
+    examples: [],
+  },
 }
 
 export function loadManifest(path = MCP_MANIFEST_PATH) {
@@ -145,23 +201,72 @@ function toolSection(tool, links) {
 }
 
 function groupByDomain(tools) {
-  const groups = new Map(Object.keys(DOMAIN_LABELS).map((domain) => [domain, []]))
+  const groups = new Map(Object.keys(DOMAINS).map((domain) => [domain, []]))
   for (const tool of tools) {
     if (!groups.has(tool.domain)) {
-      throw new Error(`mcp-tools: no section label for domain '${tool.domain}' (tool ${tool.name}); add it to DOMAIN_LABELS`)
+      throw new Error(`mcp-tools: no section for domain '${tool.domain}' (tool ${tool.name}); add it to DOMAINS`)
     }
     groups.get(tool.domain).push(tool)
   }
   return [...groups].filter(([, members]) => members.length > 0)
 }
 
-export function toToolsPage(manifest, spec) {
+/** Plain-language type of a tool, for people who are not developers. */
+const friendlyKind = (tool) => {
+  if (tool.annotations?.readOnlyHint) return 'Looks things up'
+  if (tool.kind === 'task') return 'Makes changes · previews first'
+  if (tool.annotations?.destructiveHint === false) return 'Doesn’t change records'
+  return 'Makes changes'
+}
+
+export function toToolsPage(manifest) {
+  const groups = groupByDomain(manifest.tools)
+  const lines = [
+    '# What AI assistants can do',
+    '',
+    'Once you [connect Communal to an AI assistant](./mcp-server.md) such as Claude, you can ask it, in your own words, to look things up and make changes in Communal for you. You don’t need to learn anything on this page first: the assistant works out what to do from what you ask.',
+    '',
+    'This page lists everything an assistant can do. When an assistant asks for your approval, it shows the name of the action it wants to take, such as `update_program`. Look that name up here to see what it does.',
+    '',
+    '## Good to know',
+    '',
+    '- **It works as you.** The assistant can only see and change what your own Communal role allows. If you can’t do something in Communal, the assistant can’t either.',
+    '- **Looking things up never changes anything.** You can ask as many questions as you like.',
+    '- **Changes are real.** They update your organization’s records straight away, and some send emails. Read what the assistant plans to do before you approve it.',
+    '- **Many changes show you a preview first.** For actions marked “previews first”, the assistant checks the change and shows you exactly what will happen. Nothing is saved until you say yes.',
+    '',
+  ]
+
+  for (const [domain, members] of groups) {
+    const section = DOMAINS[domain]
+    lines.push(`## ${section.label}`, '', section.intro, '')
+    if (section.examples.length > 0) {
+      lines.push('Try asking:', '', ...section.examples.map((example) => `- “${example}”`), '')
+    }
+    lines.push('| What it does | Type | Action name |', '| --- | --- | --- |')
+    for (const tool of members) {
+      lines.push(`| ${escapeProse(tool.summary || tool.title)} | ${friendlyKind(tool)} | \`${tool.name}\` |`)
+    }
+    lines.push('')
+  }
+
+  lines.push(
+    '## For developers',
+    '',
+    'The [MCP tool reference](./mcp-tool-reference.md) lists every action’s parameters and the REST API operation it uses.',
+    '',
+  )
+
+  return `${lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()}\n`
+}
+
+export function toReferencePage(manifest, spec) {
   const links = referenceLinks(spec)
   const groups = groupByDomain(manifest.tools)
   const lines = [
-    '# MCP tools',
+    '# MCP tool reference',
     '',
-    `The [MCP server](./mcp-server.md) offers ${manifest.tools.length} tools. Your MCP client lists them once you connect, and this page describes each one. A tool only works if your Communal role allows the action, so the list you see may be shorter than this page.`,
+    `The [MCP server](./mcp-server.md) offers ${manifest.tools.length} tools. Your MCP client lists them once you connect, and this page describes each one for developers. [What AI assistants can do](./mcp-tools.md) covers the same tools in plain language. A tool only works if the connected user's Communal role allows the action.`,
     '',
     'There are three kinds of tool:',
     '',
@@ -173,12 +278,12 @@ export function toToolsPage(manifest, spec) {
     '',
     '## Contents',
     '',
-    ...groups.map(([domain, members]) => `- [${DOMAIN_LABELS[domain]}](#${slugify(DOMAIN_LABELS[domain])}): ${members.map((tool) => `\`${tool.name}\``).join(', ')}`),
+    ...groups.map(([domain, members]) => `- [${DOMAINS[domain].label}](#${slugify(DOMAINS[domain].label)}): ${members.map((tool) => `\`${tool.name}\``).join(', ')}`),
     '',
   ]
 
   for (const [domain, members] of groups) {
-    lines.push(`## ${DOMAIN_LABELS[domain]}`, '')
+    lines.push(`## ${DOMAINS[domain].label}`, '')
     for (const tool of members) lines.push(...toolSection(tool, links))
   }
 
@@ -190,7 +295,7 @@ export function toLlmsSection(manifest, spec) {
   const links = referenceLinks(spec)
   const lines = ['## MCP tools', '', `MCP server tools (${manifest.tools.length}). Each acts as the connected user inside their organization.`, '']
   for (const tool of manifest.tools) {
-    lines.push(`### ${tool.name}`, '', `${tool.title}. ${tool.description}`, '')
+    lines.push(`### ${tool.name}`, '', `${tool.title}. ${tool.summary ? `${tool.summary} ` : ''}${tool.description}`, '')
     const endpoints = publishedEndpoints(tool, links)
     if (endpoints.length > 0) {
       lines.push(`REST: ${endpoints.map((endpoint) => `${endpoint.method} ${endpoint.path}`).join(', ')}`, '')
@@ -203,9 +308,10 @@ export function toLlmsSection(manifest, spec) {
   return lines.join('\n')
 }
 
-export function writeToolsPage() {
+export function writeToolsPages() {
   const manifest = loadManifest()
   const spec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
-  writeFileSync(MCP_TOOLS_PAGE, toToolsPage(manifest, spec), 'utf8')
+  writeFileSync(MCP_TOOLS_PAGE, toToolsPage(manifest), 'utf8')
+  writeFileSync(MCP_REFERENCE_PAGE, toReferencePage(manifest, spec), 'utf8')
   return manifest.tools.length
 }
