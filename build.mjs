@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs'
 import { specUrl, DEFAULT_VERSION, PRODUCTION_SERVER_URL } from './versions.mjs'
 import { HIDDEN_TAGS, HIDDEN_METHODS, isHiddenOperation } from './normalize-openapi.mjs'
+import { loadManifest, toLlmsSection } from './mcp-tools.mjs'
 
 // llms.txt tracks the current (default) API version.
 const SPEC_URL = specUrl(DEFAULT_VERSION)
@@ -193,6 +194,8 @@ for (const [path, methods] of Object.entries(spec.paths || {})) {
     if (op.operationId) summaryMap[op.operationId] = key
   }
 }
+
+fullLines.push(toLlmsSection(loadManifest(), spec))
 
 writeFileSync('public/llms.txt', fullLines.join('\n'))
 writeFileSync('public/llms-endpoints.json', JSON.stringify(endpoints))

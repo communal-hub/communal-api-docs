@@ -98,7 +98,7 @@ API keys are not used for MCP. They remain the way to authenticate direct HTTP c
 
 ## What the assistant can do
 
-Once connected, your client lists the tools the server offers — `/mcp` in Claude Code, or the MCP panel in Cursor and VS Code. Check that list to see what is available to you, since it reflects your permissions.
+[MCP tools](./mcp-tools.md) describes every tool the server offers, with its parameters and the REST operation it uses. Once connected, your client also lists the tools — `/mcp` in Claude Code, or the MCP panel in Cursor and VS Code.
 
 Assume the assistant can **change data**, not just read it — creating and archiving records, or sending membership cards, for example. Review tool calls before approving them, or use a client mode that prompts for each one. What an assistant can do is bounded by your own Communal role, so if you want a narrower blast radius, sign in as a user with narrower access.
 

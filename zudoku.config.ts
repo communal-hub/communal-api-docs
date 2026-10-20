@@ -79,6 +79,13 @@ const config: ZudokuConfig = {
               "path": "basics/mcp-server",
               "label": "MCP server",
               "icon": "bot"
+            },
+            {
+              "type": "doc",
+              "file": "docs/mcp-tools.md",
+              "path": "basics/mcp-tools",
+              "label": "MCP tools",
+              "icon": "wrench"
             }
           ]
         },

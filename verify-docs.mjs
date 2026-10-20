@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { gunzipSync } from 'node:zlib'
 import { NAVIGATION, SITE_TITLE, toDocs, toGuideRedirects } from './generate-config.mjs'
 import { DEFAULT_VERSION, VERSIONS, specPath } from './versions.mjs'
+import { MCP_TOOLS_PAGE, loadManifest, referenceLinks, toToolsPage } from './mcp-tools.mjs'
 
 // Proves a built dist/ against the navigation tree and versions.mjs. Rerun it
 // after any build: `npm run build && npm run build:docs && npm run verify-docs`.
@@ -12,7 +13,7 @@ const FRAGMENT_PREFIX = 'pagefind_dcd'
 // A term the OpenAPI documents carry and no guide mentions, so finding it in a
 // reference fragment proves search really reaches the reference. The check below
 // re-proves that property against the guide sources on every run.
-const REFERENCE_ONLY_TERM = 'prompt_for_number_of_guests'
+const REFERENCE_ONLY_TERM = 'readable_booking_item_one_description'
 // Body text from docs/overview.md, so a redirect stub at the root cannot pass.
 const ROOT_BODY_TEXT = 'lets your organization integrate with Communal programmatically'
 const ROOT_MIN_BYTES = 2000
@@ -225,6 +226,44 @@ check('no redirect points at another redirect', () => {
   return chains.length
     ? chains.map((rule) => `${rule[0]} -> ${rule[1]} -> ...`).join(', ')
     : null
+})
+
+const mcpManifest = loadManifest()
+const mcpToolsDoc = guides.find((doc) => doc.file === MCP_TOOLS_PAGE)
+
+check('the MCP tools page is current with the manifest snapshot', () => {
+  const spec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
+  return readFileSync(MCP_TOOLS_PAGE, 'utf8') === toToolsPage(mcpManifest, spec)
+    ? null
+    : `${MCP_TOOLS_PAGE} differs from the manifest; run npm run generate-config`
+})
+
+check('every MCP tool has an anchor on the MCP tools page', () => {
+  if (!mcpToolsDoc) return `${MCP_TOOLS_PAGE} is not in the navigation tree`
+  const file = `${DIST}/${pagePath(mcpToolsDoc.slug)}.html`
+  if (!existsSync(file)) return `${file} is missing`
+  const html = readFileSync(file, 'utf8')
+  const names = mcpManifest.tools.map((tool) => tool.name)
+  const missing = names.filter((name) => !html.includes(`id="${name}"`))
+  return missing.length ? listMissing(missing, names.length) : null
+})
+
+check('every MCP tool reference link resolves to a reference operation', () => {
+  const spec = JSON.parse(readFileSync(specPath(DEFAULT_VERSION), 'utf8'))
+  const broken = [...new Set(referenceLinks(spec).values())]
+    .filter((href) => readFileSync(MCP_TOOLS_PAGE, 'utf8').includes(`](${href})`))
+    .filter((href) => {
+      const [page, anchor] = href.slice(1).split('#')
+      const file = `${DIST}/${page}.html`
+      return !existsSync(file) || !readFileSync(file, 'utf8').includes(`id="${anchor}"`)
+    })
+  return broken.length ? listMissing(broken, broken.length) : null
+})
+
+check('llms.txt lists every MCP tool', () => {
+  const llms = readFileSync(`${DIST}/llms.txt`, 'utf8')
+  const missing = mcpManifest.tools.map((tool) => tool.name).filter((name) => !llms.includes(`### ${name}\n`))
+  return missing.length ? listMissing(missing, mcpManifest.tools.length) : null
 })
 
 const failed = results.filter((r) => r.problem)

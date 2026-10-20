@@ -17,9 +17,9 @@ The API reference is built from [`versions.mjs`](versions.mjs). Every version re
 
 | Command | Purpose |
 |---------|---------|
-| `npm run fetch-spec` | Download each version's spec from S3 into `docs/<date>/openapi.json` (per [`versions.mjs`](versions.mjs)), then normalize each. |
+| `npm run fetch-spec` | Download each version's spec from S3 into `docs/<date>/openapi.json` (per [`versions.mjs`](versions.mjs)), then normalize each. Also snapshots the MCP tool manifest into `docs/mcp/tools.json`. |
 | `npm run normalize-spec` | Remove per-path `servers` overrides from a version's spec so the reference uses the global production host. |
-| `npm run generate-config` | Regenerate `zudoku.config.ts` and `public/_redirects` from the `NAVIGATION` tree, and stage each version's spec under a unique filename in `.zudoku-specs/`. |
+| `npm run generate-config` | Regenerate `zudoku.config.ts` and `public/_redirects` from the `NAVIGATION` tree, `docs/mcp-tools.md` from the MCP tool manifest, and stage each version's spec under a unique filename in `.zudoku-specs/`. |
 | `npm run build` | Generate `public/llms.txt`, `public/llms-endpoints.json`, and `public/llms-summary-map.json` from the current OpenAPI spec. |
 | `npm run dev` | Regenerate the config, then serve the site locally with hot reload. |
 | `npm run build:docs` | Regenerate the config, then build the static site into `dist/`. |
@@ -32,6 +32,7 @@ The API reference is built from [`versions.mjs`](versions.mjs). Every version re
 
 - **`docs/*.md`, `docs/guides/*.md`** — Guide pages. No frontmatter; titles and icons come from `NAVIGATION`.
 - **`docs/<date>/openapi.json`** — One normalized OpenAPI 3.1 document per version (committed snapshots; refresh with `fetch-spec`).
+- **`docs/mcp/tools.json`, `docs/mcp-tools.md`** — The MCP tool manifest snapshot and the tool reference page generated from it. See [MCP tools](#mcp-tools).
 - **`public/`** — Served from the site root: logos, favicon, `_redirects`, and the generated `llms.*` artifacts.
 - **`zudoku.config.ts`, `public/_redirects`** — Generated. Commit them, never hand-edit them.
 - **`scalar.config.json`, `publish-registry.mjs`** — The Scalar setup, kept until the DNS cutover is confirmed. A follow-up removes them.
@@ -42,6 +43,17 @@ The API reference is built from [`versions.mjs`](versions.mjs). Every version re
 2. Run `npm run generate-config` and commit the regenerated `zudoku.config.ts` and `public/_redirects` alongside your change.
 3. Run `npm run build && npm run build:docs && npm run verify-docs` before opening a pull request.
 4. `fetch-spec` overwrites each `docs/<date>/openapi.json` and then runs [`normalize-openapi.mjs`](normalize-openapi.mjs), which drops path-level `servers` entries pointing at tenant subdomains and re-applies `x-tagGroups`. For a permanent fix, remove those entries in the API generator that publishes `api.json`.
+
+## MCP tools
+
+The [MCP tools](docs/mcp-tools.md) page documents every tool the Communal MCP server offers. Its source is the public tool manifest that community-management builds from the tools' own `tools/list` entries: `php artisan docs:export-to-s3` uploads it to `docs/mcp-tools.json` in the same bucket as the specs (`php artisan mcp:export-manifest` writes it locally). The manifest carries each tool's name, title, description, behaviour hints, input schema and the REST operations it uses; it deliberately carries no roles, scopes or feature flags.
+
+- `fetch-spec` snapshots the manifest into `docs/mcp/tools.json`. A missing manifest keeps the committed snapshot rather than failing.
+- [`mcp-tools.mjs`](mcp-tools.mjs) renders the page, grouped by the manifest's `domain` (a new domain needs a label in `DOMAIN_LABELS`). REST operations link into the default version's reference and are omitted when the reference does not publish them.
+- `build.mjs` appends an MCP tools section to `llms.txt`.
+- `verify-docs` fails when the page is stale against the snapshot, a tool has no anchor, a reference link does not resolve, or `llms.txt` misses a tool.
+
+To change what a tool says, edit its description or schema in community-management, never the generated page.
 
 ## Deployment
 

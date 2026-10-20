@@ -21,6 +21,10 @@
 
 const S3_BASE = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs'
 
+// The public MCP tool manifest, published beside the specs by community-management's
+// `docs:export-to-s3`. It is not versioned: the MCP server has one tool surface.
+export const MCP_MANIFEST_URL = `${S3_BASE}/mcp-tools.json`
+
 // Scalar Registry coordinates, used only by `publish-registry.mjs`. Every version
 // publishes to this ONE registry API (@<namespace>/<slug>) as a distinct registry
 // *version*, so the Scalar dashboard shows a single "API Document" with a version
