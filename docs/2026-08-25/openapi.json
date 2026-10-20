@@ -289,7 +289,7 @@
         "/attendance_records/export-config": {
             "get": {
                 "operationId": "attendanceRecord.getExportConfig",
-                "summary": "Get export configuration for the current model",
+                "summary": "Get the export options for this list",
                 "tags": [
                     "Attendance Record"
                 ],
@@ -1226,7 +1226,7 @@
         "/booking_requests": {
             "get": {
                 "operationId": "booking_requests.index",
-                "description": "Paginated booking requests for the current tenant. Members see their own\nrequests; facility managers and super admins see the full list. The\ndefault row is a curated payload (schedule, cost, owner, facility, state).\nPass `include` / `append` for the richer relations the product UI uses.",
+                "description": "Paginated booking requests for the current tenant. Members see their own\nrequests; facility managers and super admins see the full list. The\ndefault row is a curated payload (schedule, cost, owner, facility, state).\nPass `include` / `append` to add related records.",
                 "summary": "List booking requests",
                 "tags": [
                     "Booking Request"
@@ -2656,7 +2656,7 @@
         "/parent_programs/options": {
             "get": {
                 "operationId": "parentProgram.options",
-                "description": "Purpose-built for filter dropdowns that need every program for the\ntenant: paginates in SQL, selects only the columns an option list\nrenders, and serializes no relations (tags, registration opportunities,\noccurrences). Prefer this over index() for pickers.",
+                "description": "A lightweight list of every program, meant for dropdowns and pickers.\nEach row carries only the fields an option list needs, with no related\nrecords (tags, registration opportunities, occurrences). Prefer this\nover the full list endpoint when you only need names and ids.",
                 "summary": "List programs as slim dropdown options",
                 "tags": [
                     "Program"
@@ -2915,7 +2915,7 @@
         "/program_signups/export-config": {
             "get": {
                 "operationId": "programSignup.getExportConfig",
-                "summary": "Get export configuration for the current model",
+                "summary": "Get the export options for this list",
                 "tags": [
                     "Program Signup"
                 ],
@@ -3394,7 +3394,7 @@
         "/programs/options": {
             "get": {
                 "operationId": "program.options",
-                "description": "Purpose-built for filter dropdowns that need every registration\nopportunity for the tenant: paginates in SQL, selects only the columns\nan option list renders, and serializes no relations or computed\npricing attributes. Prefer this over index() for pickers.",
+                "description": "A lightweight list of every registration opportunity, meant for\ndropdowns and pickers. Each row carries only the fields an option list\nneeds, with no related records or pricing. Prefer this over the full\nlist endpoint when you only need names and ids.",
                 "summary": "List registration opportunities as slim dropdown options",
                 "tags": [
                     "Registration Opportunity"
@@ -3885,7 +3885,7 @@
                     {
                         "name": "filter[query]",
                         "in": "query",
-                        "description": "Search transactions by related user/guest/account name or email, Stripe or native invoice number, or by program signup id (subscription schedule lookup).",
+                        "description": "Search transactions by related user/guest/account name or email, Stripe or native invoice number, or by program signup id.",
                         "schema": {
                             "type": "string"
                         },
@@ -3930,7 +3930,7 @@
                     {
                         "name": "filter[invoice_id]",
                         "in": "query",
-                        "description": "Filter to transactions linked to the given local invoice id (invoices.id). Matches native_invoice_id and Stripe invoice_id rows for that invoice.",
+                        "description": "Filter to transactions linked to the given Communal invoice id, whether the invoice was issued natively or through Stripe.",
                         "schema": {
                             "type": "integer"
                         },
@@ -3939,7 +3939,7 @@
                     {
                         "name": "filter[subscription_schedule_id]",
                         "in": "query",
-                        "description": "Filter by the local subscription schedule id (transactions.subscription_schedule_id). This is not the Stripe `sub_sched_...` id, which lives on subscription_schedules.stripe_schedule_id.",
+                        "description": "Filter by Communal payment plan (subscription schedule) id. This is not the Stripe `sub_sched_...` id.",
                         "schema": {
                             "type": "integer"
                         },
@@ -3993,7 +3993,7 @@
                     {
                         "name": "include",
                         "in": "query",
-                        "description": "Include related resources (comma-separated). Only these options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity or nativeInvoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).",
+                        "description": "Include related resources (comma-separated). Only these options change the response; every other related field is always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity or nativeInvoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).",
                         "schema": {
                             "type": "string"
                         },
@@ -4103,7 +4103,7 @@
         "/transactions/{transaction}": {
             "get": {
                 "operationId": "transactions.show",
-                "description": "Returns a single transaction, scoped to the current tenant. Relations\nare always eager-loaded to match the fields the resource can return\n(e.g. invoice, associated_transaction, promotion_code); unlike the\nindex endpoint, this endpoint does not accept `include` or `append`.\nThe `tags` field is only ever populated via `include=tags` on the index\nendpoint, so it is never present in this response.",
+                "description": "Returns a single transaction with its related fields (for example\n`invoice`, `associated_transaction` and `promotion_code`) always\npresent. Unlike the list endpoint, this endpoint doesn't accept\n`include` or `append`, so the `tags` field is never returned here;\nuse `include=tags` on the list endpoint instead.",
                 "summary": "Get a transaction",
                 "tags": [
                     "Transaction"
@@ -4827,7 +4827,7 @@
             },
             "post": {
                 "operationId": "userMembership.store",
-                "description": "Gives an existing member a membership of the given type at no charge.\nWhen the type has more than one active plan, `plan_id` is required.\nA payment the member already made outside Communal is recorded only\nwhen `payment_method` and `amount_paid` are supplied, and the\nassignment email goes out only when `send_email` is true. Unlike\n`membership_cards/send`, this never creates a member, cancels other\nmemberships, or sends a card.",
+                "description": "Gives an existing member a membership of the given type at no charge.\nWhen the type has more than one active plan, `plan_id` is required.\nA payment the member already made outside Communal is recorded only\nwhen `payment_method` and `amount_paid` are supplied. Unlike\n`membership_cards/send`, this never creates a member or cancels other\nmemberships.\n\nNothing is emailed unless `send_email` is true. When it is, the member\ngets up to two emails: a \"Membership Assigned\" email naming the\nmembership and plan, sent right away, and about a minute later their\nmembership card. When the organization doesn't use membership cards,\nor the type has no card, the type's membership form PDF is sent\ninstead, if it has one. No receipt is attached, even when a payment\nis recorded. `data.emailed` echoes the `send_email` value.",
                 "summary": "Assign a membership to a member",
                 "tags": [
                     "User Membership"
@@ -5862,7 +5862,7 @@
                         ]
                     },
                     "booking_state": {
-                        "description": "Workflow state. Slim `{id, state_name, color}` by default; the full\nstate model is returned when `include=bookingState` is sent.",
+                        "description": "Workflow state. Slim `{id, state_name, color}` by default; the full\nstate object is returned when `include=bookingState` is sent.",
                         "anyOf": [
                             {
                                 "type": "object",
@@ -6083,7 +6083,10 @@
                         "type": "boolean"
                     },
                     "tenant_id": {
-                        "type": "integer"
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     }
                 },
                 "required": [
@@ -7185,7 +7188,10 @@
                         "format": "date-time"
                     },
                     "tenant_id": {
-                        "type": "integer"
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     },
                     "form_template_key": {
                         "type": [
@@ -7542,7 +7548,7 @@
                             "boolean",
                             "null"
                         ],
-                        "description": "Whether the authenticated member can purchase this membership type\naccording to MembershipTypePolicy::purchase. Only computed on the\nshow endpoint for authenticated members; null otherwise.",
+                        "description": "Whether the authenticated member can purchase this membership type.\nOnly computed on the show endpoint for authenticated members; null\notherwise.",
                         "examples": [
                             true
                         ]
@@ -8489,9 +8495,6 @@
                             "pre_expiration_leadup": {
                                 "type": "integer"
                             },
-                            "is_business_membership": {
-                                "type": "integer"
-                            },
                             "user_auto_renewals": {
                                 "type": "boolean"
                             },
@@ -8522,11 +8525,11 @@
                                     "null"
                                 ]
                             },
-                            "disable_default_card": {
-                                "type": "boolean"
-                            },
                             "sort_order": {
                                 "type": "integer"
+                            },
+                            "disable_default_card": {
+                                "type": "boolean"
                             },
                             "manual_order_enabled": {
                                 "type": "boolean"
@@ -8562,7 +8565,6 @@
                             "renewal_notifications_pre_expiration_days",
                             "renewal_notifications_post_expiration_days",
                             "pre_expiration_leadup",
-                            "is_business_membership",
                             "user_auto_renewals",
                             "require_auto_renewal",
                             "exclude_from_tax",
@@ -8571,8 +8573,8 @@
                             "visibility_requires_base_membership",
                             "exclude_from_parent_tenant_fee",
                             "form_id",
-                            "disable_default_card",
                             "sort_order",
+                            "disable_default_card",
                             "manual_order_enabled",
                             "forced_bundle_with_base",
                             "hide_starting_at_price",
@@ -9757,7 +9759,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Registration opportunity name, selected via join on the list\nendpoint so the table can render without including the full\n`program` resource. Omitted when the query does not join programs.",
+                        "description": "Registration opportunity name, returned on the list endpoint\nwithout needing `include=program`. Omitted elsewhere.",
                         "examples": [
                             "Youth Basketball Camp"
                         ]
@@ -9767,7 +9769,7 @@
                             "integer",
                             "null"
                         ],
-                        "description": "Program ID of the signup's registration opportunity, selected via\njoin on the list endpoint. Omitted when the query does not join programs.",
+                        "description": "Program ID of the signup's registration opportunity, returned on\nthe list endpoint. Omitted elsewhere.",
                         "examples": [
                             5
                         ]
@@ -9777,7 +9779,7 @@
                             "boolean",
                             "null"
                         ],
-                        "description": "Whether the registration opportunity is free, selected via join on\nthe list endpoint. Omitted when the query does not join programs.",
+                        "description": "Whether the registration opportunity is free, returned on the list\nendpoint. Omitted elsewhere.",
                         "examples": [
                             false
                         ]
@@ -10717,7 +10719,7 @@
                             "string",
                             "null"
                         ],
-                        "description": "Stripe product_id the participant must hold for this signup. Populated only when\nthe program's `participant_must_hold_membership` toggle is on AND the\n`participant_membership_enforcement` feature flag is on AND the authenticated user\nqualifies for a membership-gated price tier. Null in every other case. Gated by\n`?append=...` / `?include=...` like the other computed-for-user fields.",
+                        "description": "Stripe product_id the participant must hold for this signup. Populated only when\nthe program's `participant_must_hold_membership` setting is on, membership\nenforcement is enabled for the organization, and the authenticated user\nqualifies for a membership-gated price tier. Null in every other case. Requested\nwith `?append=...` / `?include=...` like the other computed-for-user fields.",
                         "examples": [
                             "prod_abc123"
                         ]
@@ -11477,7 +11479,6 @@
             },
             "StoreUserMembershipRequest": {
                 "type": "object",
-                "description": "Assigning a membership is organization-wide member management, so a member\nsession must hold a membership-manager role. Session authentication issues\na TransientToken whose `can()` passes every ability, so the role check has\nto happen here rather than in route middleware.\n\nAPI clients are authorized by their token: a legacy API user or a managed\nAPI key only reaches this endpoint when its token carries the\n`user-memberships:write` ability, enforced both by the route's `abilities`\nmiddleware and by this check. MCP bridge calls carrying a Passport token\nare held to the same scope; in-product agent calls carry no token and fall\nback to the session role check.",
                 "properties": {
                     "user_id": {
                         "type": "integer"
@@ -11515,7 +11516,8 @@
                         "type": [
                             "boolean",
                             "null"
-                        ]
+                        ],
+                        "description": "Email the member about the assignment. When true, they get a \"Membership Assigned\" email right away and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card). Defaults to false, which sends nothing."
                     }
                 },
                 "required": [
@@ -11763,7 +11765,10 @@
                         "format": "date-time"
                     },
                     "tenant_id": {
-                        "type": "integer"
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     },
                     "user_id": {
                         "type": [
@@ -11964,7 +11969,7 @@
                     },
                     "metadata": {
                         "type": "object",
-                        "description": "Curated, whitelisted subset of the transaction's stored metadata. Internal-only\nkeys (e.g. internal_flag, trigger_tax_receipt) are stripped before serialization.",
+                        "description": "Descriptive details recorded with the transaction, such as a description,\nrefund reason, notes or cheque number. Only the keys listed here are returned.",
                         "examples": [
                             {
                                 "description": "Membership renewal",
@@ -12058,7 +12063,7 @@
                     },
                     "has_dispute": {
                         "type": "boolean",
-                        "description": "Populated by ProgramSignup::transaction() via withExists; falls back to false on\nresources loaded outside that relation. Treat null/undefined as \"unknown\" (do NOT\nuse as an authoritative gate).",
+                        "description": "Whether the payment has been disputed. Only reliable when the transaction is\nreturned as part of a program signup; elsewhere it may be false or missing even\nwhen a dispute exists, so don't rely on it on its own.",
                         "examples": [
                             false
                         ]
@@ -13348,7 +13353,10 @@
                         "type": "integer"
                     },
                     "tenant_id": {
-                        "type": "integer"
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     },
                     "created_at": {
                         "type": [
@@ -13441,7 +13449,10 @@
                         "type": "integer"
                     },
                     "tenant_id": {
-                        "type": "integer"
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     },
                     "volunteer_opportunity_id": {
                         "type": [

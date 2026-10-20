@@ -82,7 +82,7 @@ Content-Type: `application/json`
 
 #### GET /attendance_records/export-config
 
-Get export configuration for the current model
+Get the export options for this list
 
 **Parameters:**
 
@@ -246,7 +246,7 @@ List booking requests
 Paginated booking requests for the current tenant. Members see their own
 requests; facility managers and super admins see the full list. The
 default row is a curated payload (schedule, cost, owner, facility, state).
-Pass `include` / `append` for the richer relations the product UI uses.
+Pass `include` / `append` to add related records.
 
 **Parameters:**
 
@@ -612,10 +612,10 @@ Retrieve a membership type
 #### GET /parent_programs/options
 
 List programs as slim dropdown options
-Purpose-built for filter dropdowns that need every program for the
-tenant: paginates in SQL, selects only the columns an option list
-renders, and serializes no relations (tags, registration opportunities,
-occurrences). Prefer this over index() for pickers.
+A lightweight list of every program, meant for dropdowns and pickers.
+Each row carries only the fields an option list needs, with no related
+records (tags, registration opportunities, occurrences). Prefer this
+over the full list endpoint when you only need names and ids.
 
 **Parameters:**
 
@@ -682,7 +682,7 @@ opportunities (sessions) with pricing information.
 
 #### GET /program_signups/export-config
 
-Get export configuration for the current model
+Get the export options for this list
 
 **Parameters:**
 
@@ -762,10 +762,10 @@ List program signups
 #### GET /programs/options
 
 List registration opportunities as slim dropdown options
-Purpose-built for filter dropdowns that need every registration
-opportunity for the tenant: paginates in SQL, selects only the columns
-an option list renders, and serializes no relations or computed
-pricing attributes. Prefer this over index() for pickers.
+A lightweight list of every registration opportunity, meant for
+dropdowns and pickers. Each row carries only the fields an option list
+needs, with no related records or pricing. Prefer this over the full
+list endpoint when you only need names and ids.
 
 **Parameters:**
 
@@ -857,19 +857,19 @@ managed-API-key consumers. Every row is scoped to the current tenant.
 - `filter[starting_at]` (query) - Filter to transactions with an effective date on or after this date.
 - `filter[ending_at]` (query) - Filter to transactions with an effective date on or before this date (end of day).
 - `filter[type]` (query) - Filter by transaction type. Supports comma-separated values. Options: membership, program, charge, invoice, donation, booking, refund, transfer. Each option (other than refund) matches both the charge and its refund type.
-- `filter[query]` (query) - Search transactions by related user/guest/account name or email, Stripe or native invoice number, or by program signup id (subscription schedule lookup).
+- `filter[query]` (query) - Search transactions by related user/guest/account name or email, Stripe or native invoice number, or by program signup id.
 - `filter[membership_type_id]` (query) - Filter to transactions for the given membership type (plan product) id.
 - `filter[amount]` (query) - Filter by amount in dollars. Pass a bare value for an exact match, or prefix with lte: / gte: for a range bound.
 - `filter[id]` (query) - Filter by exact transaction id. Supports comma-separated values.
 - `filter[payout_id]` (query) - Filter by exact payout id.
-- `filter[invoice_id]` (query) - Filter to transactions linked to the given local invoice id (invoices.id). Matches native_invoice_id and Stripe invoice_id rows for that invoice.
-- `filter[subscription_schedule_id]` (query) - Filter by the local subscription schedule id (transactions.subscription_schedule_id). This is not the Stripe `sub_sched_...` id, which lives on subscription_schedules.stripe_schedule_id.
+- `filter[invoice_id]` (query) - Filter to transactions linked to the given Communal invoice id, whether the invoice was issued natively or through Stripe.
+- `filter[subscription_schedule_id]` (query) - Filter by Communal payment plan (subscription schedule) id. This is not the Stripe `sub_sched_...` id.
 - `filter[user_id]` (query) - Filter by exact owning user id.
 - `filter[promotion_code_id]` (query) - Filter by exact promotion code id.
 - `filter[tags]` (query) - Filter by tag name(s). Supports comma-separated values.
 - `filter[with_product]` (query) - Filter to transactions associated with the given product (membership/plan) id. Takes a product id, not a boolean — it matches both transaction line items and invoice items for that product.
 - `filter[with_parent_program]` (query) - Filter to transactions associated with the given parent program id(s), including the refunds of those charges. Takes parent program id(s), not a boolean. Supports comma-separated values.
-- `include` (query) - Include related resources (comma-separated). Only these options visibly change the response; every other loadable relation is already eager-loaded and always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity or nativeInvoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).
+- `include` (query) - Include related resources (comma-separated). Only these options change the response; every other related field is always present. Options: tags (adds the `tags` field), invoice.bookings.bookableEntity or nativeInvoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`).
 - `sort` (query) - Sort by effective date (falls back to created_at). Options: -created_at (descending) or created_at (ascending).
 - `page[number]` (query) - Page number for pagination.
 - `page[size]` (query) - Number of results per page.
@@ -883,12 +883,11 @@ managed-API-key consumers. Every row is scoped to the current tenant.
 #### GET /transactions/{transaction}
 
 Get a transaction
-Returns a single transaction, scoped to the current tenant. Relations
-are always eager-loaded to match the fields the resource can return
-(e.g. invoice, associated_transaction, promotion_code); unlike the
-index endpoint, this endpoint does not accept `include` or `append`.
-The `tags` field is only ever populated via `include=tags` on the index
-endpoint, so it is never present in this response.
+Returns a single transaction with its related fields (for example
+`invoice`, `associated_transaction` and `promotion_code`) always
+present. Unlike the list endpoint, this endpoint doesn't accept
+`include` or `append`, so the `tags` field is never returned here;
+use `include=tags` on the list endpoint instead.
 
 **Parameters:**
 
@@ -976,10 +975,17 @@ Assign a membership to a member
 Gives an existing member a membership of the given type at no charge.
 When the type has more than one active plan, `plan_id` is required.
 A payment the member already made outside Communal is recorded only
-when `payment_method` and `amount_paid` are supplied, and the
-assignment email goes out only when `send_email` is true. Unlike
-`membership_cards/send`, this never creates a member, cancels other
-memberships, or sends a card.
+when `payment_method` and `amount_paid` are supplied. Unlike
+`membership_cards/send`, this never creates a member or cancels other
+memberships.
+
+Nothing is emailed unless `send_email` is true. When it is, the member
+gets up to two emails: a "Membership Assigned" email naming the
+membership and plan, sent right away, and about a minute later their
+membership card. When the organization doesn't use membership cards,
+or the type has no card, the type's membership form PDF is sent
+instead, if it has one. No receipt is attached, even when a payment
+is recorded. `data.emailed` echoes the `send_email` value.
 
 **Parameters:**
 
