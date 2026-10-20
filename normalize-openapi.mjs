@@ -77,11 +77,11 @@ export const isHiddenOperation = (method, path, op) =>
  * Normalize an OpenAPI document in place: drop operations using a
  * `HIDDEN_METHODS` method or carrying a `HIDDEN_TAGS` tag, strip
  * per-path/operation `servers` overrides, and apply the Scalar `x-tagGroups`
- * sidebar grouping. When `productionOnly` is set, the global `servers` array is
- * also reduced to just the production host so the published "Server" selector
- * offers Prod alone. Returns the number of `servers` entries removed.
+ * sidebar grouping. The global `servers` array is reduced to just the
+ * production host so the reference's server selector offers Prod alone, never
+ * Local or Staging. Returns the number of `servers` entries removed.
  */
-export function normalizeSpec(filePath, { productionOnly = false } = {}) {
+export function normalizeSpec(filePath) {
   const spec = JSON.parse(readFileSync(filePath, 'utf8'))
 
   let removed = 0
@@ -115,12 +115,12 @@ export function normalizeSpec(filePath, { productionOnly = false } = {}) {
     spec.tags = spec.tags.filter((tag) => !HIDDEN_TAGS.has(tag?.name))
   }
 
-  if (productionOnly && Array.isArray(spec.servers)) {
+  if (Array.isArray(spec.servers)) {
     const prod = spec.servers.find((s) => s?.url === PRODUCTION_SERVER_URL)
     if (!prod) {
       const found = spec.servers.map((s) => s?.url).join(', ') || '(none)'
       throw new Error(
-        `normalize-openapi: production build expected a server with url ${PRODUCTION_SERVER_URL} in ${filePath}, found: ${found}`,
+        `normalize-openapi: expected a server with url ${PRODUCTION_SERVER_URL} in ${filePath}, found: ${found}`,
       )
     }
     removed += spec.servers.length - 1
@@ -173,10 +173,9 @@ function assertEveryTagIsGrouped(spec, filePath) {
 }
 
 // CLI: `node normalize-openapi.mjs [path]` (defaults to the current version's spec).
-// Set SCALAR_ENV=production to also reduce global servers to the production host.
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { specPath, DEFAULT_VERSION, IS_PRODUCTION } = await import('./versions.mjs')
+  const { specPath, DEFAULT_VERSION } = await import('./versions.mjs')
   const filePath = process.argv[2] ?? specPath(DEFAULT_VERSION)
-  const removed = normalizeSpec(filePath, { productionOnly: IS_PRODUCTION })
+  const removed = normalizeSpec(filePath)
   console.log(`normalize-openapi: removed ${removed} servers, set x-tagGroups on ${filePath}`)
 }

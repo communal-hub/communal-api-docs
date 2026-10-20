@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
-import { specUrl, specPath, IS_PRODUCTION } from './versions.mjs'
+import { specUrl, specPath } from './versions.mjs'
 import { normalizeSpec } from './normalize-openapi.mjs'
 import { syncVersions } from './sync-versions.mjs'
 
@@ -22,8 +22,7 @@ for (const version of versions) {
 
   mkdirSync(dirname(dest), { recursive: true })
   writeFileSync(dest, await res.text())
-  const removed = normalizeSpec(dest, { productionOnly: IS_PRODUCTION })
+  const removed = normalizeSpec(dest)
 
-  const mode = IS_PRODUCTION ? 'production, Prod server only' : 'all servers'
-  console.log(`fetch-spec: ${version.date} <- ${url} -> ${dest} (normalized, removed ${removed} servers, ${mode})`)
+  console.log(`fetch-spec: ${version.date} <- ${url} -> ${dest} (normalized, removed ${removed} servers)`)
 }

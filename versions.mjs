@@ -29,14 +29,10 @@ const S3_BASE = 'https://communal-api.s3.ca-central-1.amazonaws.com/docs'
 export const REGISTRY_NAMESPACE = 'getcommunal'
 export const REGISTRY_SLUG = 'communal-platform-api'
 
-// The only API server exposed in production builds. Specs ship with Local,
-// Staging, and Prod entries; `npm run publish` filters the global `servers`
-// array down to this one so the published "Server" selector offers Prod alone.
+// The only API server the docs expose. Specs ship with Local, Staging, and Prod
+// entries; normalizeSpec and build.mjs filter the global `servers` array down to
+// this one so the reference and the llms artifacts offer Prod alone.
 export const PRODUCTION_SERVER_URL = 'https://api.getcommunal.com/api'
-
-// True when this process is a production docs build. Preview and plain `fetch-spec`
-// leave it unset, keeping all servers selectable.
-export const IS_PRODUCTION = process.env.SCALAR_ENV === 'production'
 
 export const VERSIONS = [
   { id: 'default', date: '2026-08-25', spec: 'api.json' }, // current/live spec

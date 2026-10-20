@@ -10,8 +10,6 @@ Version: 2026-08-25
 
 ## Servers
 
-- **Local**: http://api.community-management.test/api
-- **Staging**: https://api.communitymanagement.xyz/api
 - **Prod**: https://api.getcommunal.com/api
 
 ## Authentication

@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs'
-import { specUrl, DEFAULT_VERSION } from './versions.mjs'
+import { specUrl, DEFAULT_VERSION, PRODUCTION_SERVER_URL } from './versions.mjs'
 import { HIDDEN_TAGS, HIDDEN_METHODS, isHiddenOperation } from './normalize-openapi.mjs'
 
 // llms.txt tracks the current (default) API version.
@@ -7,6 +7,9 @@ const SPEC_URL = specUrl(DEFAULT_VERSION)
 
 const res = await fetch(SPEC_URL)
 const spec = await res.json()
+
+// Only the production host is documented; Local and Staging stay out of llms.txt.
+spec.servers = (spec.servers ?? []).filter((server) => server?.url === PRODUCTION_SERVER_URL)
 
 // Operations carrying a hidden tag are excluded from every generated artifact,
 // mirroring normalizeSpec so the published spec and llms.txt stay in sync.
