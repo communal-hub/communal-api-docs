@@ -970,6 +970,33 @@ active/expired state, or expiry date range.
 - `403`: 
 - `422`: 
 
+#### POST /user_memberships
+
+Assign a membership to a member
+Gives an existing member a membership of the given type at no charge.
+When the type has more than one active plan, `plan_id` is required.
+A payment the member already made outside Communal is recorded only
+when `payment_method` and `amount_paid` are supplied, and the
+assignment email goes out only when `send_email` is true. Unlike
+`membership_cards/send`, this never creates a member, cancels other
+memberships, or sends a card.
+
+**Parameters:**
+
+- `X-Api-Version` (header) - Optional API version for this request. When omitted, the server uses the default version. This documentation describes version 2026-08-25.
+
+**Request Body:**
+
+Content-Type: `application/json`
+
+**Responses:**
+
+- `200`: 
+- `401`: 
+- `403`: 
+- `404`: 
+- `422`: 
+
 #### GET /user_memberships/{user_membership}
 
 Get a user membership
