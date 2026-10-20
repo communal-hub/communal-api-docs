@@ -1,0 +1,3973 @@
+{
+    "server": {
+        "name": "Communal",
+        "version": "1.0.0",
+        "instructions": "This server gives you access to one Communal organization (the one this connection was authorized on), acting as the user who approved the connection. Every tool mirrors an endpoint of the Communal public REST API and returns the same JSON the API returns.\n\n- Read tools (list_*/get_*) are safe to call freely. List tools are paginated: pass `page: {number, size}` and use `filter`, `include` and `sort` exactly as documented for the REST API.\n- Write tools (create_*/update_*/archive_*/unarchive_*/send_*/mark_*/register_*) change real organization data. Confirm intent with the user before calling them.\n- Prefer task tools (update_program, clone_program, add_session, update_session, mark_attendance, add_member, update_member, create_membership_type, update_membership_type, assign_membership, send_member_card, update_facility) when one fits. They accept names instead of IDs, only change the fields you pass, and preview by default: call once without \"mode\" to see exactly what would change (nothing is saved), then again with the same inputs and mode \"apply\". Problems come back as a list of {field, message, hint}.\n- Use find_records to look up a program, session, person, membership type or facility by name and get its ID.\n- Errors come back with the API's HTTP status and message (403 = the connected user is not allowed, 404 = not found in this organization, 422 = validation errors with a per-field `errors` object).\n- A \"facility\" is a bookable space or resource (a room, court, field or piece of equipment); a facility's `children` are its sub-facilities (e.g. the individual courts inside a gym complex).\n- A \"program\" is a top-level offering (e.g. \"Youth Basketball\"); its \"registration opportunities\" are the sessions/occurrences members actually sign up for (e.g. \"Spring 2026, Tuesdays\"). Program signups belong to registration opportunities; attendance sheets belong to registration opportunity dates."
+    },
+    "tools": [
+        {
+            "name": "list_programs",
+            "title": "List programs",
+            "summary": "See the programs your organization runs.",
+            "description": "List the organization's programs (the top-level offerings members register for; each program has one or more registration opportunities / sessions beneath it).\nReturns a paginated list. Registration opportunities are excluded by default — pass include=\"programs\" to embed them.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/parent_programs"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: programs.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_program",
+            "title": "Get program",
+            "summary": "Look at one program's full details and settings.",
+            "description": "Get one program by id, including all of its configuration fields. Pass include=\"programs\" to embed its registration opportunities (sessions) with pricing.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/parent_programs/{parent_program}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "parent_program": {
+                        "description": "The program id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: programs.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "parent_program"
+                ]
+            }
+        },
+        {
+            "name": "create_program",
+            "title": "Create program",
+            "summary": "Create a new program. It starts as a draft, so you can finish setting it up before anyone sees it.",
+            "description": "Create a top-level program with optional details and registration settings. Defaults to draft. Requires a Program Manager or Super Admin role. Returns the created program. Does not create registration opportunities, schedules, or prices.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/parent_programs"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "title": {
+                        "description": "Program name. Defaults to New Program when omitted.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Program description.",
+                        "type": "string"
+                    },
+                    "ongoing": {
+                        "description": "Whether the program is ongoing. Clears event dates when true.",
+                        "type": "boolean"
+                    },
+                    "event_start_date": {
+                        "description": "Event start date and time, including timezone offset.",
+                        "type": "string"
+                    },
+                    "event_end_date": {
+                        "description": "Event end date and time, including timezone offset.",
+                        "type": "string"
+                    },
+                    "profile_image": {
+                        "description": "Program image URL or public storage path.",
+                        "type": "string"
+                    },
+                    "location_name": {
+                        "description": "Location name.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "location_address": {
+                        "description": "Location address.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "location_latitude": {
+                        "description": "Location latitude.",
+                        "type": "number"
+                    },
+                    "location_longitude": {
+                        "description": "Location longitude.",
+                        "type": "number"
+                    },
+                    "pay_by_cash": {
+                        "description": "Allow payment by cash.",
+                        "type": "boolean"
+                    },
+                    "collection_additional_information": {
+                        "description": "Collect participant information. Defaults to true.",
+                        "type": "boolean"
+                    },
+                    "require_emergency_contact_information": {
+                        "description": "Require emergency contact information.",
+                        "type": "boolean"
+                    },
+                    "waitlist_enabled": {
+                        "description": "Enable the waitlist.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_registrant": {
+                        "description": "Prompt for registrant information.",
+                        "type": "boolean"
+                    },
+                    "unsplash_author_name": {
+                        "description": "Unsplash image photographer name.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "unsplash_author_link": {
+                        "description": "Unsplash image photographer link.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "demographic": {
+                        "description": "Intended participant demographic.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "instructor": {
+                        "description": "Instructor display name.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "force_participant_selection": {
+                        "description": "Require participant selection. Disabled when participant information collection is false.",
+                        "type": "boolean"
+                    },
+                    "display_only": {
+                        "description": "Display the program without registration.",
+                        "type": "boolean"
+                    },
+                    "draft": {
+                        "description": "Whether the program is a draft. Defaults to true.",
+                        "type": "boolean"
+                    },
+                    "registration_fee": {
+                        "description": "Registration fee in major currency units, for example 12.50.",
+                        "type": "number"
+                    },
+                    "cap_registration_fee": {
+                        "description": "Cap the registration fee.",
+                        "type": "boolean"
+                    },
+                    "is_event": {
+                        "description": "Treat the program as an event.",
+                        "type": "boolean"
+                    },
+                    "multiple_signups": {
+                        "description": "Allow multiple signups.",
+                        "type": "boolean"
+                    },
+                    "is_hidden": {
+                        "description": "Hide the program from public listings.",
+                        "type": "boolean"
+                    },
+                    "show_participant_list": {
+                        "description": "Show the participant list.",
+                        "type": "boolean"
+                    },
+                    "hide_participant_details": {
+                        "description": "Hide participant details.",
+                        "type": "boolean"
+                    },
+                    "total_spots": {
+                        "description": "Total program capacity.",
+                        "type": "integer"
+                    },
+                    "allow_file_uploads": {
+                        "description": "Allow registration file uploads.",
+                        "type": "boolean"
+                    },
+                    "file_uploads_required": {
+                        "description": "Require registration file uploads.",
+                        "type": "boolean"
+                    },
+                    "file_uploads_max": {
+                        "description": "Maximum number of uploaded files.",
+                        "minimum": 1,
+                        "maximum": 20,
+                        "type": "integer"
+                    },
+                    "auto_archive": {
+                        "description": "Automatically archive the program.",
+                        "type": "boolean"
+                    },
+                    "auto_archive_days": {
+                        "description": "Days before automatic archival.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "participant_must_hold_membership": {
+                        "description": "Require participants to hold a membership.",
+                        "type": "boolean"
+                    },
+                    "gl_code": {
+                        "description": "General ledger code.",
+                        "maxLength": 255,
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "list_registration_opportunities",
+            "title": "List registration opportunities",
+            "summary": "See the sessions people can sign up for, such as “Spring, Tuesdays 6pm”.",
+            "description": "List registration opportunities (the individual sessions/occurrences of a program that members sign up for). Paginated; supports filtering, sorting and includes.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/programs"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "parent_program_id": {
+                                "description": "Only opportunities under this program id.",
+                                "type": "integer"
+                            },
+                            "status": {
+                                "description": "Comma-separated statuses. Options: active, upcoming, past, ongoing, archived.",
+                                "type": "string"
+                            },
+                            "query": {
+                                "description": "Search by name (partial match).",
+                                "type": "string"
+                            },
+                            "with_participants": {
+                                "description": "Only opportunities that have participants.",
+                                "type": "boolean"
+                            },
+                            "can_register": {
+                                "description": "Only opportunities the connected user can register for.",
+                                "type": "boolean"
+                            },
+                            "upcoming": {
+                                "description": "Only upcoming opportunities.",
+                                "type": "boolean"
+                            },
+                            "past": {
+                                "description": "Only past opportunities.",
+                                "type": "boolean"
+                            },
+                            "archived_at": {
+                                "description": "Filter by archived status; pass an empty string to exclude archived opportunities.",
+                                "type": "string"
+                            },
+                            "deleted_at": {
+                                "description": "Filter by deleted status; pass an empty string to exclude deleted opportunities.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options: audience, signup_count.",
+                        "type": "string"
+                    },
+                    "sort": {
+                        "description": "Sort field, prefix with - for descending. Options: id, registration_start_date, registration_end_date, event_start_date, event_end_date, created_at.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_registration_opportunity",
+            "title": "Get registration opportunity",
+            "summary": "Look at one session's dates, spots and prices.",
+            "description": "Get one registration opportunity (program session) by id.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/programs/{program}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "program": {
+                        "description": "The registration opportunity id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: metadata, prices, prices.membership, prices.plan, prices.schedule_config, signups, parentProgram, waitlistSignups, attendanceSheets, occurrences.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options: signup_count.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "program"
+                ]
+            }
+        },
+        {
+            "name": "create_registration_opportunity",
+            "title": "Create registration opportunity",
+            "summary": "Add a session to a program with exact settings. Assistants usually use `add_session` instead.",
+            "description": "Create a registration opportunity under an existing program. Requires a manager role or an instructor assigned to that program. Dates and times use the organization timezone. Returns the created registration opportunity.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/programs"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "parent_program_id": {
+                        "description": "The existing parent program id.",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Registration opportunity name.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Registration opportunity description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "class_limit": {
+                        "description": "Maximum number of registrations.",
+                        "type": "integer"
+                    },
+                    "ongoing": {
+                        "description": "An ongoing opportunity has no scheduled event dates.",
+                        "type": "boolean"
+                    },
+                    "event_start_date": {
+                        "description": "Event start date and time; omit when supplying occurrences.",
+                        "type": "string"
+                    },
+                    "event_end_date": {
+                        "description": "Event end date and time; omit when supplying occurrences.",
+                        "type": "string"
+                    },
+                    "registration_start_date": {
+                        "description": "Registration opening date and time.",
+                        "type": "string"
+                    },
+                    "registration_end_date": {
+                        "description": "Registration closing date and time.",
+                        "type": "string"
+                    },
+                    "registration_open_until_event_start": {
+                        "description": "Keep registration open until the event starts, ignoring registration_end_date.",
+                        "type": "boolean"
+                    },
+                    "occurrences": {
+                        "description": "Scheduled occurrences; omit for ongoing opportunities.",
+                        "maxItems": 100,
+                        "items": {
+                            "properties": {
+                                "starts_at": {
+                                    "description": "Occurrence start date and time.",
+                                    "type": "string"
+                                },
+                                "ends_at": {
+                                    "description": "Occurrence end date and time.",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object",
+                            "required": [
+                                "starts_at",
+                                "ends_at"
+                            ]
+                        },
+                        "type": "array"
+                    },
+                    "prices": {
+                        "description": "Prices by audience. Omit for a free opportunity open to everyone.",
+                        "items": {
+                            "properties": {
+                                "price": {
+                                    "description": "Price in cents.",
+                                    "type": "integer"
+                                },
+                                "free": {
+                                    "description": "true when this audience registers at no charge.",
+                                    "type": "boolean"
+                                },
+                                "guest_price": {
+                                    "description": "true for the price that applies to people without a qualifying membership.",
+                                    "type": "boolean"
+                                },
+                                "volunteer_price": {
+                                    "description": "true for the price that applies to people signed up to volunteer for this program.",
+                                    "type": "boolean"
+                                },
+                                "membership_id": {
+                                    "description": "Limit this price to holders of a membership type, by its product_id.",
+                                    "type": "string"
+                                },
+                                "plan_id": {
+                                    "description": "Limit this price to holders of one membership plan, by the plan ID listed in the membership type's plans.",
+                                    "type": "string"
+                                },
+                                "maximum_number_of_purchases": {
+                                    "description": "Maximum registrations one person can buy at this price.",
+                                    "type": "integer"
+                                },
+                                "recurring": {
+                                    "description": "Split the price into scheduled payments instead of one payment at checkout.",
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "waitlist_enabled": {
+                        "description": "Let people join a waitlist when all spots are taken.",
+                        "type": "boolean"
+                    },
+                    "display_to_all_users": {
+                        "description": "Legacy visibility flag; no longer affects what members see.",
+                        "type": "boolean"
+                    },
+                    "hide_from_non_buyers": {
+                        "description": "Hide this opportunity from people who have no price that applies to them.",
+                        "type": "boolean"
+                    },
+                    "exclude_from_reminder_emails": {
+                        "description": "Do not send reminder emails to registrants.",
+                        "type": "boolean"
+                    },
+                    "dob_validation": {
+                        "description": "Require participants to be born between min_date_of_birth and max_date_of_birth.",
+                        "type": "boolean"
+                    },
+                    "min_date_of_birth": {
+                        "description": "Oldest allowed participant date of birth, YYYY-MM-DD.",
+                        "type": "string"
+                    },
+                    "max_date_of_birth": {
+                        "description": "Youngest allowed participant date of birth, YYYY-MM-DD.",
+                        "type": "string"
+                    },
+                    "allow_file_uploads": {
+                        "description": "Collect files from registrants at signup.",
+                        "type": "boolean"
+                    },
+                    "file_uploads_required": {
+                        "description": "Make the file upload mandatory at signup.",
+                        "type": "boolean"
+                    },
+                    "file_uploads_max": {
+                        "description": "Maximum number of files per signup.",
+                        "minimum": 1,
+                        "maximum": 20,
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "parent_program_id",
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "list_program_signups",
+            "title": "List program signups",
+            "summary": "See who has signed up for your programs and sessions.",
+            "description": "List program signups (registrations of members/guests to registration opportunities). Paginated. Non-managers only see their own signups.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/program_signups"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "program_id": {
+                                "description": "Registration opportunity id(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "user_id": {
+                                "description": "Only signups for this user id (non-managers may only use their own id).",
+                                "type": "integer"
+                            },
+                            "query": {
+                                "description": "Search by opportunity name, user name/email, guest name/email or additional member name.",
+                                "type": "string"
+                            },
+                            "status": {
+                                "description": "Opportunity time status, comma-separated. Options: ongoing, upcoming, past.",
+                                "type": "string"
+                            },
+                            "signup_status": {
+                                "description": "Manager-only lifecycle filter. Options: active, cancelled, cancelled:member, cancelled:admin. Defaults to active.",
+                                "type": "string"
+                            },
+                            "timeScope": {
+                                "description": "Simple time scope; upcoming includes ongoing.",
+                                "enum": [
+                                    "upcoming",
+                                    "past",
+                                    "all"
+                                ],
+                                "type": "string"
+                            },
+                            "upcoming": {
+                                "description": "Only signups for upcoming opportunities.",
+                                "type": "boolean"
+                            },
+                            "past": {
+                                "description": "Only signups for past opportunities.",
+                                "type": "boolean"
+                            },
+                            "ongoing": {
+                                "description": "Only signups for ongoing opportunities.",
+                                "type": "boolean"
+                            },
+                            "withTrashed": {
+                                "description": "Include soft-deleted signups.",
+                                "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: additionalMember, files, guest, program, program.parentProgram, transaction, user, user.family, formSubmissions.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_program_signup",
+            "title": "Get program signup",
+            "summary": "Look at one person's signup.",
+            "description": "Get one program signup by id.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/program_signups/{program_signup}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "program_signup": {
+                        "description": "The program signup id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: additionalMember, files, guest, program, program.parentProgram, transaction, user, user.family, formSubmissions.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "program_signup"
+                ]
+            }
+        },
+        {
+            "name": "export_program_signups",
+            "title": "Export program signups as CSV",
+            "summary": "Download signups as a spreadsheet (CSV). Large exports are emailed to you instead.",
+            "description": "Export program signups to a CSV file. Accepts the same filters as list_program_signups. Small exports return a temporary download_url (valid ~10 minutes) plus record_count; larger exports are prepared in the background and emailed to the caller, in which case immediate is false and there is no download_url. Requires a manager role; instructors always receive their program-scoped export by email. Share the download_url with the user — do not try to fetch the CSV yourself.",
+            "domain": "programs",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/program_signups/export"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": false,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional — same semantics as list_program_signups.",
+                        "properties": {
+                            "program_id": {
+                                "description": "Registration opportunity id(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "program.parent_program_id": {
+                                "description": "Program id — exports signups across all of its registration opportunities.",
+                                "type": "integer"
+                            },
+                            "signup_status": {
+                                "description": "Lifecycle filter. Options: active, cancelled, cancelled:member, cancelled:admin. Defaults to active.",
+                                "type": "string"
+                            },
+                            "timeScope": {
+                                "description": "Simple time scope; upcoming includes ongoing.",
+                                "enum": [
+                                    "upcoming",
+                                    "past",
+                                    "all"
+                                ],
+                                "type": "string"
+                            },
+                            "withTrashed": {
+                                "description": "Include soft-deleted signups.",
+                                "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "update_program",
+            "title": "Update a program",
+            "summary": "Change a program's details, such as its dates, price, spots or whether it's published.",
+            "description": "Change a program's details — title, description, dates, location, price, spots, tags, or whether it's published, hidden or has a waitlist. Only send what you want to change; everything else stays exactly as it is. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
+            "domain": "programs",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/parent_programs/{parent_program}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "program": {
+                        "description": "The program to change: its name (e.g. \"Youth Basketball\") or ID.",
+                        "type": "string"
+                    },
+                    "title": {
+                        "description": "New title.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "New description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "starts_on": {
+                        "description": "First day of the program, YYYY-MM-DD, in the organization’s timezone.",
+                        "type": "string"
+                    },
+                    "ends_on": {
+                        "description": "Last day of the program, YYYY-MM-DD.",
+                        "type": "string"
+                    },
+                    "ongoing": {
+                        "description": "true if the program runs with no fixed dates. Setting this clears the start and end dates.",
+                        "type": "boolean"
+                    },
+                    "location_name": {
+                        "description": "Where it happens, e.g. \"Main Gym\".",
+                        "type": "string"
+                    },
+                    "location_address": {
+                        "description": "Street address of the location.",
+                        "type": "string"
+                    },
+                    "registration_fee": {
+                        "description": "One-time registration fee in dollars, e.g. \"25.00\". Use \"0\" for no fee.",
+                        "type": "string"
+                    },
+                    "total_spots": {
+                        "description": "Maximum people across all sessions. Send 0 to remove the limit.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "published": {
+                        "description": "true to publish the program so members can see it; false to move it back to draft.",
+                        "type": "boolean"
+                    },
+                    "hidden": {
+                        "description": "true to hide the program from member-facing lists (still reachable by direct link).",
+                        "type": "boolean"
+                    },
+                    "waitlist": {
+                        "description": "true to let people join a waitlist when the program is full.",
+                        "type": "boolean"
+                    },
+                    "tags": {
+                        "description": "The complete list of tags the program should have (replaces the current tags).",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "program"
+                ]
+            }
+        },
+        {
+            "name": "clone_program",
+            "title": "Copy a program",
+            "summary": "Copy a program, for example to run last season again. The copy starts as a draft.",
+            "description": "Make a copy of a program — for example to run last season's program again. The copy starts as a draft called \"<title> (Copy)\", keeps the waivers, facilities and tax settings, and by default copies every session and its prices too. Optionally move all dates forward one year. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to create the copy, then use update_program to rename or publish it.",
+            "domain": "programs",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/parent_programs/clone"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "program": {
+                        "description": "The program to copy: its name or ID.",
+                        "type": "string"
+                    },
+                    "include_sessions": {
+                        "description": "Copy the program’s sessions and their prices too (default true).",
+                        "type": "boolean"
+                    },
+                    "move_dates_forward_one_year": {
+                        "description": "Shift the program and session dates forward by exactly one year (default false).",
+                        "type": "boolean"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "program"
+                ]
+            }
+        },
+        {
+            "name": "add_session",
+            "title": "Add a session",
+            "summary": "Add a new session to a program, with its schedule, spots and prices.",
+            "description": "Add a session (registration opportunity) to an existing program — for example \"Spring 2027, Tuesdays 6–7pm, 12 spots, $40\". Give a single date (starts_at/ends_at), a weekly schedule, or ongoing; spots; when sign-up opens and closes (or keep it open until the session starts, the default); and what non-members and specific membership types pay. Refer to the program by name or ID. Runs as a preview first; call again with mode \"apply\" to create it.",
+            "domain": "programs",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/programs"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "program": {
+                        "description": "The program to add the session to: its name or ID.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Name of the new session, e.g. \"Spring 2027 — Tuesdays\".",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "spots": {
+                        "description": "How many people can sign up for this session.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "no_spot_limit": {
+                        "description": "true to remove this session’s own limit (the program’s overall limit, if any, still applies).",
+                        "type": "boolean"
+                    },
+                    "ongoing": {
+                        "description": "true if the session runs with no fixed dates. Clears any dates.",
+                        "type": "boolean"
+                    },
+                    "starts_at": {
+                        "description": "For a single date: when it starts, \"YYYY-MM-DD HH:MM\" in the organization’s timezone.",
+                        "type": "string"
+                    },
+                    "ends_at": {
+                        "description": "For a single date: when it ends, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "weekly": {
+                        "description": "A repeating weekly schedule. Replaces any existing dates.",
+                        "properties": {
+                            "days": {
+                                "description": "Days of the week, e.g. [\"tuesday\", \"thursday\"].",
+                                "items": {
+                                    "enum": [
+                                        "monday",
+                                        "tuesday",
+                                        "wednesday",
+                                        "thursday",
+                                        "friday",
+                                        "saturday",
+                                        "sunday"
+                                    ],
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            "start_time": {
+                                "description": "Start time each day, \"HH:MM\" (24-hour).",
+                                "type": "string"
+                            },
+                            "end_time": {
+                                "description": "End time each day, \"HH:MM\" (24-hour).",
+                                "type": "string"
+                            },
+                            "first_date": {
+                                "description": "First date the schedule can start, \"YYYY-MM-DD\".",
+                                "type": "string"
+                            },
+                            "last_date": {
+                                "description": "Last date, \"YYYY-MM-DD\". Give this or number_of_dates.",
+                                "type": "string"
+                            },
+                            "number_of_dates": {
+                                "description": "How many weeks’ worth of dates to generate. Give this or last_date. Skipped dates are taken out of this total.",
+                                "minimum": 1,
+                                "maximum": 520,
+                                "type": "integer"
+                            },
+                            "skip_dates": {
+                                "description": "Dates to skip, \"YYYY-MM-DD\" (holidays etc.).",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "registration_opens": {
+                        "description": "When sign-up opens, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "registration_closes": {
+                        "description": "When sign-up closes, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "registration_open_until_start": {
+                        "description": "true to keep sign-up open right up until the session starts, instead of fixed opening and closing dates.",
+                        "type": "boolean"
+                    },
+                    "waitlist": {
+                        "description": "true to let people join a waitlist when the session is full.",
+                        "type": "boolean"
+                    },
+                    "non_member_price": {
+                        "description": "What people without a membership pay, in dollars, e.g. \"40.00\". Use \"0\" for free, or \"none\" to stop non-members signing up.",
+                        "type": "string"
+                    },
+                    "member_prices": {
+                        "description": "Prices for specific membership types. Only the types listed change.",
+                        "items": {
+                            "properties": {
+                                "membership_type": {
+                                    "description": "Membership type name or ID.",
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "description": "Dollars, \"0\" for free, or \"none\" to stop this membership signing up.",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "program",
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "update_session",
+            "title": "Update a session",
+            "summary": "Change a session's name, spots, dates, schedule, sign-up window or prices.",
+            "description": "Change one session (registration opportunity) of a program — its name, spots, dates or weekly schedule, sign-up window, waitlist, or prices for non-members and specific membership types. Only send what you want to change; prices, dates and everything else stay exactly as they are. Refer to the session by name or ID, and pass the program too when the session name is used by more than one program. Runs as a preview first; call again with mode \"apply\" to save.",
+            "domain": "programs",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/programs/{program}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "session": {
+                        "description": "The session to change: its name (e.g. \"Spring 2027 — Tuesdays\") or ID.",
+                        "type": "string"
+                    },
+                    "program": {
+                        "description": "The program the session belongs to (name or ID), to tell apart sessions with the same name.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Name of the session, e.g. \"Spring 2027 — Tuesdays\".",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "spots": {
+                        "description": "How many people can sign up for this session.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "no_spot_limit": {
+                        "description": "true to remove this session’s own limit (the program’s overall limit, if any, still applies).",
+                        "type": "boolean"
+                    },
+                    "ongoing": {
+                        "description": "true if the session runs with no fixed dates. Clears any dates.",
+                        "type": "boolean"
+                    },
+                    "starts_at": {
+                        "description": "For a single date: when it starts, \"YYYY-MM-DD HH:MM\" in the organization’s timezone.",
+                        "type": "string"
+                    },
+                    "ends_at": {
+                        "description": "For a single date: when it ends, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "weekly": {
+                        "description": "A repeating weekly schedule. Replaces any existing dates.",
+                        "properties": {
+                            "days": {
+                                "description": "Days of the week, e.g. [\"tuesday\", \"thursday\"].",
+                                "items": {
+                                    "enum": [
+                                        "monday",
+                                        "tuesday",
+                                        "wednesday",
+                                        "thursday",
+                                        "friday",
+                                        "saturday",
+                                        "sunday"
+                                    ],
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            "start_time": {
+                                "description": "Start time each day, \"HH:MM\" (24-hour).",
+                                "type": "string"
+                            },
+                            "end_time": {
+                                "description": "End time each day, \"HH:MM\" (24-hour).",
+                                "type": "string"
+                            },
+                            "first_date": {
+                                "description": "First date the schedule can start, \"YYYY-MM-DD\".",
+                                "type": "string"
+                            },
+                            "last_date": {
+                                "description": "Last date, \"YYYY-MM-DD\". Give this or number_of_dates.",
+                                "type": "string"
+                            },
+                            "number_of_dates": {
+                                "description": "How many weeks’ worth of dates to generate. Give this or last_date. Skipped dates are taken out of this total.",
+                                "minimum": 1,
+                                "maximum": 520,
+                                "type": "integer"
+                            },
+                            "skip_dates": {
+                                "description": "Dates to skip, \"YYYY-MM-DD\" (holidays etc.).",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "registration_opens": {
+                        "description": "When sign-up opens, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "registration_closes": {
+                        "description": "When sign-up closes, \"YYYY-MM-DD HH:MM\".",
+                        "type": "string"
+                    },
+                    "registration_open_until_start": {
+                        "description": "true to keep sign-up open right up until the session starts, instead of fixed opening and closing dates.",
+                        "type": "boolean"
+                    },
+                    "waitlist": {
+                        "description": "true to let people join a waitlist when the session is full.",
+                        "type": "boolean"
+                    },
+                    "non_member_price": {
+                        "description": "What people without a membership pay, in dollars, e.g. \"40.00\". Use \"0\" for free, or \"none\" to stop non-members signing up.",
+                        "type": "string"
+                    },
+                    "member_prices": {
+                        "description": "Prices for specific membership types. Only the types listed change.",
+                        "items": {
+                            "properties": {
+                                "membership_type": {
+                                    "description": "Membership type name or ID.",
+                                    "type": "string"
+                                },
+                                "price": {
+                                    "description": "Dollars, \"0\" for free, or \"none\" to stop this membership signing up.",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "session"
+                ]
+            }
+        },
+        {
+            "name": "list_attendance_sheets",
+            "title": "List attendance sheets",
+            "summary": "See attendance sheets, one for each date a session runs.",
+            "description": "List attendance sheets (one per registration opportunity occurrence/date). Requires a manager role. Paginated.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/attendance_sheets"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "registration_opportunity_id": {
+                                "description": "Only sheets for this registration opportunity id.",
+                                "type": "integer"
+                            },
+                            "parent_program_id": {
+                                "description": "Only sheets under this program id.",
+                                "type": "integer"
+                            },
+                            "date": {
+                                "description": "Only sheets on this date (YYYY-MM-DD).",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_attendance_sheet",
+            "title": "Get attendance sheet",
+            "summary": "Look at one attendance sheet.",
+            "description": "Get one attendance sheet by id. Requires a manager role.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/attendance_sheets/{attendance_sheet}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "attendance_sheet": {
+                        "description": "The attendance sheet id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: registrationOpportunities, records, records.programSignup.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "attendance_sheet"
+                ]
+            }
+        },
+        {
+            "name": "list_attendance_records",
+            "title": "List attendance records",
+            "summary": "See who was marked present, absent, late or excused.",
+            "description": "List attendance records (a person's attendance status on an attendance sheet). Requires a manager role. Paginated.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/attendance_records"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "attendance_sheet_id": {
+                                "description": "Only records on this attendance sheet id.",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_attendance_record",
+            "title": "Get attendance record",
+            "summary": "Look at one person's attendance on one date.",
+            "description": "Get one attendance record by id. Requires a manager role.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/attendance_records/{attendance_record}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "attendance_record": {
+                        "description": "The attendance record id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: attendanceSheet, programSignup, programSignup.program.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "attendance_record"
+                ]
+            }
+        },
+        {
+            "name": "mark_attendance_record",
+            "title": "Mark attendance",
+            "summary": "Change one person's attendance mark on a sheet.",
+            "description": "Update an existing attendance record for a program signup on a specific sheet. Accepts status, notes, marked_at (timestamp with timezone), and marked_by (user ID). Timestamp and marker default to now and the credential owner. Requires the owning staff user to be a manager or an instructor assigned to the signup program.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/attendance_records/{attendance_record}/mark"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "attendance_record": {
+                        "description": "The attendance record ID; records are specific to a sheet and signup.",
+                        "type": "integer"
+                    },
+                    "status": {
+                        "description": "Attendance status to record.",
+                        "enum": [
+                            "absent",
+                            "excused",
+                            "excluded",
+                            "late",
+                            "present",
+                            "unmarked"
+                        ],
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "Free-text note about this attendance mark.",
+                        "maxLength": 1000,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "marked_at": {
+                        "description": "When attendance was marked, with timezone, e.g. 2026-09-09T15:00:00Z. Defaults to now.",
+                        "type": "string"
+                    },
+                    "marked_by": {
+                        "description": "ID of the user who marked attendance, within this tenant. Defaults to the credential owner.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "attendance_record",
+                    "status"
+                ]
+            }
+        },
+        {
+            "name": "register_attendance",
+            "title": "Register and mark attendance",
+            "summary": "Sign up someone who wasn't registered, such as a walk-in, and mark their attendance in one step.",
+            "description": "Create a program signup and mark attendance for a person not previously registered. Use existing_user with user_id for a member, or walk_in with name for a guest. program_id must be a registration opportunity on the attendance sheet. Creates a new signup on each call. Requires the owning staff user to have the existing attendance registration permission: program manager, super admin, or assigned instructor. Returns the attendance record. Timestamp and marker default to now and the credential owner.",
+            "domain": "attendance",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/attendance_sheets/{attendance_sheet}/mark"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "attendance_sheet": {
+                        "description": "The attendance sheet ID.",
+                        "type": "integer"
+                    },
+                    "program_id": {
+                        "description": "A registration opportunity ID included on the sheet.",
+                        "type": "integer"
+                    },
+                    "participant_type": {
+                        "description": "existing_user for a member of the organization, walk_in for a guest.",
+                        "enum": [
+                            "existing_user",
+                            "walk_in"
+                        ],
+                        "type": "string"
+                    },
+                    "user_id": {
+                        "description": "Required for existing_user.",
+                        "type": "integer"
+                    },
+                    "additional_member_id": {
+                        "description": "An existing family member belonging to user_id.",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Required for walk_in.",
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Walk-in guest email.",
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "telephone": {
+                        "description": "Walk-in guest phone number.",
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "description": "Walk-in guest date of birth, YYYY-MM-DD.",
+                        "type": "string"
+                    },
+                    "amount_paid": {
+                        "description": "Amount collected, in the organization's currency (e.g. 25.00).",
+                        "minimum": 0,
+                        "type": "number"
+                    },
+                    "payment_method": {
+                        "description": "How the amount was paid, e.g. cash.",
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "trigger_assign_email": {
+                        "description": "Send the assignment email; defaults to false.",
+                        "type": "boolean"
+                    },
+                    "attach_invoice": {
+                        "description": "Attach an invoice to the assignment email; defaults to false.",
+                        "type": "boolean"
+                    },
+                    "additional_member": {
+                        "description": "Optional family member to create for a walk-in guest.",
+                        "properties": {
+                            "name": {
+                                "description": "Family member name.",
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            "email": {
+                                "description": "Family member email.",
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            "date_of_birth": {
+                                "description": "Family member date of birth, YYYY-MM-DD.",
+                                "type": "string"
+                            },
+                            "emergency_contact_name": {
+                                "description": "Emergency contact name.",
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            "emergency_contact_phone": {
+                                "description": "Emergency contact phone number.",
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            "gender": {
+                                "description": "Family member gender.",
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            "medical": {
+                                "description": "Medical notes for the family member.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object",
+                        "required": [
+                            "name"
+                        ]
+                    },
+                    "status": {
+                        "description": "Attendance status to record.",
+                        "enum": [
+                            "absent",
+                            "excused",
+                            "excluded",
+                            "late",
+                            "present",
+                            "unmarked"
+                        ],
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "Free-text note about this attendance mark.",
+                        "maxLength": 1000,
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "marked_at": {
+                        "description": "When attendance was marked, with timezone, e.g. 2026-09-09T15:00:00Z. Defaults to now.",
+                        "type": "string"
+                    },
+                    "marked_by": {
+                        "description": "ID of the user who marked attendance, within this tenant. Defaults to the credential owner.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "attendance_sheet",
+                    "program_id",
+                    "participant_type",
+                    "status"
+                ]
+            }
+        },
+        {
+            "name": "mark_attendance",
+            "title": "Mark attendance",
+            "summary": "Mark one or more people present, absent, late or excused for one session date.",
+            "description": "Mark one or more people present, absent, late, excused or excluded for one date of a session — for example \"mark Sam Broadbent and Lena Kowalczyk present at the Competitive Team session on 2026-09-24\". Refer to the session and the people by name or ID; no lookups needed. The people must already be on that date's attendance sheet. Runs as a preview first and shows each person's current and new mark; call again with mode \"apply\" to save.",
+            "domain": "attendance",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/attendance_records/{attendance_record}/mark"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "session": {
+                        "description": "The session people signed up for: its name (e.g. \"Competitive Team\") or ID.",
+                        "type": "string"
+                    },
+                    "program": {
+                        "description": "The program the session belongs to, by name or ID. Only needed when more than one session has the same name.",
+                        "type": "string"
+                    },
+                    "date": {
+                        "description": "The day of the session, YYYY-MM-DD, in the organization’s timezone (e.g. \"2026-09-24\").",
+                        "type": "string"
+                    },
+                    "people": {
+                        "description": "Who to mark: each entry is a full name, an email address or a person’s ID, e.g. [\"Sam Broadbent\", \"Lena Kowalczyk\"].",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "status": {
+                        "description": "\"present\" = came; \"late\" = came but arrived late; \"absent\" = didn’t come; \"excused\" = missed it for an accepted reason; \"excluded\" = not expected that day, so it doesn’t count either way; \"unmarked\" = clear the mark.",
+                        "enum": [
+                            "present",
+                            "late",
+                            "absent",
+                            "excused",
+                            "excluded",
+                            "unmarked"
+                        ],
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "Optional note saved on each person’s mark, e.g. \"Called ahead\". Leave out to keep existing notes.",
+                        "maxLength": 1000,
+                        "type": "string"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "session",
+                    "date",
+                    "people",
+                    "status"
+                ]
+            }
+        },
+        {
+            "name": "get_user",
+            "title": "Get user",
+            "summary": "Look up a person's profile, memberships and family members.",
+            "description": "Get one user (member) by id: name, email, telephone, date of birth, subscriptions and family. Non-managers can only read themselves and their family.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/users/{user}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "user": {
+                        "description": "The user id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: card, family, roles, permissions, files.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user"
+                ]
+            }
+        },
+        {
+            "name": "update_user",
+            "title": "Update user",
+            "summary": "Update a person's profile with exact values. Assistants usually use `update_member` instead.",
+            "description": "Update a user's (member's) profile. This is a full update like the REST API's PUT: first_name, last_name and email are always required — read the user first (get_user) and resend the current values for anything you are not changing. Returns the updated user. Non-managers can only update themselves and their family.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/users/{user}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "user": {
+                        "description": "The user id.",
+                        "type": "integer"
+                    },
+                    "first_name": {
+                        "description": "First name.",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "description": "Last name.",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Email address (must be unique within the organization).",
+                        "type": "string"
+                    },
+                    "middle_name": {
+                        "description": "Middle name.",
+                        "type": "string"
+                    },
+                    "preferred_name": {
+                        "description": "Preferred name.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "Full display name.",
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "description": "Date of birth (YYYY-MM-DD).",
+                        "type": "string"
+                    },
+                    "telephone": {
+                        "description": "Phone number.",
+                        "type": "string"
+                    },
+                    "profile_address": {
+                        "description": "Street address.",
+                        "type": "string"
+                    },
+                    "profile_address_line_2": {
+                        "description": "Address line 2.",
+                        "type": "string"
+                    },
+                    "profile_city": {
+                        "description": "City.",
+                        "type": "string"
+                    },
+                    "profile_state": {
+                        "description": "Province or state.",
+                        "type": "string"
+                    },
+                    "profile_zip": {
+                        "description": "Postal or ZIP code.",
+                        "type": "string"
+                    },
+                    "profile_country": {
+                        "description": "ISO 3166-1 alpha-2 country code.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user",
+                    "first_name",
+                    "last_name",
+                    "email"
+                ]
+            }
+        },
+        {
+            "name": "create_user",
+            "title": "Create user",
+            "summary": "Add a person with exact settings. Assistants usually use `add_member` instead.",
+            "description": "Create a member in this organization. Requires a manager role. Returns the created user and auto_login flag. A password is generated when omitted, and the existing welcome or profile-completion notification is sent.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/users"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "first_name": {
+                        "description": "First name.",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "description": "Last name.",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Email address, unique within this organization.",
+                        "type": "string"
+                    },
+                    "middle_name": {
+                        "description": "Middle name.",
+                        "type": "string"
+                    },
+                    "preferred_name": {
+                        "description": "Preferred name.",
+                        "type": "string"
+                    },
+                    "telephone": {
+                        "description": "Phone number.",
+                        "type": "string"
+                    },
+                    "address": {
+                        "description": "Street address.",
+                        "type": "string"
+                    },
+                    "addressTwo": {
+                        "description": "Address line 2.",
+                        "type": "string"
+                    },
+                    "city": {
+                        "description": "City.",
+                        "type": "string"
+                    },
+                    "state": {
+                        "description": "Province or state.",
+                        "type": "string"
+                    },
+                    "zip": {
+                        "description": "Postal or ZIP code.",
+                        "type": "string"
+                    },
+                    "country": {
+                        "description": "Country.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "email"
+                ]
+            }
+        },
+        {
+            "name": "list_custom_profile_fields",
+            "title": "List custom profile fields",
+            "summary": "See the extra profile questions your organization asks, such as “Jersey size”.",
+            "description": "List the organization's custom profile fields (extra per-member attributes). Paginated. Pass include=\"values\" to embed each field's stored values.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/custom_profile_fields"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "applies_to_users": {
+                                "description": "Only fields that apply to user profiles.",
+                                "type": "boolean"
+                            },
+                            "applies_to_family_members": {
+                                "description": "Only fields that apply to family members.",
+                                "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: values.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "create_custom_profile_field",
+            "title": "Create custom profile field",
+            "summary": "Add a new profile question.",
+            "description": "Create a custom profile field. Requires a manager role.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/custom_profile_fields"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "name": {
+                        "description": "Field label shown on member profiles.",
+                        "type": "string"
+                    },
+                    "display_on_membership_card": {
+                        "description": "Print this field on digital membership cards.",
+                        "type": "boolean"
+                    },
+                    "for_child_tenants": {
+                        "description": "Also create/propagate the field to child organizations (parent organizations only).",
+                        "type": "boolean"
+                    },
+                    "user_editable": {
+                        "description": "Whether members may edit the value themselves.",
+                        "type": "boolean"
+                    },
+                    "applies_to_users": {
+                        "description": "Whether this field applies to user profiles. Defaults to true. At least one of applies_to_users or applies_to_family_members must be true.",
+                        "type": "boolean"
+                    },
+                    "applies_to_family_members": {
+                        "description": "Whether this field applies to family members. Defaults to false. At least one of applies_to_users or applies_to_family_members must be true.",
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "update_custom_profile_field",
+            "title": "Update custom profile field",
+            "summary": "Rename a profile question or change its settings.",
+            "description": "Update a custom profile field's label or flags. Requires a manager role.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/custom_profile_fields/{id}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "id": {
+                        "description": "The custom profile field id.",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "description": "Field label shown on member profiles.",
+                        "type": "string"
+                    },
+                    "display_on_membership_card": {
+                        "description": "Print this field on digital membership cards.",
+                        "type": "boolean"
+                    },
+                    "for_child_tenants": {
+                        "description": "Also create/propagate the field to child organizations (parent organizations only).",
+                        "type": "boolean"
+                    },
+                    "user_editable": {
+                        "description": "Whether members may edit the value themselves.",
+                        "type": "boolean"
+                    },
+                    "applies_to_users": {
+                        "description": "Whether this field applies to user profiles. At least one of applies_to_users or applies_to_family_members must be true.",
+                        "type": "boolean"
+                    },
+                    "applies_to_family_members": {
+                        "description": "Whether this field applies to family members. At least one of applies_to_users or applies_to_family_members must be true.",
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ]
+            }
+        },
+        {
+            "name": "list_custom_profile_field_values",
+            "title": "List custom profile field values",
+            "summary": "See people's answers to your profile questions.",
+            "description": "List stored custom profile field values. Filter by user, family member, or field. Paginated. Pass include=\"customProfileField\" to embed the field.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/custom_profile_field_values"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "user_id": {
+                                "description": "Only values for this user id.",
+                                "type": "integer"
+                            },
+                            "family_id": {
+                                "description": "Only values for this family member id.",
+                                "type": "integer"
+                            },
+                            "custom_profile_field_id": {
+                                "description": "Only values for this custom profile field id.",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: customProfileField.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "create_custom_profile_field_value",
+            "title": "Create custom profile field value",
+            "summary": "Save someone's answer to a profile question.",
+            "description": "Store a custom profile field value for a user or family member. Provide exactly one of user_id or family_id. Values cannot be modified from a parent organization.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/custom_profile_field_values"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "user_id": {
+                        "description": "The user the value belongs to. Required when family_id is omitted.",
+                        "type": "integer"
+                    },
+                    "family_id": {
+                        "description": "The family member the value belongs to. Required when user_id is omitted.",
+                        "type": "integer"
+                    },
+                    "custom_profile_field_id": {
+                        "description": "The custom profile field.",
+                        "type": "integer"
+                    },
+                    "value": {
+                        "description": "The value to store. Empty values are ignored.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "custom_profile_field_id"
+                ]
+            }
+        },
+        {
+            "name": "update_custom_profile_field_value",
+            "title": "Update custom profile field value",
+            "summary": "Change or clear someone's answer to a profile question.",
+            "description": "Change a stored custom profile field value. Only `value` is used; sending an empty value deletes the stored value.",
+            "domain": "people",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/custom_profile_field_values/{id}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "id": {
+                        "description": "The custom profile field value id.",
+                        "type": "integer"
+                    },
+                    "value": {
+                        "description": "The new value. An empty value deletes the stored value.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ]
+            }
+        },
+        {
+            "name": "update_member",
+            "title": "Update a person",
+            "summary": "Change a person's name, email, phone, date of birth, address or profile answers.",
+            "description": "Change a person's details — name, email, phone, date of birth, address, or custom profile fields such as \"Jersey Size\". Only send what you want to change; everything else stays exactly as it is. Refer to the person by name, email or ID, and to profile fields by their name. Runs as a preview first; call again with mode \"apply\" to save.",
+            "domain": "people",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/users/{user}"
+                },
+                {
+                    "method": "POST",
+                    "path": "/custom_profile_field_values"
+                },
+                {
+                    "method": "PUT",
+                    "path": "/custom_profile_field_values/{id}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "person": {
+                        "description": "The person to change: their full name (e.g. \"Maya Chen\"), email or ID.",
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "description": "New first name.",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "description": "New last name.",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "New email address. It must not belong to anyone else in the organization.",
+                        "type": "string"
+                    },
+                    "date_of_birth": {
+                        "description": "Date of birth, YYYY-MM-DD. Send an empty string to clear it.",
+                        "type": "string"
+                    },
+                    "preferred_name": {
+                        "description": "The name they like to go by, if different from their first name.",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Phone number, e.g. \"403-555-0100\".",
+                        "type": "string"
+                    },
+                    "address": {
+                        "description": "Street address.",
+                        "type": "string"
+                    },
+                    "address_line_2": {
+                        "description": "Apartment, suite or unit.",
+                        "type": "string"
+                    },
+                    "city": {
+                        "description": "City.",
+                        "type": "string"
+                    },
+                    "state": {
+                        "description": "Province or state.",
+                        "type": "string"
+                    },
+                    "postal_code": {
+                        "description": "Postal or ZIP code.",
+                        "type": "string"
+                    },
+                    "country": {
+                        "description": "Two-letter country code, e.g. \"CA\" or \"US\".",
+                        "type": "string"
+                    },
+                    "profile_fields": {
+                        "description": "Custom profile fields by their name, e.g. {\"Jersey Size\": \"M\"}. Send an empty string to clear a field.",
+                        "type": "object"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "person"
+                ]
+            }
+        },
+        {
+            "name": "add_member",
+            "title": "Add a person",
+            "summary": "Add a new person to your organization. They get a welcome email right away.",
+            "description": "Add a new person to the organization with their name and email, plus optional phone, address and custom profile fields such as \"Jersey Size\" (by field name). They get a welcome email as soon as they are added. Warns when someone with the same email or name already exists. Runs as a preview first; call again with mode \"apply\" to add them. To set a date of birth, use update_member afterwards.",
+            "domain": "people",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/users"
+                },
+                {
+                    "method": "POST",
+                    "path": "/custom_profile_field_values"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "first_name": {
+                        "description": "First name.",
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "description": "Last name.",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "Email address. Each person in the organization needs their own.",
+                        "type": "string"
+                    },
+                    "preferred_name": {
+                        "description": "The name they like to go by, if different from their first name.",
+                        "type": "string"
+                    },
+                    "phone": {
+                        "description": "Phone number, e.g. \"403-555-0100\".",
+                        "type": "string"
+                    },
+                    "address": {
+                        "description": "Street address.",
+                        "type": "string"
+                    },
+                    "address_line_2": {
+                        "description": "Apartment, suite or unit.",
+                        "type": "string"
+                    },
+                    "city": {
+                        "description": "City.",
+                        "type": "string"
+                    },
+                    "state": {
+                        "description": "Province or state.",
+                        "type": "string"
+                    },
+                    "postal_code": {
+                        "description": "Postal or ZIP code.",
+                        "type": "string"
+                    },
+                    "country": {
+                        "description": "Two-letter country code, e.g. \"CA\" or \"US\".",
+                        "type": "string"
+                    },
+                    "profile_fields": {
+                        "description": "Custom profile fields by their name, e.g. {\"Jersey Size\": \"M\"}. Send an empty string to clear a field.",
+                        "type": "object"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "email"
+                ]
+            }
+        },
+        {
+            "name": "list_membership_types",
+            "title": "List membership types",
+            "summary": "See the memberships you offer and their prices.",
+            "description": "List all membership types the organization offers, with their plans (prices/billing intervals), status and configuration.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/membership_types"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_membership_type",
+            "title": "Get membership type",
+            "summary": "Look at one membership type and its prices.",
+            "description": "Get one membership type by id, including its plans.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/membership_types/{membership_type}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "membership_type": {
+                        "description": "The membership type id.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "membership_type"
+                ]
+            }
+        },
+        {
+            "name": "archive_membership_type",
+            "title": "Archive membership type",
+            "summary": "Stop selling a membership type. People who already have it keep it.",
+            "description": "Archive a membership type so it can no longer be purchased. Existing memberships are unaffected. Requires a membership manager role.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/membership_types/{id}/archive"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "id": {
+                        "description": "The membership type id.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ]
+            }
+        },
+        {
+            "name": "unarchive_membership_type",
+            "title": "Unarchive membership type",
+            "summary": "Start selling an archived membership type again.",
+            "description": "Restore a previously archived membership type. Requires a membership manager role.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/membership_types/{id}/unarchive"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "id": {
+                        "description": "The membership type id.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ]
+            }
+        },
+        {
+            "name": "list_user_memberships",
+            "title": "List user memberships",
+            "summary": "See who holds which membership, when it expires and whether it renews.",
+            "description": "List the memberships members hold — which membership type and plan each member is on, its status (active/expired/retrying), expiry date and auto-renewal state. Paginated.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/user_memberships"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "user_id": {
+                                "description": "Only memberships held by the user with this id.",
+                                "type": "integer"
+                            },
+                            "active": {
+                                "description": "Only memberships that have not expired.",
+                                "type": "boolean"
+                            },
+                            "expired": {
+                                "description": "Only memberships that have expired.",
+                                "type": "boolean"
+                            },
+                            "expires_starting_at": {
+                                "description": "Only memberships ending on or after this ISO 8601 date/datetime.",
+                                "type": "string"
+                            },
+                            "expires_ending_at": {
+                                "description": "Only memberships ending on or before this ISO 8601 date/datetime.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "create_user_membership",
+            "title": "Assign a membership",
+            "summary": "Give someone a membership with exact settings. Assistants usually use `assign_membership` instead.",
+            "description": "Give an existing member a membership of the given type at no charge. Requires a membership-manager role. When the type has more than one active plan, plan_id is required. A payment the member already made outside Communal is recorded only when payment_method and amount_paid are supplied. Nothing is emailed unless send_email is true; then the member gets a \"Membership Assigned\" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card).",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/user_memberships"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "user_id": {
+                        "description": "The member's user id.",
+                        "type": "integer"
+                    },
+                    "membership_type_id": {
+                        "description": "The membership type to assign.",
+                        "type": "integer"
+                    },
+                    "plan_id": {
+                        "description": "Which of the membership type's active plans (prices) to use. Required when the type has more than one.",
+                        "type": "integer"
+                    },
+                    "payment_method": {
+                        "description": "How the member already paid outside Communal, e.g. \"cash\", \"cheque\" or \"e-transfer\". Leave out when they didn't pay.",
+                        "type": "string"
+                    },
+                    "amount_paid": {
+                        "description": "How much the member already paid outside Communal, e.g. 120.00.",
+                        "type": "number"
+                    },
+                    "purchase_date": {
+                        "description": "The date the payment is recorded on, YYYY-MM-DD. Defaults to today.",
+                        "type": "string"
+                    },
+                    "send_email": {
+                        "description": "true to send the \"Membership Assigned\" email followed by their membership card (or membership form PDF). Defaults to false, which sends nothing.",
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user_id",
+                    "membership_type_id"
+                ]
+            }
+        },
+        {
+            "name": "get_user_membership",
+            "title": "Get user membership",
+            "summary": "Look at one person's membership.",
+            "description": "Get one held membership by id, including its membership type and plan.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/user_memberships/{user_membership}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "user_membership": {
+                        "description": "The user membership id.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user_membership"
+                ]
+            }
+        },
+        {
+            "name": "send_membership_card",
+            "title": "Send membership card",
+            "summary": "Send a card using a member ID. It can also add the person and replace their current memberships, so to only send a card, `send_member_card` is safer.",
+            "description": "Send a digital membership card (Apple Wallet, Google Wallet and/or PDF) to a member by email. This does more than send a card: it looks the member up by their member ID (the value of `data[unique_identifier_key]`), creates a new member if none matches, CANCELS every active membership they hold, and gives them the membership type named in `data.MemberType` (which must match a membership type title exactly). It also sends real email. Confirm all of this with the user before calling.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/membership_cards/send"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "user": {
+                        "description": "The member the card is for, plus the data printed on the card.",
+                        "properties": {
+                            "unique_identifier_key": {
+                                "description": "Which key in `data` holds the member ID, usually \"MemberID\". Its value is matched against members’ member IDs.",
+                                "type": "string"
+                            },
+                            "data": {
+                                "description": "Card data keyed in CapitalCase. Every value must be a string. FirstName, LastName, PreferredEmail and MemberType are required; MemberType must exactly match a membership type title. Example: {\"MemberID\": \"123456\", \"FirstName\": \"John\", \"LastName\": \"Smith\", \"PreferredEmail\": \"john@smith.com\", \"ExpiryDate\": \"12/31/2025\", \"MemberType\": \"Adult Annual\"}.",
+                                "type": "object"
+                            }
+                        },
+                        "type": "object",
+                        "required": [
+                            "unique_identifier_key",
+                            "data"
+                        ]
+                    },
+                    "card_types": {
+                        "description": "Card formats to send. Defaults to all of apple, google and pdf.",
+                        "items": {
+                            "enum": [
+                                "apple",
+                                "google",
+                                "pdf"
+                            ],
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "user"
+                ]
+            }
+        },
+        {
+            "name": "list_membership_card_deliveries",
+            "title": "List membership card deliveries",
+            "summary": "See when membership cards were sent and whether they arrived.",
+            "description": "List digital membership card delivery activities (when cards were sent, to whom, and whether delivery succeeded). Paginated.",
+            "domain": "memberships",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/activities/card-deliveries"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "member_id": {
+                                "description": "Only deliveries for the user with this member id.",
+                                "type": "string"
+                            },
+                            "request_hash": {
+                                "description": "Only deliveries from the API request with this hash.",
+                                "type": "string"
+                            },
+                            "date_from": {
+                                "description": "Created on or after this ISO 8601 date/datetime.",
+                                "type": "string"
+                            },
+                            "date_to": {
+                                "description": "Created on or before this ISO 8601 date/datetime.",
+                                "type": "string"
+                            },
+                            "status": {
+                                "description": "Delivery status.",
+                                "enum": [
+                                    "success",
+                                    "failed"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "update_membership_type",
+            "title": "Update a membership type",
+            "summary": "Change a membership type's name, description, visibility or reminder emails.",
+            "description": "Change a membership type's details — its name, description, whether members can see it, and its expiry reminder emails. Only send what you want to change; everything else stays exactly as it is. Prices, renewal dates, auto-renewal, tax, waivers and forms can't be changed here — do that in Manage → Memberships. Refer to the membership type by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
+            "domain": "memberships",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/membership_types/{membership_type}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "membership_type": {
+                        "description": "The membership type to change: its name (e.g. \"Adult Annual\") or ID.",
+                        "type": "string"
+                    },
+                    "title": {
+                        "description": "New name.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "New description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "hidden": {
+                        "description": "true to hide the membership type from the list members can buy from (it can still be assigned by staff).",
+                        "type": "boolean"
+                    },
+                    "hide_starting_price": {
+                        "description": "true to hide the “starting at” price shown to members.",
+                        "type": "boolean"
+                    },
+                    "email_before_expiry": {
+                        "description": "Email members before their membership expires.",
+                        "type": "boolean"
+                    },
+                    "email_before_expiry_days": {
+                        "description": "How many days before expiry that reminder goes out.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "email_on_expiry": {
+                        "description": "Email members on the day their membership expires.",
+                        "type": "boolean"
+                    },
+                    "email_after_expiry": {
+                        "description": "Email members after their membership has expired.",
+                        "type": "boolean"
+                    },
+                    "email_after_expiry_days": {
+                        "description": "How many days after expiry that reminder goes out.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "renewal_window_days": {
+                        "description": "How many days before expiry members may renew early. 0 means they can’t renew early.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "membership_type"
+                ]
+            }
+        },
+        {
+            "name": "create_membership_type",
+            "title": "Create a membership type",
+            "summary": "Create a new membership type. Add a price in Communal before people can buy it.",
+            "description": "Create a new membership type (for example \"Adult Annual\" or a \"Locker Add-on\") with its name, description, how it expires, and its reminder emails. This does not set up any prices: members can't buy the new type until a price is added in Manage → Memberships. Runs as a preview first; call again with mode \"apply\" to create it.",
+            "domain": "memberships",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/membership_types"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "title": {
+                        "description": "Name of the membership type, e.g. \"Adult Annual\".",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "What the membership includes (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "expires": {
+                        "description": "\"after_plan_length\" (default): each membership lasts the length of the price it was bought with, counted from the day it starts. \"on_a_date\": every membership of this type ends on the same date (give end_date).",
+                        "enum": [
+                            "after_plan_length",
+                            "on_a_date"
+                        ],
+                        "type": "string"
+                    },
+                    "end_date": {
+                        "description": "Only with expires \"on_a_date\": the day every membership ends, YYYY-MM-DD, within the next two years.",
+                        "type": "string"
+                    },
+                    "add_on_to": {
+                        "description": "Make this an add-on to an existing membership type (name or ID). Members need that membership to buy the add-on. Leave out for a normal membership type.",
+                        "type": "string"
+                    },
+                    "hidden": {
+                        "description": "true to hide the membership type from the list members can buy from (it can still be assigned by staff).",
+                        "type": "boolean"
+                    },
+                    "hide_starting_price": {
+                        "description": "true to hide the “starting at” price shown to members.",
+                        "type": "boolean"
+                    },
+                    "email_before_expiry": {
+                        "description": "Email members before their membership expires.",
+                        "type": "boolean"
+                    },
+                    "email_before_expiry_days": {
+                        "description": "How many days before expiry that reminder goes out.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "email_on_expiry": {
+                        "description": "Email members on the day their membership expires.",
+                        "type": "boolean"
+                    },
+                    "email_after_expiry": {
+                        "description": "Email members after their membership has expired.",
+                        "type": "boolean"
+                    },
+                    "email_after_expiry_days": {
+                        "description": "How many days after expiry that reminder goes out.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "renewal_window_days": {
+                        "description": "How many days before expiry members may renew early. 0 means they can’t renew early.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title",
+                    "description"
+                ]
+            }
+        },
+        {
+            "name": "send_member_card",
+            "title": "Send a member their membership card",
+            "summary": "Email someone their digital membership card: a PDF plus Apple Wallet and Google Wallet versions.",
+            "description": "Email an existing member their digital membership card for the membership they already have. The email includes the PDF card plus Apple Wallet and Google Wallet versions. It only sends the card: it never creates a person and never changes, cancels or assigns any membership. Refer to the person by name, email or ID. By default the card goes to the email on their profile; pass send_to to use other addresses. Runs as a preview first; call again with mode \"apply\" to send. Prefer this over send_membership_card.",
+            "domain": "memberships",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/users/send-member-card"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "person": {
+                        "description": "The member: their name, email or ID. They must already exist.",
+                        "type": "string"
+                    },
+                    "send_to": {
+                        "description": "Up to 5 email addresses to send the card to. Defaults to the email on their profile.",
+                        "maxItems": 5,
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "card_types": {
+                        "description": "Card formats. Every card email includes all of pdf, apple and google, so leave this out or list all three.",
+                        "items": {
+                            "enum": [
+                                "pdf",
+                                "apple",
+                                "google"
+                            ],
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "person"
+                ]
+            }
+        },
+        {
+            "name": "assign_membership",
+            "title": "Assign a membership",
+            "summary": "Give someone a membership. Nothing is charged, and their other memberships stay as they are.",
+            "description": "Give an existing person a membership: pick the membership type and, when it has more than one, which of its prices (plans). It never cancels their other memberships. Nothing is ever charged: Communal sets the membership up in Stripe with no charge, and can record money the person already paid outside Communal (payment_method plus amount_paid, e.g. \"cash\" and \"120.00\"). Nothing is emailed unless send_email is true, so only turn it on when asked; then they get a \"Membership Assigned\" email and, about a minute later, their membership card (or the type's membership form PDF when cards are off or the type has no card). To send only a card, use send_member_card instead. Refer to the person and the membership type by name or ID. Runs as a preview first; call again with mode \"apply\" to assign it. To add someone who isn't in Communal yet with a membership, use add_member_with_membership.",
+            "domain": "memberships",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/user_memberships"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "person": {
+                        "description": "Who gets the membership: their full name, email or ID. They must already be in Communal.",
+                        "type": "string"
+                    },
+                    "membership_type": {
+                        "description": "The membership type to assign, by name or ID, e.g. \"Annual Family\".",
+                        "type": "string"
+                    },
+                    "price": {
+                        "description": "Which of that membership type’s prices (plans) to use, by name or ID, e.g. \"Family Plan\". Leave it out when the type has only one price.",
+                        "type": "string"
+                    },
+                    "payment_method": {
+                        "description": "How they already paid, outside Communal, e.g. \"cash\", \"cheque\" or \"e-transfer\". Leave it out, or use \"free\", when they didn’t pay. Communal never charges anyone here.",
+                        "enum": [
+                            "credit_card",
+                            "cheque",
+                            "cash",
+                            "debit",
+                            "paypal",
+                            "e-transfer",
+                            "pad",
+                            "promo",
+                            "free"
+                        ],
+                        "type": "string"
+                    },
+                    "amount_paid": {
+                        "description": "How much they already paid outside Communal, like \"120.00\". Defaults to 0.",
+                        "type": "string"
+                    },
+                    "purchase_date": {
+                        "description": "The date the payment is recorded on, YYYY-MM-DD. Defaults to today. The membership itself starts as soon as it is assigned.",
+                        "type": "string"
+                    },
+                    "send_email": {
+                        "description": "true to send the \"Membership Assigned\" email followed by their membership card (or membership form PDF). Defaults to false, which sends nothing.",
+                        "type": "boolean"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "person",
+                    "membership_type"
+                ]
+            }
+        },
+        {
+            "name": "list_transactions",
+            "title": "List transactions",
+            "summary": "See payments, refunds and other money movements for reporting.",
+            "description": "List financial transactions (charges, refunds, disputes, transfers, adjustments) for reporting. Paginated. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.",
+            "domain": "payments",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/transactions"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "range": {
+                                "description": "Filter to transactions whose effective date falls between two dates. Comma-separated start,end, e.g. 2025-01-01,2025-01-31.",
+                                "type": "string"
+                            },
+                            "starting_at": {
+                                "description": "Filter to transactions with an effective date on or after this date.",
+                                "type": "string"
+                            },
+                            "ending_at": {
+                                "description": "Filter to transactions with an effective date on or before this date (end of day).",
+                                "type": "string"
+                            },
+                            "type": {
+                                "description": "Filter by transaction type(s). Each option (other than refund) matches both the charge and its refund type.",
+                                "items": {
+                                    "enum": [
+                                        "membership",
+                                        "program",
+                                        "charge",
+                                        "invoice",
+                                        "donation",
+                                        "booking",
+                                        "refund",
+                                        "transfer"
+                                    ],
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            "query": {
+                                "description": "Search transactions by related user/guest/account name or email, or by program signup id (subscription schedule lookup).",
+                                "type": "string"
+                            },
+                            "membership_type_id": {
+                                "description": "Filter to transactions for the given membership type (plan product) id.",
+                                "type": "integer"
+                            },
+                            "amount": {
+                                "description": "Filter by amount in dollars. Pass a bare value for an exact match, or prefix with lte: / gte: for a range bound.",
+                                "type": "string"
+                            },
+                            "id": {
+                                "description": "Filter by exact transaction id(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "payout_id": {
+                                "description": "Filter by exact payout id.",
+                                "type": "string"
+                            },
+                            "subscription_schedule_id": {
+                                "description": "Filter by the local subscription schedule id (not the Stripe sub_sched_... id).",
+                                "type": "integer"
+                            },
+                            "user_id": {
+                                "description": "Filter by exact owning user id.",
+                                "type": "integer"
+                            },
+                            "promotion_code_id": {
+                                "description": "Filter by exact promotion code id.",
+                                "type": "integer"
+                            },
+                            "tags": {
+                                "description": "Filter by tag name(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "with_product": {
+                                "description": "Filter to transactions associated with the given product (membership/plan) id. Takes a product id, not a boolean.",
+                                "type": "integer"
+                            },
+                            "with_parent_program": {
+                                "description": "Filter to transactions associated with the given parent program id(s), including refunds of those charges. Takes parent program id(s), not a boolean. Comma-separated for multiple.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: tags (adds the `tags` field), invoice.bookings.bookableEntity (populates `bookable_entity` inside `invoice.bookings`). Every other loadable relation is already eager-loaded and always present in the response.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_transaction",
+            "title": "Get transaction",
+            "summary": "Look at one payment or refund.",
+            "description": "Get one financial transaction by id. Requires a manager-role user. Amounts are signed integer cents; negative amounts are refunds.",
+            "domain": "payments",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/transactions/{transaction}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "transaction": {
+                        "description": "The transaction id.",
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "transaction"
+                ]
+            }
+        },
+        {
+            "name": "list_bookings",
+            "title": "List bookings",
+            "summary": "See facility bookings.",
+            "description": "List facility bookings for this organization. Paginated. Members see their own bookings; managers see all bookings. Times are UTC ISO 8601; use include/append for owner, facility, and computed fields.",
+            "domain": "bookings",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/bookings"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "user_id": {
+                                "description": "Filter by owning user id. Members are limited to their own bookings regardless of this value.",
+                                "type": "integer"
+                            },
+                            "bookable_entity": {
+                                "description": "Filter by facility (bookable entity) id(s), including child facilities of a parent. Comma-separated for multiple.",
+                                "type": "string"
+                            },
+                            "id": {
+                                "description": "Filter by exact booking id(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "recurring_id": {
+                                "description": "Filter by the recurring series id.",
+                                "type": "integer"
+                            },
+                            "uuid": {
+                                "description": "Filter by exact booking uuid.",
+                                "type": "string"
+                            },
+                            "starting_at": {
+                                "description": "Filter to bookings that start on or after this date/time.",
+                                "type": "string"
+                            },
+                            "ending_at": {
+                                "description": "Filter to bookings that end on or before this date/time.",
+                                "type": "string"
+                            },
+                            "query": {
+                                "description": "Search bookings by owner name or email, facility name, or booking id.",
+                                "type": "string"
+                            },
+                            "associated_booking_id": {
+                                "description": "Filter by the parent booking id for linked/child bookings.",
+                                "type": "integer"
+                            },
+                            "only_recurring": {
+                                "description": "When true, only bookings that belong to a recurring series.",
+                                "type": "boolean"
+                            },
+                            "tags": {
+                                "description": "Filter by tag name(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "with_product": {
+                                "description": "Filter to bookings associated with the given product id.",
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: user, guest, bookableEntity, bookableEntity.parent, associatedBooking, organization, bookingItems, tags, formSubmissions, recurringBooking, facilities, bookingContactDetails, products.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options include readable_start_time, readable_end_time, owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, participants.",
+                        "type": "string"
+                    },
+                    "sort": {
+                        "description": "Sort field. Options: id, starting_at, ending_at. Prefix with - for descending.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_booking",
+            "title": "Get booking",
+            "summary": "Look at one booking.",
+            "description": "Get one facility booking by id. Members may only fetch their own bookings; managers may fetch any booking in the organization.",
+            "domain": "bookings",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/bookings/{booking}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "booking": {
+                        "description": "The booking id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.parent.form, bookableEntity.form, notes, organization, tags, user, guest, formSubmissions, facilities, bookingItems, bookingContactDetails, recurringBooking, products, invoices.transactions.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options include combined_notes, owner_name, owner_email, owner_telephone, participants, facilities_with_cost, created_by.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "booking"
+                ]
+            }
+        },
+        {
+            "name": "list_booking_requests",
+            "title": "List booking requests",
+            "summary": "See booking requests that need approval, and ones already decided.",
+            "description": "List facility booking requests (reservations that go through an approval workflow). Paginated. Members only see their own requests; facility managers and super admins see the full organization. The default row is a curated payload (schedule, cost, owner, facility, state).",
+            "domain": "bookings",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/booking_requests"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "query": {
+                                "description": "Search by owner name, facility name, or organization name.",
+                                "type": "string"
+                            },
+                            "bookable_entity_id": {
+                                "description": "Bookable entity id(s), comma-separated. Also matches child facilities of a parent entity.",
+                                "type": "string"
+                            },
+                            "booking_state_id": {
+                                "description": "Booking state id(s), comma-separated.",
+                                "type": "string"
+                            },
+                            "user_id": {
+                                "description": "Only requests owned by this member id. Non-managers may only use their own id.",
+                                "type": "integer"
+                            },
+                            "starting_at": {
+                                "description": "Only requests that start on or after this datetime.",
+                                "type": "string"
+                            },
+                            "ending_at": {
+                                "description": "Only requests that end on or before this datetime.",
+                                "type": "string"
+                            },
+                            "uuid": {
+                                "description": "Look up a single request by its public uuid.",
+                                "type": "string"
+                            },
+                            "recurring_id": {
+                                "description": "Only requests in this recurring series.",
+                                "type": "integer"
+                            },
+                            "tags": {
+                                "description": "Filter by tag name(s), comma-separated.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, organization, bookingItems, tags, bookingContactDetails, recurringBooking, formSubmissions, files, notes, facilities.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options: owner_name, owner_email, owner_telephone, invoices_paid, total_amount_of_invoices, combined_notes, associated_recurring_ids, flat_total_for_user_and_availability, participant_name (facility managers and super admins only).",
+                        "type": "string"
+                    },
+                    "sort": {
+                        "description": "Sort by id, starting_at, or ending_at. Prefix with - for descending.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_booking_request",
+            "title": "Get booking request",
+            "summary": "Look at one booking request.",
+            "description": "Get one facility booking request by id. Members may only view their own; facility managers and super admins may view any request in the organization.",
+            "domain": "bookings",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/booking_requests/{booking_request}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "booking_request": {
+                        "description": "The booking request id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: bookableEntity, bookableEntity.parent, bookableEntity.form, guest, user, bookingState, transaction, files, notes, organization, recurringBooking, tags, formSubmissions, formSubmissions.form, bookingContactDetails, bookingItems, facilities.",
+                        "type": "string"
+                    },
+                    "append": {
+                        "description": "Append computed attributes (comma-separated). Options: remaining_recurring_bookings, combined_notes, owner_name, owner_email, owner_telephone, created_by, facilities_with_cost, participant_name (facility managers and super admins only).",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "booking_request"
+                ]
+            }
+        },
+        {
+            "name": "list_facilities",
+            "title": "List facilities",
+            "summary": "See the spaces and equipment people can book, such as rooms, courts and fields.",
+            "description": "List the bookable spaces and resources the organization offers — rooms, courts, fields, equipment — with their booking rules, capacity and membership requirements. Paginated.",
+            "domain": "facilities",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/facilities"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "filter": {
+                        "description": "Filters, all optional.",
+                        "properties": {
+                            "type": {
+                                "description": "Only facilities of this booking type: instant or request.",
+                                "type": "string"
+                            },
+                            "parent_id": {
+                                "description": "Only sub-facilities of the facility with this id.",
+                                "type": "integer"
+                            },
+                            "status": {
+                                "description": "active (default) or archived.",
+                                "type": "string"
+                            },
+                            "query": {
+                                "description": "Free-text search across facility names.",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: parent, children.",
+                        "type": "string"
+                    },
+                    "page": {
+                        "description": "Pagination. Results are returned as {\"data\": [...]} with flat pagination keys (current_page, per_page, total, last_page).",
+                        "properties": {
+                            "number": {
+                                "description": "Page number, starting at 1.",
+                                "minimum": 1,
+                                "type": "integer"
+                            },
+                            "size": {
+                                "description": "Results per page (default 30).",
+                                "minimum": 1,
+                                "maximum": 500,
+                                "type": "integer"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        {
+            "name": "get_facility",
+            "title": "Get facility",
+            "summary": "Look at one facility's booking rules and capacity.",
+            "description": "Get one bookable space or resource by id, including its booking rules, capacity and membership requirements.",
+            "domain": "facilities",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "path": "/facilities/{facility}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "facility": {
+                        "description": "The facility id.",
+                        "type": "integer"
+                    },
+                    "include": {
+                        "description": "Include related resources (comma-separated). Options: parent, children.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "facility"
+                ]
+            }
+        },
+        {
+            "name": "create_facility",
+            "title": "Create facility",
+            "summary": "Add a new facility. It starts hidden, and only managers can book it until you change its settings.",
+            "description": "Create a facility configuration record. Requires the facilities:write OAuth scope, independently of user roles. Accepts name, description, and optional booking type, capacity, scheduling settings, visibility, and booking-form options; other fields are ignored. Defaults to hidden from the public with public booking disabled and manager-only booking.",
+            "domain": "facilities",
+            "kind": "endpoint",
+            "endpoints": [
+                {
+                    "method": "POST",
+                    "path": "/facilities"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": false
+            },
+            "inputSchema": {
+                "properties": {
+                    "publicly_exposed": {
+                        "description": "Show the facility publicly. Defaults to false.",
+                        "type": "boolean"
+                    },
+                    "publicly_exposed_allow_bookings": {
+                        "description": "Allow public bookings. Defaults to false.",
+                        "type": "boolean"
+                    },
+                    "manager_only": {
+                        "description": "Restrict bookings to managers. Defaults to true.",
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "description": "Booking type: instant confirmation or manager-approved request.",
+                        "enum": [
+                            "instant",
+                            "request"
+                        ],
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "description": "Maximum number of people. Null means no capacity limit.",
+                        "minimum": 1,
+                        "maximum": 2147483647,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "booking_interval": {
+                        "description": "Booking slot interval in minutes.",
+                        "enum": [
+                            5,
+                            10,
+                            15,
+                            30,
+                            60
+                        ],
+                        "type": "integer"
+                    },
+                    "buffer_minutes": {
+                        "description": "Held minutes after each booking, 0 to 480. Zero or omit is Off. A child with no value uses the parent.",
+                        "minimum": 0,
+                        "maximum": 480,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "future_days": {
+                        "description": "Number of days ahead members may book.",
+                        "minimum": 0,
+                        "maximum": 2147483647,
+                        "type": "integer"
+                    },
+                    "basis_time": {
+                        "description": "Local time from which booking slots align, in HH:MM:SS format.",
+                        "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$",
+                        "type": "string"
+                    },
+                    "booking_request_deadline": {
+                        "description": "Hours before a booking starts that requests must be submitted. Null means no deadline.",
+                        "minimum": 0,
+                        "maximum": 4294967295,
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "publicly_exposed_hide_user_names": {
+                        "description": "Hide booking owner names on the public schedule.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_booking_owner": {
+                        "description": "Ask who the booking is for.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_adding_more_users": {
+                        "description": "Ask for additional members to include.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_number_of_guests": {
+                        "description": "Ask how many guests are attending.",
+                        "type": "boolean"
+                    },
+                    "user_recurring_bookings": {
+                        "description": "Allow members to create recurring bookings.",
+                        "type": "boolean"
+                    },
+                    "user_specified_reason": {
+                        "description": "Require members to give a booking reason.",
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "description": "Facility name.",
+                        "maxLength": 191,
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Facility description.",
+                        "maxLength": 16000,
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description"
+                ]
+            }
+        },
+        {
+            "name": "update_facility",
+            "title": "Update a facility",
+            "summary": "Change a facility's name, description, capacity or booking rules.",
+            "description": "Change a facility's own settings — its name, description, booking type, capacity, booking instructions and prompts, booking lengths and interval, buffer, how far ahead and how late it can be booked, public visibility, manager-only booking, recurring bookings, reminder emails and calendar view. Only send what you want to change; everything else stays exactly as it is. Parent and sub-facilities, associated facilities, products, membership requirements, booking checklists, tax, availability and existing bookings can't be changed here — do that in Manage → Facilities. Refer to the facility by name or ID. Runs as a preview first; call again with mode \"apply\" to save.",
+            "domain": "facilities",
+            "kind": "task",
+            "endpoints": [
+                {
+                    "method": "PUT",
+                    "path": "/bookable_entities/{bookable_entity}"
+                }
+            ],
+            "annotations": {
+                "readOnlyHint": false,
+                "destructiveHint": true,
+                "idempotentHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "facility": {
+                        "description": "The facility to change: its name (e.g. \"Court 1\") or ID.",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "New name.",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "New description (plain text or simple HTML).",
+                        "type": "string"
+                    },
+                    "type": {
+                        "description": "\"instant\" books straight away; \"request\" needs a manager to approve each booking.",
+                        "enum": [
+                            "instant",
+                            "request"
+                        ],
+                        "type": "string"
+                    },
+                    "capacity": {
+                        "description": "Most people allowed at once.",
+                        "minimum": 1,
+                        "type": "integer"
+                    },
+                    "booking_instructions": {
+                        "description": "Instructions shown to people when they book.",
+                        "type": "string"
+                    },
+                    "prompt_for_booking_owner": {
+                        "description": "Ask who the booking is for.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_adding_more_users": {
+                        "description": "Let people add others to their booking.",
+                        "type": "boolean"
+                    },
+                    "prompt_for_number_of_guests": {
+                        "description": "Ask how many guests are coming.",
+                        "type": "boolean"
+                    },
+                    "user_specified_reason": {
+                        "description": "Ask people for a reason when they book.",
+                        "type": "boolean"
+                    },
+                    "minimum_length": {
+                        "description": "Shortest booking, in hours (e.g. 0.5 or 1).",
+                        "type": "string"
+                    },
+                    "maximum_length": {
+                        "description": "Longest booking, in hours (e.g. 2).",
+                        "type": "string"
+                    },
+                    "booking_interval": {
+                        "description": "Booking start times step by this many minutes.",
+                        "enum": [
+                            "5",
+                            "10",
+                            "15",
+                            "30",
+                            "60"
+                        ],
+                        "type": "string"
+                    },
+                    "basis_time": {
+                        "description": "Time of day booking slots line up with, as HH:MM (e.g. 08:00).",
+                        "type": "string"
+                    },
+                    "buffer_minutes": {
+                        "description": "Minutes kept free between bookings (0 for none).",
+                        "minimum": 0,
+                        "maximum": 480,
+                        "type": "integer"
+                    },
+                    "future_days": {
+                        "description": "How many days ahead people can book.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "booking_request_deadline": {
+                        "description": "How many hours before the start a booking must be made.",
+                        "minimum": 0,
+                        "type": "integer"
+                    },
+                    "publicly_exposed": {
+                        "description": "Show the facility on the public calendar.",
+                        "type": "boolean"
+                    },
+                    "publicly_exposed_allow_bookings": {
+                        "description": "Let people book from the public calendar.",
+                        "type": "boolean"
+                    },
+                    "publicly_exposed_hide_user_names": {
+                        "description": "Hide who booked on the public calendar.",
+                        "type": "boolean"
+                    },
+                    "manager_only": {
+                        "description": "Only managers can make bookings.",
+                        "type": "boolean"
+                    },
+                    "user_recurring_bookings": {
+                        "description": "Let members make recurring bookings.",
+                        "type": "boolean"
+                    },
+                    "send_reminder_emails": {
+                        "description": "Email people before their booking.",
+                        "type": "boolean"
+                    },
+                    "remind_hours_before": {
+                        "description": "How many hours before the booking the reminder goes out.",
+                        "minimum": 1,
+                        "maximum": 720,
+                        "type": "integer"
+                    },
+                    "reminder_email_subject": {
+                        "description": "Subject of the reminder email.",
+                        "maxLength": 255,
+                        "type": "string"
+                    },
+                    "reminder_email_body": {
+                        "description": "Body of the reminder email.",
+                        "maxLength": 5000,
+                        "type": "string"
+                    },
+                    "view_type": {
+                        "description": "How members see the booking times.",
+                        "enum": [
+                            "list",
+                            "calendar"
+                        ],
+                        "type": "string"
+                    },
+                    "mode": {
+                        "description": "\"preview\" (default) checks the change and shows exactly what would happen without saving anything. \"apply\" makes the change.",
+                        "enum": [
+                            "preview",
+                            "apply"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "facility"
+                ]
+            }
+        },
+        {
+            "name": "find_records",
+            "title": "Find records by name",
+            "summary": "Find a program, session, person, membership type or facility by name.",
+            "description": "Look up programs, sessions, people, membership types or facilities by name and get their IDs. Most task tools also accept a plain name wherever they ask for a record, so you only need this when a name is ambiguous or you want to browse. Leave query empty to list the most relevant records of that kind.",
+            "domain": "assistant",
+            "kind": "lookup",
+            "endpoints": [],
+            "annotations": {
+                "readOnlyHint": true
+            },
+            "inputSchema": {
+                "properties": {
+                    "kind": {
+                        "description": "What to look for. A \"program\" is a top-level offering (e.g. \"Youth Basketball\"); a \"session\" is one of its sign-up options (e.g. \"Spring 2026, Tuesdays\").",
+                        "enum": [
+                            "booking",
+                            "booking_request",
+                            "booking_state",
+                            "facility",
+                            "invoice",
+                            "membership_price",
+                            "membership_type",
+                            "notification",
+                            "organization",
+                            "person",
+                            "product",
+                            "program",
+                            "session",
+                            "subscription",
+                            "tag",
+                            "transaction",
+                            "volunteer_hour_submission",
+                            "volunteer_shift"
+                        ],
+                        "type": "string"
+                    },
+                    "query": {
+                        "description": "Part of the name (or email, for people). Leave empty to browse.",
+                        "type": "string"
+                    },
+                    "program": {
+                        "description": "Only for sessions: the program name or ID to search within.",
+                        "type": "string"
+                    },
+                    "limit": {
+                        "description": "How many matches to return (default 10).",
+                        "minimum": 1,
+                        "maximum": 25,
+                        "type": "integer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "kind"
+                ]
+            }
+        }
+    ]
+}

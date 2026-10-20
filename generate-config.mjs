@@ -1,5 +1,6 @@
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { VERSIONS, specPath } from './versions.mjs'
+import { MCP_REFERENCE_PAGE, MCP_TOOLS_PAGE, writeToolsPages } from './mcp-tools.mjs'
 
 // Single source of navigation truth. One declarative tree, three derived
 // artifacts: zudoku.config.ts, the legacy version-prefixed guide redirects in
@@ -36,6 +37,8 @@ const PHOSPHOR_TO_LUCIDE = {
   'phosphor/regular/code': 'code',
   'phosphor/regular/git-branch': 'git-branch',
   'phosphor/regular/robot': 'bot',
+  'phosphor/regular/wrench': 'wrench',
+  'phosphor/regular/chat-circle-text': 'message-square-text',
   'phosphor/regular/squares-four': 'layout-grid',
   'phosphor/regular/user': 'user',
   'phosphor/regular/book-open-text': 'book-open-text',
@@ -73,7 +76,9 @@ const DOCS_SECTIONS = [
       { kind: 'doc', slug: 'basics/authentication', file: 'docs/authentication.md', label: 'Authentication', icon: 'phosphor/regular/key' },
       { kind: 'doc', slug: 'basics/using-the-api', file: 'docs/using-the-api.md', label: 'Using the API', icon: 'phosphor/regular/code' },
       { kind: 'doc', slug: 'basics/versioning', file: 'docs/versioning.md', label: 'Versioning', icon: 'phosphor/regular/git-branch' },
-      { kind: 'doc', slug: 'basics/mcp-server', file: 'docs/mcp-server.md', label: 'MCP server', icon: 'phosphor/regular/robot' },
+      { kind: 'doc', slug: 'basics/mcp-server', file: 'docs/mcp-server.md', label: 'Connect an AI assistant', icon: 'phosphor/regular/robot' },
+      { kind: 'doc', slug: 'basics/mcp-tools', file: MCP_TOOLS_PAGE, label: 'What AI assistants can do', icon: 'phosphor/regular/chat-circle-text' },
+      { kind: 'doc', slug: 'basics/mcp-tool-reference', file: MCP_REFERENCE_PAGE, label: 'MCP tool reference', icon: 'phosphor/regular/wrench' },
     ],
   },
   {
@@ -284,11 +289,12 @@ if (import.meta.main) {
   mkdirSync(SPEC_STAGE_DIR, { recursive: true })
   for (const version of VERSIONS) copyFileSync(specPath(version), stagedSpecPath(version))
 
+  const mcpTools = writeToolsPages()
   writeFileSync('zudoku.config.ts', toConfigFile(NAVIGATION), 'utf8')
   writeFileSync('public/_redirects', toRedirectsFile(NAVIGATION), 'utf8')
   const docs = toDocs(NAVIGATION).length
   const redirects = toGuideRedirects(NAVIGATION).length + REFERENCE_REDIRECTS.length
   console.log(
-    `generate-config: wrote zudoku.config.ts (${docs} guides, ${VERSIONS.length} API versions) and public/_redirects (${redirects} rules)`,
+    `generate-config: wrote zudoku.config.ts (${docs} guides, ${VERSIONS.length} API versions), public/_redirects (${redirects} rules) and the MCP tool pages (${mcpTools} tools)`,
   )
 }

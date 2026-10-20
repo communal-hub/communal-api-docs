@@ -1,6 +1,8 @@
-# MCP server
+# Connect an AI assistant
 
-Communal exposes a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server for your organization. Connect it to an AI assistant — Claude Code, Claude, Cursor, VS Code — and the assistant can work with your Communal data on your behalf: programs and registration, signups, membership, attendance, and users.
+Connect Communal to an AI assistant such as Claude, and you can ask it in plain language to look things up and make changes for you: "Who signed up for Tuesday's session?", "Mark Sam present", "Send Maria her membership card". The assistant signs in as you, so it can only do what your Communal role allows. See [What AI assistants can do](./mcp-tools.md) for the full list.
+
+Communal connects to assistants through a [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server for your organization. Claude (desktop and web) is the easiest place to start; developer tools such as Claude Code, Cursor and VS Code work too.
 
 ## Server details
 
@@ -26,6 +28,10 @@ This is the one place Communal uses your organization's subdomain. The REST API 
 
 Setup is the same everywhere: register your server URL from [above](#finding-your-server-url), then complete the browser sign-in your client prompts for. Replace `<your-subdomain>` in each example with your organization's own — the URLs below will not work as written. There is no key or secret to configure, so these config files are safe to commit.
 
+### Claude (desktop and web)
+
+Open **Settings → Connectors → Add custom connector**, paste the server URL, and complete the sign-in when prompted.
+
 ### Claude Code
 
 ```bash
@@ -44,10 +50,6 @@ Run `/mcp` and choose the server to start the sign-in. Add `--scope project` to 
   }
 }
 ```
-
-### Claude (desktop and web)
-
-Open **Settings → Connectors → Add custom connector**, paste the server URL, and complete the sign-in when prompted.
 
 ### Cursor
 
@@ -98,7 +100,7 @@ API keys are not used for MCP. They remain the way to authenticate direct HTTP c
 
 ## What the assistant can do
 
-Once connected, your client lists the tools the server offers — `/mcp` in Claude Code, or the MCP panel in Cursor and VS Code. Check that list to see what is available to you, since it reflects your permissions.
+[What AI assistants can do](./mcp-tools.md) lists every action in plain language, and the [MCP tool reference](./mcp-tool-reference.md) gives developers each tool's parameters and REST operation. Once connected, your client also lists the tools — `/mcp` in Claude Code, or the MCP panel in Cursor and VS Code.
 
 Assume the assistant can **change data**, not just read it — creating and archiving records, or sending membership cards, for example. Review tool calls before approving them, or use a client mode that prompts for each one. What an assistant can do is bounded by your own Communal role, so if you want a narrower blast radius, sign in as a user with narrower access.
 
